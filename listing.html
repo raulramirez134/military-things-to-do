@@ -77,6 +77,20 @@
   .admin-remove-btn:hover{ color:var(--rust); }
   .removed-card{ background:var(--parchment-dim); border-style:dashed; }
   .removed-text{ color:#8a8578; font-style:italic; margin:0; }
+  .admin-remove-row{
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:8px;
+    padding-top:8px; border-top:1px dashed var(--line);
+  }
+  .admin-pw-input{
+    font-family:'Source Sans 3', sans-serif; font-size:13px; padding:6px 10px;
+    border:1px solid var(--line); border-radius:3px; background:var(--parchment); color:var(--ink);
+  }
+  .admin-confirm-btn, .admin-cancel-btn{
+    font-family:'JetBrains Mono', monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:0.04em;
+    padding:6px 10px; border-radius:3px; border:1px solid var(--line); background:#fff; cursor:pointer;
+  }
+  .admin-confirm-btn{ background:var(--rust); color:#fff; border-color:var(--rust); }
+  .admin-remove-msg{ font-size:11.5px; color:var(--rust); width:100%; }
 
   .review-form{ background:#fff; border:1px solid var(--line); border-radius:4px; padding:22px; margin-top:24px; }
   .f-row{ margin-bottom:14px; display:flex; flex-direction:column; gap:6px; }
@@ -218,7 +232,7 @@ if(!place){
         listEl.innerHTML = `<p class="no-reviews">No reviews on this site yet — be the first to write one.</p>`;
         return;
       }
-      listEl.innerHTML = reviews.map(r => {
+      listEl.innerHTML = reviews.map((r, i) => {
         if(r.removed){
           return `
             <div class="review-card removed-card">
@@ -234,7 +248,13 @@ if(!place){
           </div>
           <div class="review-stars">${starGlyphs(r.rating)}</div>
           <p class="review-text">${escapeHtml(r.text)}</p>
-          <button class="admin-remove-btn" onclick="removeReview('${r.date}')">Remove (admin)</button>
+          <button class="admin-remove-btn" data-date="${r.date}" onclick="showRemoveRow(${i})">Remove (admin)</button>
+          <div class="admin-remove-row" id="removeRow${i}" style="display:none;">
+            <input type="password" class="admin-pw-input" id="pw${i}" placeholder="Admin password">
+            <button class="admin-confirm-btn" onclick="removeReview('${r.date}', ${i})">Confirm</button>
+            <button class="admin-cancel-btn" onclick="hideRemoveRow(${i})">Cancel</button>
+            <div class="admin-remove-msg" id="removeMsg${i}"></div>
+          </div>
         </div>
       `;
       }).join("");
@@ -249,9 +269,24 @@ if(!place){
     return div.innerHTML;
   }
 
-  async function removeReview(date){
-    const adminKey = window.prompt("Admin password:");
-    if(!adminKey) return;
+  function showRemoveRow(i){
+    document.getElementById(`removeRow${i}`).style.display = "flex";
+    document.getElementById(`pw${i}`).focus();
+  }
+
+  function hideRemoveRow(i){
+    document.getElementById(`removeRow${i}`).style.display = "none";
+  }
+
+  async function removeReview(date, i){
+    const input = document.getElementById(`pw${i}`);
+    const msgEl = document.getElementById(`removeMsg${i}`);
+    const adminKey = input.value;
+    if(!adminKey){
+      msgEl.textContent = "Enter the admin password.";
+      return;
+    }
+    msgEl.textContent = "Removing…";
     try {
       const res = await fetch("/api/reviews", {
         method: "DELETE",
@@ -260,12 +295,12 @@ if(!place){
       });
       const data = await res.json();
       if(!res.ok){
-        alert(data.error || "Couldn't remove that review.");
+        msgEl.textContent = data.error || "Couldn't remove that review.";
         return;
       }
       loadReviews();
     } catch (err) {
-      alert("Couldn't reach the server — try again.");
+      msgEl.textContent = "Couldn't reach the server — try again.";
     }
   }
 
