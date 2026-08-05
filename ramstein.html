@@ -979,9 +979,9 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 18
 }).addTo(map);
 
-// Group markers into a layer per category so the legend can toggle them
-const categoryLayers = {};
-Object.keys(catLabels).forEach(cat=>{ categoryLayers[cat] = L.layerGroup().addTo(map); });
+// Track markers individually per category so the legend can toggle them reliably
+const markersByCat = {};
+Object.keys(catLabels).forEach(cat=>{ markersByCat[cat] = []; });
 
 places.forEach(p=>{
   const color = catColors[p.cat] || "#182420";
@@ -994,7 +994,8 @@ places.forEach(p=>{
   });
   const dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`;
   marker.bindPopup(`<b>${p.name}</b><br>${catLabels[p.cat]} · ${p.dist === 0 ? "On base" : p.dist.toFixed(1) + " km from gate"}<br><a href="${dirUrl}" target="_blank" rel="noopener">Get directions →</a>`);
-  marker.addTo(categoryLayers[p.cat]);
+  marker.addTo(map);
+  markersByCat[p.cat].push(marker);
 });
 
 // Base marker (always visible, not part of the legend toggles)
@@ -1013,24 +1014,32 @@ Object.keys(catLabels).forEach(cat=>{
   label.innerHTML = `<input type="checkbox" checked data-cat="${cat}"><span class="legend-swatch" style="background:${color}"></span><span>${catLabels[cat]} (${count})</span>`;
   legendItems.appendChild(label);
 });
+
+function setCategoryVisible(cat, visible){
+  markersByCat[cat].forEach(marker=>{
+    if(visible){
+      if(!map.hasLayer(marker)) marker.addTo(map);
+    } else {
+      if(map.hasLayer(marker)) map.removeLayer(marker);
+    }
+  });
+}
+
 legendItems.addEventListener("change", (e)=>{
   if(e.target.type !== "checkbox") return;
   const cat = e.target.dataset.cat;
   const item = e.target.closest(".legend-item");
-  if(e.target.checked){
-    map.addLayer(categoryLayers[cat]);
-    item.classList.remove("off");
-  } else {
-    map.removeLayer(categoryLayers[cat]);
-    item.classList.add("off");
-  }
+  setCategoryVisible(cat, e.target.checked);
+  item.classList.toggle("off", !e.target.checked);
 });
 document.getElementById("legendAllBtn").addEventListener("click", ()=>{
   const checkboxes = legendItems.querySelectorAll('input[type="checkbox"]');
   const anyChecked = Array.from(checkboxes).some(c => c.checked);
+  const newState = !anyChecked;
   checkboxes.forEach(cb=>{
-    cb.checked = !anyChecked;
-    cb.dispatchEvent(new Event("change"));
+    cb.checked = newState;
+    setCategoryVisible(cb.dataset.cat, newState);
+    cb.closest(".legend-item").classList.toggle("off", !newState);
   });
 });
 </script>
