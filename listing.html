@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Listing — Military Things To Do</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#182420; --ink-soft:#223129; --parchment:#EDE7D6; --parchment-dim:#E1DAC4;
+    --olive:#5B6B4F; --brass:#C08A34; --brass-bright:#D9A24C; --rust:#A8472C; --steel:#3F5C6B;
+    --line: rgba(24,36,32,0.14); --line-dark: rgba(237,231,214,0.16);
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:var(--parchment); color:var(--ink); font-family:'Source Sans 3', sans-serif; -webkit-font-smoothing:antialiased; }
+  a{ color:var(--olive); }
+  .mono{ font-family:'JetBrains Mono', monospace; }
+
+  header.brief{
+    background: radial-gradient(1200px 500px at 15% -10%, #22352c 0%, var(--ink) 55%), var(--ink);
+    color:var(--parchment); padding: 20px 24px 28px; border-bottom: 6px solid var(--brass);
+  }
+  .topbar{ display:flex; align-items:center; justify-content:space-between; max-width:900px; margin:0 auto 20px;
+    font-family:'JetBrains Mono', monospace; font-size:12px; color: rgba(237,231,214,0.72); flex-wrap:wrap; gap:10px; }
+  .brand{ display:flex; align-items:center; gap:9px; font-family:'Big Shoulders Display', sans-serif; font-weight:800;
+    font-size:15px; letter-spacing:0.02em; color:var(--parchment); text-transform:uppercase; text-decoration:none; }
+  .brand .mark{ width:22px; height:22px; border-radius:4px; background:var(--brass); display:inline-flex;
+    align-items:center; justify-content:center; color:var(--ink); font-size:12px; font-weight:800; }
+  .back-link{ color: rgba(237,231,214,0.8); text-decoration:none; font-size:12px; }
+  .header-inner{ max-width:900px; margin:0 auto; }
+  .tag-inline{
+    font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.06em; text-transform:uppercase;
+    padding:4px 10px; border-radius:2px; background: rgba(217,162,76,0.18); color:var(--brass-bright); display:inline-block; margin-bottom:12px;
+  }
+  h1.title{ font-family:'Big Shoulders Display', sans-serif; font-weight:800; font-size: clamp(28px, 5vw, 44px); line-height:1.05; margin:0 0 10px; }
+  .rating-row{ display:flex; align-items:baseline; gap:8px; font-size:15px; margin-bottom:6px; }
+  .rating-row .stars{ color:var(--brass-bright); letter-spacing:2px; font-size:18px; }
+  .rating-row .num{ font-weight:700; }
+  .rating-row .count{ color: rgba(237,231,214,0.6); font-size:13px; }
+  .rating-note{ font-size:11px; color: rgba(237,231,214,0.45); margin-top:2px; }
+
+  main{ max-width:900px; margin:0 auto; padding: 34px 24px 80px; }
+  .detail-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-bottom:28px; }
+  .detail-card{ background:#fff; border:1px solid var(--line); border-radius:4px; padding:16px 18px; }
+  .detail-card .k{ font-family:'JetBrains Mono', monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:0.06em; color:#8a8578; margin-bottom:4px; }
+  .detail-card .v{ font-size:14.5px; }
+  .blurb-block{ font-size:15px; line-height:1.6; margin-bottom:24px; }
+  .action-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:36px; }
+  .action-btn{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:0.03em; text-transform:uppercase;
+    padding:10px 14px; border-radius:3px; border:1px solid var(--line);
+    text-decoration:none; color:var(--ink); background:#fff;
+  }
+  .action-btn:hover{ background:var(--parchment-dim); }
+  .action-btn.primary{ background:var(--ink); color:var(--parchment); border-color:var(--ink); }
+
+  .section-label{
+    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--olive); margin: 0 0 14px; display:flex; align-items:center; gap:10px;
+  }
+  .section-label::after{ content:""; flex:1; height:1px; background:var(--line); }
+
+  .review-card{ background:#fff; border:1px solid var(--line); border-radius:4px; padding:14px 16px; margin-bottom:10px; }
+  .review-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; }
+  .review-name{ font-weight:700; font-size:14px; }
+  .review-stars{ color:var(--brass); letter-spacing:1px; }
+  .review-date{ font-family:'JetBrains Mono', monospace; font-size:10.5px; color:#8a8578; }
+  .review-text{ font-size:14px; line-height:1.55; color:#3b4640; }
+  .no-reviews{ font-size:13.5px; color:#8a8578; font-style:italic; margin-bottom:20px; }
+
+  .review-form{ background:#fff; border:1px solid var(--line); border-radius:4px; padding:22px; margin-top:24px; }
+  .f-row{ margin-bottom:14px; display:flex; flex-direction:column; gap:6px; }
+  .f-row label{ font-family:'JetBrains Mono', monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.04em; color:#6b7268; }
+  .f-row input, .f-row select, .f-row textarea{
+    font-family:'Source Sans 3', sans-serif; font-size:14px; padding:10px 12px;
+    border:1px solid var(--line); border-radius:3px; background:var(--parchment); color:var(--ink);
+  }
+  .f-row textarea{ min-height:100px; resize:vertical; }
+  .f-submit{
+    font-family:'JetBrains Mono', monospace; font-size:12px; text-transform:uppercase; letter-spacing:0.05em;
+    padding:11px 20px; border:none; border-radius:3px; background:var(--ink); color:var(--parchment); cursor:pointer;
+  }
+  .f-submit:hover{ background:var(--ink-soft); }
+  .f-submit:disabled{ opacity:0.5; cursor:default; }
+  .form-msg{ font-size:12.5px; margin-top:10px; }
+  .form-msg.error{ color:var(--rust); }
+  .form-msg.ok{ color:var(--olive); }
+
+  .not-found{ padding:60px 20px; text-align:center; }
+
+  footer{ background:var(--ink); color: rgba(237,231,214,0.55); padding: 26px 24px; font-size:12px; line-height:1.7; }
+  footer .footer-inner{ max-width:900px; margin:0 auto; }
+
+  @media (max-width:600px){ .detail-grid{ grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+  <header class="brief">
+    <div class="topbar">
+      <a class="brand" href="ramstein.html"><span class="mark">M</span> Military Things To Do</a>
+      <a class="back-link" href="ramstein.html">← Back to Ramstein listings</a>
+    </div>
+    <div class="header-inner" id="headerInner">
+      <p class="mono" style="color:rgba(237,231,214,0.5); font-size:12px;">Loading…</p>
+    </div>
+  </header>
+
+  <main id="mainContent"></main>
+
+  <footer>
+    <div class="footer-inner">
+      <p><b>Military Things To Do</b> is an independent community resource. Not an official U.S. Department of Defense or U.S. Air Force publication. Google-sourced ratings reflect public data at time of writing and may have changed since.</p>
+    </div>
+  </footer>
+
+<script src="data.js"></script>
+<script>
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
+const place = places.find(p => p.id === id);
+
+function starGlyphs(rating){
+  const full = Math.round(rating);
+  let s = "";
+  for(let i=1;i<=5;i++) s += i <= full ? "★" : "☆";
+  return s;
+}
+
+if(!place){
+  document.getElementById("headerInner").innerHTML = `<h1 class="title">Listing not found</h1>`;
+  document.getElementById("mainContent").innerHTML = `<div class="not-found"><p>That listing doesn't exist — it may have been renamed or removed.</p><p><a href="ramstein.html">← Back to the full Ramstein list</a></p></div>`;
+} else {
+  document.title = `${place.name} — Military Things To Do`;
+
+  document.getElementById("headerInner").innerHTML = `
+    <div class="tag-inline">${catLabels[place.cat]}</div>
+    <h1 class="title">${place.name}</h1>
+    ${place.rating != null ? `
+      <div class="rating-row">
+        <span class="stars">${starGlyphs(place.rating)}</span>
+        <span class="num">${place.rating.toFixed(1)}</span>
+        <span class="count">(${place.reviewCount} Google ratings)</span>
+      </div>
+      <div class="rating-note">Google rating shown for reference — write your own review below.</div>
+    ` : `<div class="rating-note">Not yet rated on Google — be the first to leave a review below.</div>`}
+  `;
+
+  const distText = place.dist === 0 ? "On base" : `${place.dist.toFixed(1)} km / ${(place.dist * 0.621371).toFixed(1)} mi from gate`;
+  const dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`;
+  const callHref = place.phone ? `tel:${place.phone.replace(/\s+/g,'')}` : null;
+
+  document.getElementById("mainContent").innerHTML = `
+    <p class="blurb-block">${place.blurb}</p>
+
+    <div class="detail-grid">
+      <div class="detail-card"><div class="k">Address</div><div class="v">${place.addr}</div></div>
+      <div class="detail-card"><div class="k">Distance from gate</div><div class="v">${distText}</div></div>
+      <div class="detail-card"><div class="k">Hours</div><div class="v">${place.hours}</div></div>
+      <div class="detail-card"><div class="k">Phone</div><div class="v">${place.phone ? place.phone : "Not listed"}</div></div>
+    </div>
+
+    <div class="action-row">
+      <a class="action-btn primary" href="${dirUrl}" target="_blank" rel="noopener">Get directions →</a>
+      ${callHref ? `<a class="action-btn" href="${callHref}">Call ${place.phone}</a>` : ""}
+      <a class="action-btn" href="ramstein.html#feedback-section">Claim / report this listing</a>
+    </div>
+
+    <div id="reviews-section">
+      <div class="section-label">Reviews from this site</div>
+      <div id="reviewsList"><p class="no-reviews">Loading reviews…</p></div>
+    </div>
+
+    <div class="review-form">
+      <div class="section-label" style="margin-bottom:16px;">Write a review</div>
+      <form id="reviewForm">
+        <div class="f-row">
+          <label for="rName">Name (optional)</label>
+          <input type="text" id="rName" placeholder="Your name">
+        </div>
+        <div class="f-row">
+          <label for="rRating">Rating</label>
+          <select id="rRating" required>
+            <option value="">Select a rating</option>
+            <option value="5">★★★★★ — Excellent</option>
+            <option value="4">★★★★☆ — Good</option>
+            <option value="3">★★★☆☆ — Okay</option>
+            <option value="2">★★☆☆☆ — Not great</option>
+            <option value="1">★☆☆☆☆ — Poor</option>
+          </select>
+        </div>
+        <div class="f-row">
+          <label for="rText">Your review</label>
+          <textarea id="rText" placeholder="What should other families know?" required></textarea>
+        </div>
+        <button type="submit" class="f-submit" id="rSubmit">Post review</button>
+        <div class="form-msg" id="rMsg"></div>
+      </form>
+    </div>
+  `;
+
+  async function loadReviews(){
+    const listEl = document.getElementById("reviewsList");
+    try {
+      const res = await fetch(`/api/reviews?id=${encodeURIComponent(place.id)}`);
+      const data = await res.json();
+      const reviews = data.reviews || [];
+      if(reviews.length === 0){
+        listEl.innerHTML = `<p class="no-reviews">No reviews on this site yet — be the first to write one.</p>`;
+        return;
+      }
+      listEl.innerHTML = reviews.map(r => `
+        <div class="review-card">
+          <div class="review-head">
+            <span class="review-name">${escapeHtml(r.name || "Anonymous")}</span>
+            <span class="review-date">${new Date(r.date).toLocaleDateString()}</span>
+          </div>
+          <div class="review-stars">${starGlyphs(r.rating)}</div>
+          <p class="review-text">${escapeHtml(r.text)}</p>
+        </div>
+      `).join("");
+    } catch (err) {
+      listEl.innerHTML = `<p class="no-reviews">Couldn't load reviews right now — try again in a moment.</p>`;
+    }
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  loadReviews();
+
+  document.getElementById("reviewForm").addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    const submitBtn = document.getElementById("rSubmit");
+    const msgEl = document.getElementById("rMsg");
+    const name = document.getElementById("rName").value.trim();
+    const rating = document.getElementById("rRating").value;
+    const text = document.getElementById("rText").value.trim();
+
+    if(!rating || !text){
+      msgEl.textContent = "Please add a rating and a review.";
+      msgEl.className = "form-msg error";
+      return;
+    }
+
+    submitBtn.disabled = true;
+    msgEl.textContent = "Posting…";
+    msgEl.className = "form-msg";
+
+    try {
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: place.id, name, rating, text })
+      });
+      const data = await res.json();
+      if(!res.ok){
+        msgEl.textContent = data.error || "Something went wrong — try again.";
+        msgEl.className = "form-msg error";
+      } else {
+        msgEl.textContent = "Review posted — thank you!";
+        msgEl.className = "form-msg ok";
+        document.getElementById("reviewForm").reset();
+        loadReviews();
+      }
+    } catch (err) {
+      msgEl.textContent = "Couldn't reach the server — check your connection and try again.";
+      msgEl.className = "form-msg error";
+    }
+    submitBtn.disabled = false;
+  });
+}
+</script>
+</body>
+</html>

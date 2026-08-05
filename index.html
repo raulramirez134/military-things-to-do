@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KMC Briefing — Find Your Base</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#182420;
+    --parchment:#EDE7D6;
+    --brass:#C08A34;
+    --brass-bright:#D9A24C;
+    --line-dark: rgba(237,231,214,0.16);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background: radial-gradient(1200px 600px at 20% -10%, #22352c 0%, var(--ink) 55%), var(--ink);
+    color:var(--parchment);
+    font-family:'Source Sans 3', sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .wrap{ max-width:640px; width:100%; text-align:center; }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.14em;
+    color: var(--brass-bright);
+    text-transform:uppercase;
+    margin-bottom:16px;
+  }
+  h1{
+    font-family:'Big Shoulders Display', sans-serif;
+    font-weight:800;
+    font-size: clamp(36px, 7vw, 60px);
+    line-height:1.0;
+    margin: 0 0 18px;
+  }
+  p.sub{
+    font-size:16px;
+    line-height:1.6;
+    color: rgba(237,231,214,0.78);
+    max-width:460px;
+    margin: 0 auto 40px;
+  }
+  .base-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    text-align:left;
+  }
+  .base-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 16px 18px;
+    border:1px solid var(--line-dark);
+    border-radius:5px;
+    background: rgba(237,231,214,0.04);
+    text-decoration:none;
+    color:var(--parchment);
+    transition: background .15s ease, border-color .15s ease;
+  }
+  .base-row.live:hover{ background: rgba(237,231,214,0.09); border-color: var(--brass); }
+  .base-row.disabled{ opacity:0.45; cursor:default; }
+  .base-name{ font-family:'Big Shoulders Display', sans-serif; font-weight:700; font-size:19px; }
+  .base-status{
+    font-family:'JetBrains Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    padding:4px 9px;
+    border-radius:3px;
+  }
+  .base-status.live{ background: rgba(192,138,52,0.2); color: var(--brass-bright); }
+  .base-status.soon{ background: rgba(237,231,214,0.08); color: rgba(237,231,214,0.5); }
+  footer{
+    margin-top:40px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color: rgba(237,231,214,0.4);
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="eyebrow">Arrival Briefings for U.S. Bases Worldwide</div>
+    <h1>New orders?<br>Find your base.</h1>
+    <p class="sub">
+      Restaurants, groceries, language schools, and family attractions —
+      mapped against how far they actually are from the gate.
+    </p>
+    <div class="base-list">
+      <a class="base-row live" href="ramstein.html">
+        <span class="base-name">Ramstein Air Base, Germany</span>
+        <span class="base-status live">Live</span>
+      </a>
+      <div class="base-row disabled">
+        <span class="base-name">Fort Bragg / Fort Liberty, NC</span>
+        <span class="base-status soon">Coming soon</span>
+      </div>
+      <div class="base-row disabled">
+        <span class="base-name">Camp Pendleton, CA</span>
+        <span class="base-status soon">Coming soon</span>
+      </div>
+      <div class="base-row disabled">
+        <span class="base-name">Yokota Air Base, Japan</span>
+        <span class="base-status soon">Coming soon</span>
+      </div>
+    </div>
+    <footer>Independent community resource — not affiliated with the U.S. Department of Defense.<br><a href="guide.html" style="color:var(--brass-bright);">New to a base? Start with the arrival guide →</a></footer>
+  </div>
+</body>
+</html>
