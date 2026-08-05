@@ -269,16 +269,16 @@ if(!place){
     return div.innerHTML;
   }
 
-  function showRemoveRow(i){
+  window.showRemoveRow = function(i){
     document.getElementById(`removeRow${i}`).style.display = "flex";
     document.getElementById(`pw${i}`).focus();
-  }
+  };
 
-  function hideRemoveRow(i){
+  window.hideRemoveRow = function(i){
     document.getElementById(`removeRow${i}`).style.display = "none";
-  }
+  };
 
-  async function removeReview(date, i){
+  window.removeReview = async function(date, i){
     const input = document.getElementById(`pw${i}`);
     const msgEl = document.getElementById(`removeMsg${i}`);
     const adminKey = input.value;
@@ -302,7 +302,7 @@ if(!place){
     } catch (err) {
       msgEl.textContent = "Couldn't reach the server — try again.";
     }
-  }
+  };
 
   loadReviews();
 
