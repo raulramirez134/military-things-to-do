@@ -447,7 +447,7 @@
       <div class="coords-row">
         <span><b>49.4513° N, 7.5845° E</b> — Ramstein AB (ref. point)</span>
         <span><b>21</b> categories mapped</span>
-        <span><b>105</b> locations logged</span>
+        <span><b>113</b> locations logged</span>
       </div>
     </div>
   </header>
@@ -577,11 +577,37 @@
       <div class="section-label">Dog Parks &amp; Swimming Spots</div>
       <div class="grid" data-group="outdoors" id="grid-outdoors"></div>
 
-      <div class="section-label">Seasonal Events</div>
-      <div class="events-note">
-        Christmas markets, base open houses, Volksfest — this section fills in as
-        the calendar does. Know something coming up in the KMC? This is where it'll go.
+      <div class="section-label" id="eventsLabel">Seasonal Events</div>
+      <div class="help-grid" id="eventsGrid">
+        <div class="help-card">
+          <div class="h-name">Kaiserslautern Christmas Market</div>
+          <div class="h-desc">Centered on Stiftsplatz and around the pedestrian zone — Glühwein, food stalls, and a carousel for the kids.</div>
+          <div class="h-numbers"><span><span class="h-tag">Typical dates</span>Late Nov – Dec 23</span></div>
+        </div>
+        <div class="help-card">
+          <div class="h-name">Landstuhler Advent</div>
+          <div class="h-desc">A smaller, cozier Christmas market in Landstuhl — weekends only, easy to combine with a trip to the hospital or Kaufland.</div>
+          <div class="h-numbers"><span><span class="h-tag">Typical dates</span>Late Nov – late Dec, weekends</span></div>
+        </div>
+        <div class="help-card">
+          <div class="h-name">Ramstein-Miesenbach Christmas Market</div>
+          <div class="h-desc">The local village market, right in town — small, walkable, and low-key compared to the bigger city markets.</div>
+          <div class="h-numbers"><span><span class="h-tag">Typical dates</span>First weekend of December</span></div>
+        </div>
+        <div class="help-card">
+          <div class="h-name">Altstadtfest Kaiserslautern</div>
+          <div class="h-desc">The city's biggest annual street festival — nine live-music stages, craft market, and Palatinate food, drawing around 150,000 visitors.</div>
+          <div class="h-numbers"><span><span class="h-tag">Typical dates</span>First weekend of July</span></div>
+        </div>
+        <div class="help-card">
+          <div class="h-name">Local Kerwe season</div>
+          <div class="h-desc">Small village festivals (Palatinate dialect for a church-consecration celebration) pop up throughout the surrounding towns all summer and into fall — worth asking neighbors or checking the local Gemeinde's postings for what's on nearby.</div>
+          <div class="h-numbers"><span><span class="h-tag">Typical dates</span>Summer through early fall</span></div>
+        </div>
       </div>
+      <p id="eventsNote" style="font-size:12px; color:#8a8578; margin-top:14px; max-width:700px;">
+        Dates shift year to year — treat these as a rough seasonal guide and confirm current dates closer to the time. Know of something else worth adding? Use the feedback form below.
+      </p>
     </div>
     <div class="empty-state" id="emptyState" style="display:none;">No matches — try a different search or category.</div>
 
@@ -883,11 +909,13 @@ function applyFilter(){
     }
   });
 
-  const eventsBlock = document.querySelector(".events-note");
-  const eventsLabel = eventsBlock.previousElementSibling;
+  const eventsBlock = document.getElementById("eventsGrid");
+  const eventsLabel = document.getElementById("eventsLabel");
+  const eventsNote = document.getElementById("eventsNote");
   const showEvents = active === "all" || active === "events";
   eventsBlock.style.display = showEvents ? "" : "none";
   eventsLabel.style.display = showEvents ? "" : "none";
+  eventsNote.style.display = showEvents ? "" : "none";
   if(showEvents && !query) anyVisible = true;
 
   emptyState.style.display = anyVisible ? "none" : "block";
