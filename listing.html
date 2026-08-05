@@ -70,6 +70,13 @@
   .review-date{ font-family:'JetBrains Mono', monospace; font-size:10.5px; color:#8a8578; }
   .review-text{ font-size:14px; line-height:1.55; color:#3b4640; }
   .no-reviews{ font-size:13.5px; color:#8a8578; font-style:italic; margin-bottom:20px; }
+  .admin-remove-btn{
+    border:none; background:none; color:#c9c3af; font-size:10.5px; cursor:pointer; padding:6px 0 0;
+    font-family:'JetBrains Mono', monospace; text-transform:uppercase; letter-spacing:0.04em;
+  }
+  .admin-remove-btn:hover{ color:var(--rust); }
+  .removed-card{ background:var(--parchment-dim); border-style:dashed; }
+  .removed-text{ color:#8a8578; font-style:italic; margin:0; }
 
   .review-form{ background:#fff; border:1px solid var(--line); border-radius:4px; padding:22px; margin-top:24px; }
   .f-row{ margin-bottom:14px; display:flex; flex-direction:column; gap:6px; }
@@ -211,7 +218,15 @@ if(!place){
         listEl.innerHTML = `<p class="no-reviews">No reviews on this site yet — be the first to write one.</p>`;
         return;
       }
-      listEl.innerHTML = reviews.map(r => `
+      listEl.innerHTML = reviews.map(r => {
+        if(r.removed){
+          return `
+            <div class="review-card removed-card">
+              <p class="review-text removed-text">This review was removed for violating our content guidelines.</p>
+            </div>
+          `;
+        }
+        return `
         <div class="review-card">
           <div class="review-head">
             <span class="review-name">${escapeHtml(r.name || "Anonymous")}</span>
@@ -219,8 +234,10 @@ if(!place){
           </div>
           <div class="review-stars">${starGlyphs(r.rating)}</div>
           <p class="review-text">${escapeHtml(r.text)}</p>
+          <button class="admin-remove-btn" onclick="removeReview('${r.date}')">Remove (admin)</button>
         </div>
-      `).join("");
+      `;
+      }).join("");
     } catch (err) {
       listEl.innerHTML = `<p class="no-reviews">Couldn't load reviews right now — try again in a moment.</p>`;
     }
@@ -230,6 +247,26 @@ if(!place){
     const div = document.createElement("div");
     div.textContent = str;
     return div.innerHTML;
+  }
+
+  async function removeReview(date){
+    const adminKey = window.prompt("Admin password:");
+    if(!adminKey) return;
+    try {
+      const res = await fetch("/api/reviews", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: place.id, date, adminKey })
+      });
+      const data = await res.json();
+      if(!res.ok){
+        alert(data.error || "Couldn't remove that review.");
+        return;
+      }
+      loadReviews();
+    } catch (err) {
+      alert("Couldn't reach the server — try again.");
+    }
   }
 
   loadReviews();

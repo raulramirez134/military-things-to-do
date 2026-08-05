@@ -1,9 +1,25 @@
 // Cloudflare Worker — serves the static site and handles the reviews API.
 // Requires a KV binding named REVIEWS_KV (Settings → Bindings → Add binding → KV).
+// Requires a secret variable named ADMIN_KEY (Settings → Variables and Secrets →
+// Add variable → type: Secret) — this is your personal password for removing reviews.
+// Only you know this value; it's never sent to the browser.
 
 const MAX_REVIEWS_PER_LISTING = 200;
 const MAX_TEXT_LENGTH = 1000;
 const MAX_NAME_LENGTH = 60;
+
+// Basic automatic filter — blocks the most obvious profanity/slurs outright.
+// This is a first line of defense, not a complete solution; you can still
+// remove anything that slips through using the admin removal feature.
+const BLOCKED_WORDS = [
+  "fuck", "shit", "bitch", "asshole", "cunt", "faggot", "retard", "nigger", "nigga",
+  "whore", "slut", "rape", "kike", "spic", "chink", "tranny",
+];
+
+function containsBlockedWords(str) {
+  const lower = str.toLowerCase();
+  return BLOCKED_WORDS.some(word => lower.includes(word));
+}
 
 function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -53,15 +69,61 @@ async function handlePostReview(request, env) {
   }
   rating = Math.round(rating);
 
+  if (containsBlockedWords(text) || containsBlockedWords(name)) {
+    return jsonResponse({ error: "Your review couldn't be posted because it contains language that isn't allowed here." }, 400);
+  }
+
   const key = `reviews:${id}`;
   const raw = await env.REVIEWS_KV.get(key);
   const reviews = raw ? JSON.parse(raw) : [];
 
-  reviews.unshift({ name, rating, text, date: new Date().toISOString() });
+  reviews.unshift({ name, rating, text, date: new Date().toISOString(), removed: false });
   const trimmed = reviews.slice(0, MAX_REVIEWS_PER_LISTING);
 
   await env.REVIEWS_KV.put(key, JSON.stringify(trimmed));
   return jsonResponse({ ok: true, reviews: trimmed });
+}
+
+async function handleDeleteReview(request, env) {
+  if (!env.REVIEWS_KV) {
+    return jsonResponse({ error: "Reviews storage isn't set up yet (REVIEWS_KV binding missing)." }, 503);
+  }
+  if (!env.ADMIN_KEY) {
+    return jsonResponse({ error: "Admin removal isn't set up yet (ADMIN_KEY secret missing)." }, 503);
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ error: "Invalid JSON" }, 400);
+  }
+
+  const id = (body.id || "").toString();
+  const date = (body.date || "").toString();
+  const adminKey = (body.adminKey || "").toString();
+
+  if (adminKey !== env.ADMIN_KEY) {
+    return jsonResponse({ error: "Incorrect admin password." }, 401);
+  }
+  if (!id || !date) return jsonResponse({ error: "Missing id or date" }, 400);
+
+  const key = `reviews:${id}`;
+  const raw = await env.REVIEWS_KV.get(key);
+  const reviews = raw ? JSON.parse(raw) : [];
+
+  const idx = reviews.findIndex(r => r.date === date);
+  if (idx === -1) return jsonResponse({ error: "Review not found" }, 404);
+
+  // Replace with a generic placeholder rather than deleting outright —
+  // keeps the removal visible and the reason consistent for everyone.
+  reviews[idx] = {
+    date: reviews[idx].date,
+    removed: true,
+  };
+
+  await env.REVIEWS_KV.put(key, JSON.stringify(reviews));
+  return jsonResponse({ ok: true, reviews });
 }
 
 export default {
@@ -73,13 +135,14 @@ export default {
         return new Response(null, {
           headers: {
             "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
             "Access-Control-Allow-Headers": "Content-Type",
           },
         });
       }
       if (request.method === "GET") return handleGetReviews(request, env);
       if (request.method === "POST") return handlePostReview(request, env);
+      if (request.method === "DELETE") return handleDeleteReview(request, env);
       return jsonResponse({ error: "Method not allowed" }, 405);
     }
 
