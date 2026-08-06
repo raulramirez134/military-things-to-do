@@ -158,7 +158,10 @@
   /* ===== Nav / categories ===== */
   nav.categories{ position:relative; background: var(--parchment); border-bottom:1px solid var(--line); padding: 14px 24px; }
   .cat-inner{ max-width:1100px; margin:0 auto; display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
-  .cat-tabs{ display:flex; gap:8px; flex-wrap:wrap; }
+  .cat-tabs{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .cat-tabs-extra{ display:none; gap:8px; flex-wrap:wrap; }
+  .cat-tabs-extra.open{ display:flex; }
+  .cat-tab-toggle{ background:var(--parchment-dim); border-style:dashed; }
   .cat-tab{
     font-family:'JetBrains Mono', monospace;
     font-size:12px; letter-spacing:0.04em; text-transform:uppercase;
@@ -456,26 +459,29 @@
         <button class="cat-tab active" data-cat="all">All</button>
         <button class="cat-tab" data-cat="restaurant">Restaurants &amp; Cafés</button>
         <button class="cat-tab" data-cat="grocery">Grocery &amp; Food</button>
-        <button class="cat-tab" data-cat="language">Language Schools</button>
         <button class="cat-tab" data-cat="attraction">Parks &amp; Attractions</button>
         <button class="cat-tab" data-cat="auto">Auto &amp; Transportation</button>
         <button class="cat-tab" data-cat="health">Health &amp; Personal Care</button>
-        <button class="cat-tab" data-cat="banking">Banking &amp; Money</button>
         <button class="cat-tab" data-cat="housing">Housing &amp; Off-Base Living</button>
-        <button class="cat-tab" data-cat="schools">Schools &amp; Childcare</button>
-        <button class="cat-tab" data-cat="pets">Pet Services</button>
-        <button class="cat-tab" data-cat="fitness">Fitness &amp; Recreation</button>
-        <button class="cat-tab" data-cat="community">Community &amp; Spouse Groups</button>
-        <button class="cat-tab" data-cat="religious">Religious Services</button>
         <button class="cat-tab" data-cat="rec">Recreation &amp; Entertainment</button>
         <button class="cat-tab" data-cat="services">Base Services</button>
-        <button class="cat-tab" data-cat="pcs">PCS &amp; Household Goods</button>
-        <button class="cat-tab" data-cat="legal">Legal &amp; Financial Services</button>
-        <button class="cat-tab" data-cat="education">Education &amp; Career</button>
-        <button class="cat-tab" data-cat="shopping">Shopping &amp; Retail</button>
-        <button class="cat-tab" data-cat="kids">Kids &amp; Playgrounds</button>
-        <button class="cat-tab" data-cat="outdoors">Dog Parks &amp; Swimming Spots</button>
-        <button class="cat-tab" data-cat="events">Seasonal Events</button>
+        <span id="catTabsExtra" class="cat-tabs-extra">
+          <button class="cat-tab" data-cat="language">Language Schools</button>
+          <button class="cat-tab" data-cat="banking">Banking &amp; Money</button>
+          <button class="cat-tab" data-cat="schools">Schools &amp; Childcare</button>
+          <button class="cat-tab" data-cat="pets">Pet Services</button>
+          <button class="cat-tab" data-cat="fitness">Fitness &amp; Recreation</button>
+          <button class="cat-tab" data-cat="community">Community &amp; Spouse Groups</button>
+          <button class="cat-tab" data-cat="religious">Religious Services</button>
+          <button class="cat-tab" data-cat="pcs">PCS &amp; Household Goods</button>
+          <button class="cat-tab" data-cat="legal">Legal &amp; Financial Services</button>
+          <button class="cat-tab" data-cat="education">Education &amp; Career</button>
+          <button class="cat-tab" data-cat="shopping">Shopping &amp; Retail</button>
+          <button class="cat-tab" data-cat="kids">Kids &amp; Playgrounds</button>
+          <button class="cat-tab" data-cat="outdoors">Dog Parks &amp; Swimming Spots</button>
+          <button class="cat-tab" data-cat="events">Seasonal Events</button>
+        </span>
+        <button class="cat-tab cat-tab-toggle" id="catTabsToggle" type="button">More categories ▾</button>
       </div>
       <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
         <a href="guide.html" class="cat-tab" style="text-decoration:none; display:inline-block; background:var(--brass); color:#fff; border-color:var(--brass);">New Here? Start Guide →</a>
@@ -866,7 +872,7 @@ function render(){
 render();
 
 // Category filtering
-const tabs = document.querySelectorAll(".cat-tab");
+const tabs = document.querySelectorAll(".cat-tab:not(.cat-tab-toggle)");
 const listView = document.getElementById("listView");
 const emptyState = document.getElementById("emptyState");
 
@@ -933,6 +939,14 @@ tabs.forEach(tab=>{
   });
 });
 document.getElementById("searchBox").addEventListener("input", applyFilter);
+
+// Show/hide the less-common category buttons
+const catTabsToggle = document.getElementById("catTabsToggle");
+const catTabsExtra = document.getElementById("catTabsExtra");
+catTabsToggle.addEventListener("click", ()=>{
+  const isOpen = catTabsExtra.classList.toggle("open");
+  catTabsToggle.textContent = isOpen ? "Fewer categories ▴" : "More categories ▾";
+});
 
 // Base picker dropdown
 const basePicker = document.getElementById("basePicker");
