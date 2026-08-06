@@ -4,6 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Listing — Military Things To Do</title>
+<meta name="description" content="Details, hours, distance from the gate, and reviews for local businesses and resources near Ramstein Air Base." id="metaDescTag">
+<link rel="canonical" href="https://militarythingstodo.com/listing.html" id="canonicalTag">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -156,6 +158,9 @@ if(!place){
   document.getElementById("mainContent").innerHTML = `<div class="not-found"><p>That listing doesn't exist — it may have been renamed or removed.</p><p><a href="ramstein.html">← Back to the full Ramstein list</a></p></div>`;
 } else {
   document.title = `${place.name} — Military Things To Do`;
+
+  document.getElementById("metaDescTag").content = `${place.name}: ${place.blurb} Distance from Ramstein AB gate, hours, contact info, and reviews.`;
+  document.getElementById("canonicalTag").href = `https://militarythingstodo.com/listing.html?id=${place.id}`;
 
   document.getElementById("headerInner").innerHTML = `
     <div class="tag-inline">${catLabels[place.cat]}</div>
