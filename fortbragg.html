@@ -215,6 +215,22 @@
   .emblem.health{ background: rgba(168,72,44,0.14); }
   .emblem.banking{ background: rgba(91,107,79,0.16); }
   .emblem.housing{ background: rgba(192,138,52,0.16); }
+  .emblem.pets{ background: rgba(168,72,44,0.14); }
+  .emblem.fitness{ background: rgba(91,107,79,0.16); }
+  .emblem.religious{ background: rgba(63,92,107,0.16); }
+  .emblem.shopping{ background: rgba(192,138,52,0.16); }
+  .emblem.storage{ background: rgba(168,72,44,0.14); }
+  .emblem.museum{ background: rgba(192,138,52,0.16); }
+  .emblem.outdoors{ background: rgba(91,107,79,0.16); }
+  .emblem.kids{ background: rgba(192,138,52,0.16); }
+  .emblem.farmers{ background: rgba(91,107,79,0.16); }
+  .emblem.phone{ background: rgba(63,92,107,0.16); }
+  .emblem.cars{ background: rgba(63,92,107,0.16); }
+  .emblem.tailor{ background: rgba(63,92,107,0.16); }
+  .emblem.furniture{ background: rgba(192,138,52,0.16); }
+  .emblem.health{ background: rgba(168,72,44,0.14); }
+  .emblem.banking{ background: rgba(91,107,79,0.16); }
+  .emblem.housing{ background: rgba(192,138,52,0.16); }
   .emblem.schools{ background: rgba(63,92,107,0.16); }
   .emblem.pets{ background: rgba(168,72,44,0.14); }
   .emblem.fitness{ background: rgba(91,107,79,0.16); }
@@ -253,6 +269,22 @@
   .tag.language{ background: rgba(63,92,107,0.14); color:#2b4652; }
   .tag.attraction{ background: rgba(192,138,52,0.16); color:#8c621f; }
   .tag.auto{ background: rgba(63,92,107,0.14); color:#2b4652; }
+  .tag.health{ background: rgba(168,72,44,0.13); color:#8a3a20; }
+  .tag.banking{ background: rgba(91,107,79,0.14); color:#41502f; }
+  .tag.housing{ background: rgba(192,138,52,0.16); color:#8c621f; }
+  .tag.pets{ background: rgba(168,72,44,0.13); color:#8a3a20; }
+  .tag.fitness{ background: rgba(91,107,79,0.14); color:#41502f; }
+  .tag.religious{ background: rgba(63,92,107,0.14); color:#2b4652; }
+  .tag.shopping{ background: rgba(192,138,52,0.16); color:#8c621f; }
+  .tag.storage{ background: rgba(168,72,44,0.13); color:#8a3a20; }
+  .tag.museum{ background: rgba(192,138,52,0.16); color:#8c621f; }
+  .tag.outdoors{ background: rgba(91,107,79,0.14); color:#41502f; }
+  .tag.kids{ background: rgba(192,138,52,0.16); color:#8c621f; }
+  .tag.farmers{ background: rgba(91,107,79,0.14); color:#41502f; }
+  .tag.phone{ background: rgba(63,92,107,0.14); color:#2b4652; }
+  .tag.cars{ background: rgba(63,92,107,0.14); color:#2b4652; }
+  .tag.tailor{ background: rgba(63,92,107,0.14); color:#2b4652; }
+  .tag.furniture{ background: rgba(192,138,52,0.16); color:#8c621f; }
   .tag.health{ background: rgba(168,72,44,0.13); color:#8a3a20; }
   .tag.banking{ background: rgba(91,107,79,0.14); color:#41502f; }
   .tag.housing{ background: rgba(192,138,52,0.16); color:#8c621f; }
@@ -474,8 +506,8 @@
       </div>
       <div class="coords-row">
         <span><b>35.1415° N, 79.0060° W</b> — Fort Bragg (ref. point)</span>
-        <span><b>4</b> categories mapped</span>
-        <span><b>30</b> locations logged</span>
+        <span><b>26</b> categories mapped</span>
+        <span><b>94</b> locations logged</span>
       </div>
     </div>
   </header>
@@ -488,6 +520,32 @@
         <button class="cat-tab" data-cat="grocery">Grocery &amp; Food</button>
         <button class="cat-tab" data-cat="attraction">Parks &amp; Attractions</button>
         <button class="cat-tab" data-cat="auto">Auto &amp; Transportation</button>
+        <button class="cat-tab" data-cat="health">Health &amp; Personal Care</button>
+        <button class="cat-tab" data-cat="housing">Housing &amp; Off-Post Living</button>
+        <button class="cat-tab" data-cat="shopping">Exchange &amp; Shopping</button>
+        <button class="cat-tab" data-cat="museum">Museums &amp; Local History</button>
+        <span id="catTabsExtra" class="cat-tabs-extra">
+          <button class="cat-tab" data-cat="banking">Banking &amp; Money</button>
+          <button class="cat-tab" data-cat="pets">Pet Services</button>
+          <button class="cat-tab" data-cat="fitness">Fitness &amp; Recreation</button>
+          <button class="cat-tab" data-cat="religious">Religious Services</button>
+          <button class="cat-tab" data-cat="storage">Storage &amp; Moving</button>
+          <button class="cat-tab" data-cat="outdoors">Dog Parks &amp; Nature</button>
+          <button class="cat-tab" data-cat="kids">Kids &amp; Playgrounds</button>
+          <button class="cat-tab" data-cat="farmers">Farmers Markets</button>
+          <button class="cat-tab" data-cat="phone">Phone &amp; Internet</button>
+          <button class="cat-tab" data-cat="cars">Car Dealerships</button>
+          <button class="cat-tab" data-cat="tailor">Tailoring &amp; Alterations</button>
+          <button class="cat-tab" data-cat="furniture">Furniture &amp; Home Goods</button>
+          <button class="cat-tab" data-cat="legal">Legal &amp; Financial Services</button>
+          <button class="cat-tab" data-cat="education">Education &amp; Career</button>
+          <button class="cat-tab" data-cat="schools">Schools &amp; Childcare</button>
+          <button class="cat-tab" data-cat="community">Community &amp; Spouse Groups</button>
+          <button class="cat-tab" data-cat="bars">Bars &amp; Nightlife</button>
+          <button class="cat-tab" data-cat="services">Base Services</button>
+        </span>
+        <button class="cat-tab" data-cat="events" style="margin-left:8px;">Seasonal Events</button>
+        <button class="cat-tab cat-tab-toggle" id="catTabsToggle" type="button">More categories ▾</button>
       </div>
       <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
         <button class="cat-tab" data-cat="map">Map View</button>
@@ -533,6 +591,104 @@
 
       <div class="section-label">Auto &amp; Transportation</div>
       <div class="grid" data-group="auto" id="grid-auto"></div>
+
+      <div class="section-label">Health &amp; Personal Care</div>
+      <div class="grid" data-group="health" id="grid-health"></div>
+
+      <div class="section-label">Banking &amp; Money</div>
+      <div class="grid" data-group="banking" id="grid-banking"></div>
+
+      <div class="section-label">Housing &amp; Off-Post Living</div>
+      <div class="grid" data-group="housing" id="grid-housing"></div>
+
+      <div class="section-label">Pet Services</div>
+      <div class="grid" data-group="pets" id="grid-pets"></div>
+
+      <div class="section-label">Fitness &amp; Recreation</div>
+      <div class="grid" data-group="fitness" id="grid-fitness"></div>
+
+      <div class="section-label">Religious Services</div>
+      <div class="grid" data-group="religious" id="grid-religious"></div>
+
+      <div class="section-label">Exchange &amp; Shopping</div>
+      <div class="grid" data-group="shopping" id="grid-shopping"></div>
+
+      <div class="section-label">Storage &amp; Moving</div>
+      <div class="grid" data-group="storage" id="grid-storage"></div>
+
+      <div class="section-label">Museums &amp; Local History</div>
+      <div class="grid" data-group="museum" id="grid-museum"></div>
+
+      <div class="section-label">Dog Parks &amp; Nature</div>
+      <div class="grid" data-group="outdoors" id="grid-outdoors"></div>
+
+      <div class="section-label">Kids &amp; Playgrounds</div>
+      <div class="grid" data-group="kids" id="grid-kids"></div>
+
+      <div class="section-label">Farmers Markets</div>
+      <div class="grid" data-group="farmers" id="grid-farmers"></div>
+
+      <div class="section-label">Phone &amp; Internet Providers</div>
+      <div class="grid" data-group="phone" id="grid-phone"></div>
+
+      <div class="section-label">Car Dealerships</div>
+      <div class="grid" data-group="cars" id="grid-cars"></div>
+
+      <div class="section-label">Tailoring &amp; Alterations</div>
+      <div class="grid" data-group="tailor" id="grid-tailor"></div>
+
+      <div class="section-label">Furniture &amp; Home Goods</div>
+      <div class="grid" data-group="furniture" id="grid-furniture"></div>
+
+      <div class="section-label">Legal &amp; Financial Services</div>
+      <div class="grid" data-group="legal" id="grid-legal"></div>
+
+      <div class="section-label">Education &amp; Career</div>
+      <div class="grid" data-group="education" id="grid-education"></div>
+
+      <div class="section-label">Schools &amp; Childcare</div>
+      <div class="grid" data-group="schools" id="grid-schools"></div>
+
+      <div class="section-label">Community &amp; Spouse Groups</div>
+      <div class="grid" data-group="community" id="grid-community"></div>
+
+      <div class="section-label">Bars &amp; Nightlife</div>
+      <div class="grid" data-group="bars" id="grid-bars"></div>
+
+      <div class="section-label">Base Services</div>
+      <div class="grid" data-group="services" id="grid-services"></div>
+
+      <div class="section-label" id="eventsLabel">Seasonal Events</div>
+      <div class="help-grid" id="eventsGrid">
+        <div class="help-card">
+          <div class="h-name">All American Week</div>
+          <div class="h-desc">The 82nd Airborne Division's flagship annual celebration — a division run, Hall of Fame ceremony, and sports competitions, open to the public with a visitor pass. Note: cancelled for 2026 due to deployment; officially set to resume in 2027.</div>
+          <div class="h-numbers"><span><span class="h-tag">Typical dates</span>Mid-to-late May</span></div>
+        </div>
+        <div class="help-card">
+          <div class="h-name">Fayetteville Dogwood Festival</div>
+          <div class="h-desc">A free three-day downtown festival with live music, food, arts and crafts, and carnival rides — one of the city's biggest annual traditions.</div>
+          <div class="h-numbers"><span><span class="h-tag">Typical dates</span>4th weekend of April</span></div>
+        </div>
+        <div class="help-card">
+          <div class="h-name">International Folk Festival</div>
+          <div class="h-desc">A large cultural celebration downtown with a Parade of Nations, food from dozens of countries, live music and dance — draws 50,000+ visitors most years.</div>
+          <div class="h-numbers"><span><span class="h-tag">Typical dates</span>Late September</span></div>
+        </div>
+        <div class="help-card">
+          <div class="h-name">Dogwood Fall Festival</div>
+          <div class="h-desc">The autumn counterpart to the spring Dogwood Festival — food and gift vendors, live entertainment, hayrides, and a "Historic Haunted" theme.</div>
+          <div class="h-numbers"><span><span class="h-tag">Typical dates</span>Third weekend of October</span></div>
+        </div>
+        <div class="help-card">
+          <div class="h-name">4th Friday</div>
+          <div class="h-desc">A recurring monthly street event in downtown Fayetteville — live buskers, food carts, and open-late shopping across 200+ downtown businesses.</div>
+          <div class="h-numbers"><span><span class="h-tag">Typical dates</span>4th Friday of the month, March–October, 6–9pm</span></div>
+        </div>
+      </div>
+      <p id="eventsNote" style="font-size:12px; color:#8a8578; margin-top:14px; max-width:700px;">
+        Dates shift year to year and military events can be cancelled on short notice due to deployments — treat these as a rough seasonal guide and confirm current dates closer to the time. Know of something else worth adding? Use the feedback form below.
+      </p>
     </div>
     <div class="empty-state" id="emptyState" style="display:none;">No matches — try a different search or category.</div>
 
@@ -787,7 +943,7 @@ function cardHTML(p){
 }
 
 function render(){
-  ["restaurant","grocery","attraction","auto"].forEach(cat=>{
+  ["restaurant","grocery","attraction","auto","health","banking","housing","pets","fitness","religious","shopping","storage","museum","outdoors","kids","farmers","phone","cars","tailor","furniture","legal","education","schools","community","bars","services"].forEach(cat=>{
     const el = document.getElementById("grid-"+cat);
     const items = places.filter(p=>p.cat===cat);
     el.innerHTML = items.map(cardHTML).join("");
@@ -838,6 +994,15 @@ function applyFilter(){
     }
   });
 
+  const eventsBlock = document.getElementById("eventsGrid");
+  const eventsLabel = document.getElementById("eventsLabel");
+  const eventsNote = document.getElementById("eventsNote");
+  const showEvents = active === "all" || active === "events";
+  eventsBlock.style.display = showEvents ? "" : "none";
+  eventsLabel.style.display = showEvents ? "" : "none";
+  eventsNote.style.display = showEvents ? "" : "none";
+  if(showEvents && !query) anyVisible = true;
+
   emptyState.style.display = anyVisible ? "none" : "block";
   emptyState.textContent = active === "favorites" && !anyVisible
     ? "No favorites saved yet — tap the ★ on any listing to save it here."
@@ -854,6 +1019,14 @@ tabs.forEach(tab=>{
   });
 });
 document.getElementById("searchBox").addEventListener("input", applyFilter);
+
+// Show/hide the less-common category buttons
+const catTabsToggle = document.getElementById("catTabsToggle");
+const catTabsExtra = document.getElementById("catTabsExtra");
+catTabsToggle.addEventListener("click", ()=>{
+  const isOpen = catTabsExtra.classList.toggle("open");
+  catTabsToggle.textContent = isOpen ? "Fewer categories ▴" : "More categories ▾";
+});
 
 // Base picker dropdown
 const basePicker = document.getElementById("basePicker");
