@@ -228,6 +228,11 @@
   .emblem.shopping{ background: rgba(192,138,52,0.16); }
   .emblem.kids{ background: rgba(192,138,52,0.16); }
   .emblem.outdoors{ background: rgba(91,107,79,0.16); }
+  .emblem.tailor{ background: rgba(63,92,107,0.16); }
+  .emblem.museum{ background: rgba(192,138,52,0.16); }
+  .emblem.storage{ background: rgba(168,72,44,0.14); }
+  .emblem.farmers{ background: rgba(91,107,79,0.16); }
+  .emblem.bars{ background: rgba(168,72,44,0.14); }
   .card-name{ font-family:'Big Shoulders Display', sans-serif; font-weight:700; font-size:20px; line-height:1.1; text-decoration:none; color:var(--ink); }
   .card-name:hover{ color:var(--brass); }
   .card-rating{ display:flex; align-items:baseline; gap:6px; font-size:13px; }
@@ -260,6 +265,11 @@
   .tag.shopping{ background: rgba(192,138,52,0.16); color:#8c621f; }
   .tag.kids{ background: rgba(192,138,52,0.16); color:#8c621f; }
   .tag.outdoors{ background: rgba(91,107,79,0.14); color:#41502f; }
+  .tag.tailor{ background: rgba(63,92,107,0.14); color:#2b4652; }
+  .tag.museum{ background: rgba(192,138,52,0.16); color:#8c621f; }
+  .tag.storage{ background: rgba(168,72,44,0.13); color:#8a3a20; }
+  .tag.farmers{ background: rgba(91,107,79,0.14); color:#41502f; }
+  .tag.bars{ background: rgba(168,72,44,0.13); color:#8a3a20; }
 
   .card-blurb{ font-size:14px; line-height:1.5; color:#3b4640; }
   .card-addr{ font-size:12.5px; color:#7a8078; }
@@ -456,8 +466,8 @@
       </div>
       <div class="coords-row">
         <span><b>49.4513° N, 7.5845° E</b> — Ramstein AB (ref. point)</span>
-        <span><b>21</b> categories mapped</span>
-        <span><b>113</b> locations logged</span>
+        <span><b>26</b> categories mapped</span>
+        <span><b>134</b> locations logged</span>
       </div>
     </div>
   </header>
@@ -489,6 +499,11 @@
           <button class="cat-tab" data-cat="kids">Kids &amp; Playgrounds</button>
           <button class="cat-tab" data-cat="outdoors">Dog Parks &amp; Swimming Spots</button>
           <button class="cat-tab" data-cat="events">Seasonal Events</button>
+          <button class="cat-tab" data-cat="tailor">Tailoring &amp; Alterations</button>
+          <button class="cat-tab" data-cat="museum">Museums &amp; Local History</button>
+          <button class="cat-tab" data-cat="storage">Storage &amp; Moving</button>
+          <button class="cat-tab" data-cat="farmers">Farmers Markets</button>
+          <button class="cat-tab" data-cat="bars">Bars &amp; Nightlife</button>
         </span>
         <button class="cat-tab cat-tab-toggle" id="catTabsToggle" type="button">More categories ▾</button>
       </div>
@@ -589,6 +604,21 @@
 
       <div class="section-label">Dog Parks &amp; Swimming Spots</div>
       <div class="grid" data-group="outdoors" id="grid-outdoors"></div>
+
+      <div class="section-label">Tailoring &amp; Alterations</div>
+      <div class="grid" data-group="tailor" id="grid-tailor"></div>
+
+      <div class="section-label">Museums &amp; Local History</div>
+      <div class="grid" data-group="museum" id="grid-museum"></div>
+
+      <div class="section-label">Storage &amp; Moving</div>
+      <div class="grid" data-group="storage" id="grid-storage"></div>
+
+      <div class="section-label">Farmers Markets</div>
+      <div class="grid" data-group="farmers" id="grid-farmers"></div>
+
+      <div class="section-label">Bars &amp; Nightlife</div>
+      <div class="grid" data-group="bars" id="grid-bars"></div>
 
       <div class="section-label" id="eventsLabel">Seasonal Events</div>
       <div class="help-grid" id="eventsGrid">
@@ -783,6 +813,11 @@ const icons = {
   shopping: `<svg viewBox="0 0 24 24" fill="none" stroke="#8c621f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4"/><path d="M3 6h18M9 10a3 3 0 0 0 6 0"/></svg>`,
   kids: `<svg viewBox="0 0 24 24" fill="none" stroke="#8c621f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><path d="M12 7v6M6 22l6-9 6 9M6 13h12"/></svg>`,
   outdoors: `<svg viewBox="0 0 24 24" fill="none" stroke="#41502f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 17c1.5-3 4-3 5.5 0M9 17c1.5-3 4-3 5.5 0M16 17c1.5-3 4-3 5.5 0"/><path d="M4 12a2 2 0 1 1 0-4M9 10a1.6 1.6 0 1 1 0-3.2M14 10a1.6 1.6 0 1 1 0-3.2M19 12a2 2 0 1 0 0-4"/></svg>`,
+  tailor: `<svg viewBox="0 0 24 24" fill="none" stroke="#2b4652" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"/></svg>`,
+  museum: `<svg viewBox="0 0 24 24" fill="none" stroke="#8c621f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M4 21V10M20 21V10M2 10l10-6 10 6"/><path d="M8 21v-7M12 21v-7M16 21v-7"/></svg>`,
+  storage: `<svg viewBox="0 0 24 24" fill="none" stroke="#8a3a20" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="1"/><path d="M3 7l2-4h14l2 4M9 11v4M15 11v4"/></svg>`,
+  farmers: `<svg viewBox="0 0 24 24" fill="none" stroke="#41502f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c-3 3-3 6 0 8 3-2 3-5 0-8Z"/><path d="M12 10v12M7 22c0-3 2-5 5-5s5 2 5 5"/></svg>`,
+  bars: `<svg viewBox="0 0 24 24" fill="none" stroke="#8a3a20" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14l-6 9v6h3v3H8v-3h3v-6Z"/></svg>`,
 };
 
 const dirIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>`;
@@ -872,7 +907,7 @@ function cardHTML(p){
 }
 
 function render(){
-  ["restaurant","grocery","language","attraction","auto","health","banking","housing","schools","pets","fitness","community","religious","rec","services","pcs","legal","education","shopping","kids","outdoors"].forEach(cat=>{
+  ["restaurant","grocery","language","attraction","auto","health","banking","housing","schools","pets","fitness","community","religious","rec","services","pcs","legal","education","shopping","kids","outdoors","tailor","museum","storage","farmers","bars"].forEach(cat=>{
     const el = document.getElementById("grid-"+cat);
     const items = places.filter(p=>p.cat===cat);
     el.innerHTML = items.map(cardHTML).join("");
@@ -991,7 +1026,8 @@ const catColors = {
   auto:"#3f5c6b", health:"#a8482c", banking:"#5b6b4f", housing:"#c08a34",
   schools:"#3f5c6b", pets:"#a8482c", fitness:"#5b6b4f", community:"#c08a34",
   religious:"#3f5c6b", rec:"#c08a34", services:"#3f5c6b", pcs:"#a8482c",
-  legal:"#3f5c6b", education:"#5b6b4f", shopping:"#c08a34", kids:"#c08a34", outdoors:"#5b6b4f"
+  legal:"#3f5c6b", education:"#5b6b4f", shopping:"#c08a34", kids:"#c08a34", outdoors:"#5b6b4f",
+  tailor:"#3f5c6b", museum:"#c08a34", storage:"#a8482c", farmers:"#5b6b4f", bars:"#a8482c"
 };
 
 const map = L.map('leafletMap').setView([49.4512593, 7.5844778], 12);
