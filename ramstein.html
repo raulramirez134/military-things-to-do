@@ -233,6 +233,10 @@
   .emblem.storage{ background: rgba(168,72,44,0.14); }
   .emblem.farmers{ background: rgba(91,107,79,0.16); }
   .emblem.bars{ background: rgba(168,72,44,0.14); }
+  .emblem.phone{ background: rgba(63,92,107,0.16); }
+  .emblem.cars{ background: rgba(63,92,107,0.16); }
+  .emblem.furniture{ background: rgba(192,138,52,0.16); }
+  .emblem.wine{ background: rgba(168,72,44,0.14); }
   .card-name{ font-family:'Big Shoulders Display', sans-serif; font-weight:700; font-size:20px; line-height:1.1; text-decoration:none; color:var(--ink); }
   .card-name:hover{ color:var(--brass); }
   .card-rating{ display:flex; align-items:baseline; gap:6px; font-size:13px; }
@@ -270,6 +274,10 @@
   .tag.storage{ background: rgba(168,72,44,0.13); color:#8a3a20; }
   .tag.farmers{ background: rgba(91,107,79,0.14); color:#41502f; }
   .tag.bars{ background: rgba(168,72,44,0.13); color:#8a3a20; }
+  .tag.phone{ background: rgba(63,92,107,0.14); color:#2b4652; }
+  .tag.cars{ background: rgba(63,92,107,0.14); color:#2b4652; }
+  .tag.furniture{ background: rgba(192,138,52,0.16); color:#8c621f; }
+  .tag.wine{ background: rgba(168,72,44,0.13); color:#8a3a20; }
 
   .card-blurb{ font-size:14px; line-height:1.5; color:#3b4640; }
   .card-addr{ font-size:12.5px; color:#7a8078; }
@@ -466,8 +474,8 @@
       </div>
       <div class="coords-row">
         <span><b>49.4513° N, 7.5845° E</b> — Ramstein AB (ref. point)</span>
-        <span><b>26</b> categories mapped</span>
-        <span><b>134</b> locations logged</span>
+        <span><b>30</b> categories mapped</span>
+        <span><b>167</b> locations logged</span>
       </div>
     </div>
   </header>
@@ -504,6 +512,10 @@
           <button class="cat-tab" data-cat="storage">Storage &amp; Moving</button>
           <button class="cat-tab" data-cat="farmers">Farmers Markets</button>
           <button class="cat-tab" data-cat="bars">Bars &amp; Nightlife</button>
+          <button class="cat-tab" data-cat="phone">Phone &amp; Internet</button>
+          <button class="cat-tab" data-cat="cars">Car Dealerships</button>
+          <button class="cat-tab" data-cat="furniture">Furniture &amp; Home Goods</button>
+          <button class="cat-tab" data-cat="wine">Wine Country Day Trips</button>
         </span>
         <button class="cat-tab cat-tab-toggle" id="catTabsToggle" type="button">More categories ▾</button>
       </div>
@@ -619,6 +631,18 @@
 
       <div class="section-label">Bars &amp; Nightlife</div>
       <div class="grid" data-group="bars" id="grid-bars"></div>
+
+      <div class="section-label">Phone &amp; Internet Providers</div>
+      <div class="grid" data-group="phone" id="grid-phone"></div>
+
+      <div class="section-label">Car Dealerships &amp; Buying</div>
+      <div class="grid" data-group="cars" id="grid-cars"></div>
+
+      <div class="section-label">Furniture &amp; Home Goods</div>
+      <div class="grid" data-group="furniture" id="grid-furniture"></div>
+
+      <div class="section-label">Wine Country Day Trips</div>
+      <div class="grid" data-group="wine" id="grid-wine"></div>
 
       <div class="section-label" id="eventsLabel">Seasonal Events</div>
       <div class="help-grid" id="eventsGrid">
@@ -818,6 +842,10 @@ const icons = {
   storage: `<svg viewBox="0 0 24 24" fill="none" stroke="#8a3a20" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="1"/><path d="M3 7l2-4h14l2 4M9 11v4M15 11v4"/></svg>`,
   farmers: `<svg viewBox="0 0 24 24" fill="none" stroke="#41502f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c-3 3-3 6 0 8 3-2 3-5 0-8Z"/><path d="M12 10v12M7 22c0-3 2-5 5-5s5 2 5 5"/></svg>`,
   bars: `<svg viewBox="0 0 24 24" fill="none" stroke="#8a3a20" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14l-6 9v6h3v3H8v-3h3v-6Z"/></svg>`,
+  phone: `<svg viewBox="0 0 24 24" fill="none" stroke="#2b4652" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/><path d="M9 6l2 3 4-5"/></svg>`,
+  cars: `<svg viewBox="0 0 24 24" fill="none" stroke="#2b4652" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14M5 17a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm14 0a2 2 0 1 0 4 0 2 2 0 0 0-4 0ZM3 17V11l2-5h10l3 5h3v6"/><path d="M5 11h14"/></svg>`,
+  furniture: `<svg viewBox="0 0 24 24" fill="none" stroke="#8c621f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/><path d="M2 11h20v5a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1Z"/><path d="M4 17v3M20 17v3"/></svg>`,
+  wine: `<svg viewBox="0 0 24 24" fill="none" stroke="#8a3a20" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2h8l-1 8a3 3 0 0 1-6 0Z"/><path d="M12 13v7M8 22h8"/></svg>`,
 };
 
 const dirIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>`;
@@ -907,7 +935,7 @@ function cardHTML(p){
 }
 
 function render(){
-  ["restaurant","grocery","language","attraction","auto","health","banking","housing","schools","pets","fitness","community","religious","rec","services","pcs","legal","education","shopping","kids","outdoors","tailor","museum","storage","farmers","bars"].forEach(cat=>{
+  ["restaurant","grocery","language","attraction","auto","health","banking","housing","schools","pets","fitness","community","religious","rec","services","pcs","legal","education","shopping","kids","outdoors","tailor","museum","storage","farmers","bars","phone","cars","furniture","wine"].forEach(cat=>{
     const el = document.getElementById("grid-"+cat);
     const items = places.filter(p=>p.cat===cat);
     el.innerHTML = items.map(cardHTML).join("");
@@ -1027,7 +1055,8 @@ const catColors = {
   schools:"#3f5c6b", pets:"#a8482c", fitness:"#5b6b4f", community:"#c08a34",
   religious:"#3f5c6b", rec:"#c08a34", services:"#3f5c6b", pcs:"#a8482c",
   legal:"#3f5c6b", education:"#5b6b4f", shopping:"#c08a34", kids:"#c08a34", outdoors:"#5b6b4f",
-  tailor:"#3f5c6b", museum:"#c08a34", storage:"#a8482c", farmers:"#5b6b4f", bars:"#a8482c"
+  tailor:"#3f5c6b", museum:"#c08a34", storage:"#a8482c", farmers:"#5b6b4f", bars:"#a8482c",
+  phone:"#3f5c6b", cars:"#3f5c6b", furniture:"#c08a34", wine:"#a8482c"
 };
 
 const map = L.map('leafletMap').setView([49.4512593, 7.5844778], 12);
