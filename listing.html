@@ -140,27 +140,51 @@
     </div>
   </footer>
 
-<script src="data.js"></script>
 <script>
+const BASE_CONFIG = {
+  ramstein: { label: "Ramstein", hub: "ramstein.html", dataFile: "data.js", refWord: "gate", unit: "km" },
+  fortbragg: { label: "Fort Bragg", hub: "fortbragg.html", dataFile: "data-fortbragg.js", refWord: "post", unit: "mi" },
+};
+
 const params = new URLSearchParams(window.location.search);
+const baseKey = BASE_CONFIG[params.get("base")] ? params.get("base") : "ramstein";
+const cfg = BASE_CONFIG[baseKey];
 const id = params.get("id");
-const place = places.find(p => p.id === id);
 
-function starGlyphs(rating){
-  const full = Math.round(rating);
-  let s = "";
-  for(let i=1;i<=5;i++) s += i <= full ? "★" : "☆";
-  return s;
-}
+// Update nav links to point at the right base's hub page
+document.querySelector(".brand").setAttribute("href", cfg.hub);
+document.querySelector(".back-link").setAttribute("href", cfg.hub);
+document.querySelector(".back-link").textContent = `← Back to ${cfg.label} listings`;
 
-if(!place){
-  document.getElementById("headerInner").innerHTML = `<h1 class="title">Listing not found</h1>`;
-  document.getElementById("mainContent").innerHTML = `<div class="not-found"><p>That listing doesn't exist — it may have been renamed or removed.</p><p><a href="ramstein.html">← Back to the full Ramstein list</a></p></div>`;
-} else {
+// Dynamically load the correct base's data file, then run the page
+const dataScript = document.createElement("script");
+dataScript.src = cfg.dataFile;
+dataScript.onload = initPage;
+document.body.appendChild(dataScript);
+
+function initPage(){
+  const place = places.find(p => p.id === id);
+  const fullId = baseKey === "ramstein" ? place?.id : `${baseKey}:${place?.id}`;
+
+  function starGlyphs(rating){
+    const full = Math.round(rating);
+    let s = "";
+    for(let i=1;i<=5;i++) s += i <= full ? "★" : "☆";
+    return s;
+  }
+
+  function milesFrom(km){ return (km * 0.621371).toFixed(1); }
+
+  if(!place){
+    document.getElementById("headerInner").innerHTML = `<h1 class="title">Listing not found</h1>`;
+    document.getElementById("mainContent").innerHTML = `<div class="not-found"><p>That listing doesn't exist — it may have been renamed or removed.</p><p><a href="${cfg.hub}">← Back to the full ${cfg.label} list</a></p></div>`;
+    return;
+  }
+
   document.title = `${place.name} — Military Things To Do`;
 
-  document.getElementById("metaDescTag").content = `${place.name}: ${place.blurb} Distance from Ramstein AB gate, hours, contact info, and reviews.`;
-  document.getElementById("canonicalTag").href = `https://militarythingstodo.com/listing.html?id=${place.id}`;
+  document.getElementById("metaDescTag").content = `${place.name}: ${place.blurb} Distance from ${cfg.label} ${cfg.refWord}, hours, contact info, and reviews.`;
+  document.getElementById("canonicalTag").href = `https://militarythingstodo.com/listing.html?base=${baseKey}&id=${place.id}`;
 
   document.getElementById("headerInner").innerHTML = `
     <div class="tag-inline">${catLabels[place.cat]}</div>
@@ -175,7 +199,11 @@ if(!place){
     ` : `<div class="rating-note">Not yet rated on Google — be the first to leave a review below.</div>`}
   `;
 
-  const distText = place.dist === 0 ? "On base" : `${place.dist.toFixed(1)} km / ${(place.dist * 0.621371).toFixed(1)} mi from gate`;
+  const distText = place.dist === 0
+    ? `On ${cfg.refWord === "post" ? "post" : "base"}`
+    : cfg.unit === "mi"
+      ? `${milesFrom(place.dist)} mi / ${place.dist.toFixed(1)} km from ${cfg.refWord}`
+      : `${place.dist.toFixed(1)} km / ${milesFrom(place.dist)} mi from ${cfg.refWord}`;
   const dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`;
   const callHref = place.phone ? `tel:${place.phone.replace(/\s+/g,'')}` : null;
 
@@ -184,7 +212,7 @@ if(!place){
 
     <div class="detail-grid">
       <div class="detail-card"><div class="k">Address</div><div class="v">${place.addr}</div></div>
-      <div class="detail-card"><div class="k">Distance from gate</div><div class="v">${distText}</div></div>
+      <div class="detail-card"><div class="k">Distance from ${cfg.refWord}</div><div class="v">${distText}</div></div>
       <div class="detail-card"><div class="k">Hours</div><div class="v">${place.hours}</div></div>
       <div class="detail-card"><div class="k">Phone</div><div class="v">${place.phone ? place.phone : "Not listed"}</div></div>
     </div>
@@ -192,7 +220,7 @@ if(!place){
     <div class="action-row">
       <a class="action-btn primary" href="${dirUrl}" target="_blank" rel="noopener">Get directions →</a>
       ${callHref ? `<a class="action-btn" href="${callHref}">Call ${place.phone}</a>` : ""}
-      <a class="action-btn" href="ramstein.html#feedback-section">Claim / report this listing</a>
+      <a class="action-btn" href="${cfg.hub}#feedback-section">Claim / report this listing</a>
     </div>
 
     <div id="reviews-section">
@@ -231,7 +259,7 @@ if(!place){
   async function loadReviews(){
     const listEl = document.getElementById("reviewsList");
     try {
-      const res = await fetch(`/api/reviews?id=${encodeURIComponent(place.id)}`);
+      const res = await fetch(`/api/reviews?id=${encodeURIComponent(fullId)}`);
       const data = await res.json();
       const reviews = data.reviews || [];
       if(reviews.length === 0){
@@ -297,7 +325,7 @@ if(!place){
       const res = await fetch("/api/reviews", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: place.id, date, adminKey })
+        body: JSON.stringify({ id: fullId, date, adminKey })
       });
       const data = await res.json();
       if(!res.ok){
@@ -334,7 +362,7 @@ if(!place){
       const res = await fetch("/api/reviews", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: place.id, name, rating, text })
+        body: JSON.stringify({ id: fullId, name, rating, text })
       });
       const data = await res.json();
       if(!res.ok){
