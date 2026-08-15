@@ -511,8 +511,8 @@
       </div>
       <div class="coords-row">
         <span><b>33.2276° N, 117.3930° W</b> — Camp Pendleton (ref. point)</span>
-        <span><b>4</b> categories mapped</span>
-        <span><b>30</b> locations logged</span>
+        <span><b>23</b> categories mapped</span>
+        <span><b>80</b> locations logged</span>
       </div>
     </div>
   </header>
@@ -525,6 +525,28 @@
         <button class="cat-tab" data-cat="grocery">Grocery &amp; Food</button>
         <button class="cat-tab" data-cat="attraction">Parks &amp; Attractions</button>
         <button class="cat-tab" data-cat="auto">Auto &amp; Transportation</button>
+        <button class="cat-tab" data-cat="health">Health &amp; Personal Care</button>
+        <button class="cat-tab" data-cat="housing">Housing &amp; Off-Base Living</button>
+        <button class="cat-tab" data-cat="shopping">Exchange &amp; Shopping</button>
+        <button class="cat-tab" data-cat="museum">Museums &amp; Local History</button>
+        <span id="catTabsExtra" class="cat-tabs-extra">
+          <button class="cat-tab" data-cat="banking">Banking &amp; Money</button>
+          <button class="cat-tab" data-cat="pets">Pet Services</button>
+          <button class="cat-tab" data-cat="fitness">Fitness &amp; Recreation</button>
+          <button class="cat-tab" data-cat="religious">Religious Services</button>
+          <button class="cat-tab" data-cat="storage">Storage &amp; Moving</button>
+          <button class="cat-tab" data-cat="outdoors">Dog Parks &amp; Nature</button>
+          <button class="cat-tab" data-cat="kids">Kids &amp; Playgrounds</button>
+          <button class="cat-tab" data-cat="farmers">Farmers Markets</button>
+          <button class="cat-tab" data-cat="phone">Phone &amp; Internet</button>
+          <button class="cat-tab" data-cat="cars">Car Dealerships</button>
+          <button class="cat-tab" data-cat="tailor">Tailoring &amp; Alterations</button>
+          <button class="cat-tab" data-cat="furniture">Furniture &amp; Home Goods</button>
+          <button class="cat-tab" data-cat="legal">Legal &amp; Financial Services</button>
+          <button class="cat-tab" data-cat="education">Education &amp; Career</button>
+          <button class="cat-tab" data-cat="bars">Bars &amp; Nightlife</button>
+        </span>
+        <button class="cat-tab cat-tab-toggle" id="catTabsToggle" type="button">More categories ▾</button>
       </div>
       <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
         <button class="cat-tab" data-cat="map">Map View</button>
@@ -554,7 +576,7 @@
           <div class="legend-items" id="legendItems"></div>
         </div>
       </div>
-      <p style="font-size:12px; color:#8a8578; margin-top:8px;">All 30 logged locations at once — zoom, click a pin for details, or toggle categories in the legend.</p>
+      <p style="font-size:12px; color:#8a8578; margin-top:8px;">All 80 logged locations at once — zoom, click a pin for details, or toggle categories in the legend.</p>
     </div>
 
     <div id="listView">
@@ -569,6 +591,63 @@
 
       <div class="section-label">Auto &amp; Transportation</div>
       <div class="grid" data-group="auto" id="grid-auto"></div>
+
+      <div class="section-label">Health &amp; Personal Care</div>
+      <div class="grid" data-group="health" id="grid-health"></div>
+
+      <div class="section-label">Banking &amp; Money</div>
+      <div class="grid" data-group="banking" id="grid-banking"></div>
+
+      <div class="section-label">Housing &amp; Off-Base Living</div>
+      <div class="grid" data-group="housing" id="grid-housing"></div>
+
+      <div class="section-label">Pet Services</div>
+      <div class="grid" data-group="pets" id="grid-pets"></div>
+
+      <div class="section-label">Fitness &amp; Recreation</div>
+      <div class="grid" data-group="fitness" id="grid-fitness"></div>
+
+      <div class="section-label">Religious Services</div>
+      <div class="grid" data-group="religious" id="grid-religious"></div>
+
+      <div class="section-label">Exchange &amp; Shopping</div>
+      <div class="grid" data-group="shopping" id="grid-shopping"></div>
+
+      <div class="section-label">Storage &amp; Moving</div>
+      <div class="grid" data-group="storage" id="grid-storage"></div>
+
+      <div class="section-label">Museums &amp; Local History</div>
+      <div class="grid" data-group="museum" id="grid-museum"></div>
+
+      <div class="section-label">Dog Parks &amp; Nature</div>
+      <div class="grid" data-group="outdoors" id="grid-outdoors"></div>
+
+      <div class="section-label">Kids &amp; Playgrounds</div>
+      <div class="grid" data-group="kids" id="grid-kids"></div>
+
+      <div class="section-label">Farmers Markets</div>
+      <div class="grid" data-group="farmers" id="grid-farmers"></div>
+
+      <div class="section-label">Phone &amp; Internet Providers</div>
+      <div class="grid" data-group="phone" id="grid-phone"></div>
+
+      <div class="section-label">Car Dealerships</div>
+      <div class="grid" data-group="cars" id="grid-cars"></div>
+
+      <div class="section-label">Tailoring &amp; Alterations</div>
+      <div class="grid" data-group="tailor" id="grid-tailor"></div>
+
+      <div class="section-label">Furniture &amp; Home Goods</div>
+      <div class="grid" data-group="furniture" id="grid-furniture"></div>
+
+      <div class="section-label">Legal &amp; Financial Services</div>
+      <div class="grid" data-group="legal" id="grid-legal"></div>
+
+      <div class="section-label">Education &amp; Career</div>
+      <div class="grid" data-group="education" id="grid-education"></div>
+
+      <div class="section-label">Bars &amp; Nightlife</div>
+      <div class="grid" data-group="bars" id="grid-bars"></div>
     </div>
     <div class="empty-state" id="emptyState" style="display:none;">No matches — try a different search or category.</div>
 
@@ -825,7 +904,7 @@ function cardHTML(p){
 }
 
 function render(){
-  ["restaurant","grocery","attraction","auto"].forEach(cat=>{
+  ["restaurant","grocery","attraction","auto","health","banking","housing","pets","fitness","religious","shopping","storage","museum","outdoors","kids","farmers","phone","cars","tailor","furniture","legal","education","bars"].forEach(cat=>{
     const el = document.getElementById("grid-"+cat);
     const items = places.filter(p=>p.cat===cat);
     el.innerHTML = items.map(cardHTML).join("");
@@ -903,6 +982,14 @@ tabs.forEach(tab=>{
   });
 });
 document.getElementById("searchBox").addEventListener("input", applyFilter);
+
+// Show/hide the less-common category buttons
+const catTabsToggle = document.getElementById("catTabsToggle");
+const catTabsExtra = document.getElementById("catTabsExtra");
+catTabsToggle.addEventListener("click", ()=>{
+  const isOpen = catTabsExtra.classList.toggle("open");
+  catTabsToggle.textContent = isOpen ? "Fewer categories ▴" : "More categories ▾";
+});
 
 // Base picker dropdown
 const basePicker = document.getElementById("basePicker");
