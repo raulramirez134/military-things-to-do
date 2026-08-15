@@ -511,8 +511,8 @@
       </div>
       <div class="coords-row">
         <span><b>35.1415° N, 79.0060° W</b> — Fort Bragg (ref. point)</span>
-        <span><b>26</b> categories mapped</span>
-        <span><b>94</b> locations logged</span>
+        <span><b>27</b> categories mapped</span>
+        <span><b>97</b> locations logged</span>
       </div>
     </div>
   </header>
@@ -529,6 +529,7 @@
         <button class="cat-tab" data-cat="housing">Housing &amp; Off-Post Living</button>
         <button class="cat-tab" data-cat="shopping">Exchange &amp; Shopping</button>
         <button class="cat-tab" data-cat="museum">Museums &amp; Local History</button>
+        <button class="cat-tab" data-cat="rec">Recreation &amp; Entertainment</button>
         <span id="catTabsExtra" class="cat-tabs-extra">
           <button class="cat-tab" data-cat="banking">Banking &amp; Money</button>
           <button class="cat-tab" data-cat="pets">Pet Services</button>
@@ -623,6 +624,9 @@
 
       <div class="section-label">Museums &amp; Local History</div>
       <div class="grid" data-group="museum" id="grid-museum"></div>
+
+      <div class="section-label">Recreation &amp; Entertainment</div>
+      <div class="grid" data-group="rec" id="grid-rec"></div>
 
       <div class="section-label">Dog Parks &amp; Nature</div>
       <div class="grid" data-group="outdoors" id="grid-outdoors"></div>
@@ -948,7 +952,7 @@ function cardHTML(p){
 }
 
 function render(){
-  ["restaurant","grocery","attraction","auto","health","banking","housing","pets","fitness","religious","shopping","storage","museum","outdoors","kids","farmers","phone","cars","tailor","furniture","legal","education","schools","community","bars","services"].forEach(cat=>{
+  ["restaurant","grocery","attraction","auto","health","banking","housing","pets","fitness","religious","shopping","storage","museum","rec","outdoors","kids","farmers","phone","cars","tailor","furniture","legal","education","schools","community","bars","services"].forEach(cat=>{
     const el = document.getElementById("grid-"+cat);
     const items = places.filter(p=>p.cat===cat);
     el.innerHTML = items.map(cardHTML).join("");
