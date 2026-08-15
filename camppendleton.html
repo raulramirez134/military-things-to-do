@@ -185,6 +185,19 @@
   }
   .cat-tab:hover{ border-color:var(--olive); }
   .cat-tab.active{ background:var(--ink); color:var(--parchment); border-color:var(--ink); }
+  .area-tab{
+    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:0.04em; text-transform:uppercase;
+    padding:7px 12px; border:1px solid var(--line); border-radius:3px;
+    background:transparent; cursor:pointer; color: var(--ink);
+  }
+  .area-tab:hover{ border-color:var(--olive); }
+  .area-tab.active{ background:var(--brass); color:#fff; border-color:var(--brass); }
+  .area-badge{
+    font-family:'JetBrains Mono', monospace; font-size:9.5px; letter-spacing:0.04em; text-transform:uppercase;
+    padding:2px 7px; border-radius:2px; display:inline-block; margin-left:6px;
+  }
+  .area-badge.north{ background:rgba(63,92,107,0.14); color:#2b4652; }
+  .area-badge.south{ background:rgba(192,138,52,0.16); color:#8c621f; }
   .search-box{
     font-family:'Source Sans 3', sans-serif; font-size:13px; padding:9px 12px;
     border:1px solid var(--line); border-radius:3px; background:#fff; min-width:200px;
@@ -510,7 +523,8 @@
         </div>
       </div>
       <div class="coords-row">
-        <span><b>33.2276° N, 117.3930° W</b> — Camp Pendleton (ref. point)</span>
+        <span><b>33.2276° N, 117.3930° W</b> — North Area (ref. point)</span>
+        <span><b>33.3756° N, 117.5648° W</b> — South Area / San Onofre (ref. point)</span>
         <span><b>26</b> categories mapped</span>
         <span><b>104</b> locations logged</span>
       </div>
@@ -551,6 +565,12 @@
         </span>
         <button class="cat-tab" data-cat="events" style="margin-left:8px;">Seasonal Events</button>
         <button class="cat-tab cat-tab-toggle" id="catTabsToggle" type="button">More categories ▾</button>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:10px;">
+        <span class="mono" style="font-size:11px; color:#8a8578; text-transform:uppercase; letter-spacing:.06em;">Area:</span>
+        <button class="area-tab active" data-area="all">Both Areas</button>
+        <button class="area-tab" data-area="north">North Area</button>
+        <button class="area-tab" data-area="south">South Area</button>
       </div>
       <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
         <button class="cat-tab" data-cat="map">Map View</button>
@@ -910,12 +930,13 @@ function starsHTML(p){
 }
 
 function cardHTML(p){
-  const distText = p.dist === 0 ? "On base" : `${milesFrom(p.dist)} mi / ${p.dist.toFixed(1)} km from base`;
+  const areaLabel = p.area === "south" ? "South Area" : "North Area";
+  const distText = p.dist === 0 ? "On base" : `${milesFrom(p.dist)} mi / ${p.dist.toFixed(1)} km from ${areaLabel}`;
   const dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`;
   const callHref = p.phone ? `tel:${p.phone.replace(/\s+/g,'')}` : null;
   const isFav = getFavorites().includes(p.name);
   return `
-    <div class="card" data-name="${p.name.toLowerCase()}" data-cat="${p.cat}" data-placename="${p.name}">
+    <div class="card" data-name="${p.name.toLowerCase()}" data-cat="${p.cat}" data-placename="${p.name}" data-area="${p.area}">
       <div class="card-top">
         <div class="name-row">
           <div class="emblem ${p.cat}">${icons[p.cat]}</div>
@@ -924,7 +945,7 @@ function cardHTML(p){
         <button class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${p.name.replace(/'/g,"\\'")}', this)" aria-label="Save to favorites">★</button>
         <div class="tag ${p.cat}">${catLabels[p.cat]}</div>
       </div>
-      <div class="card-rating">${starsHTML(p)}</div>
+      <div class="card-rating">${starsHTML(p)} <span class="area-badge ${p.area}">${areaLabel}</span></div>
       <div class="card-blurb">${p.blurb}</div>
       <div class="card-addr">${p.addr}</div>
       <div class="card-meta">
@@ -959,6 +980,7 @@ const emptyState = document.getElementById("emptyState");
 
 function applyFilter(){
   const active = document.querySelector(".cat-tab.active").dataset.cat;
+  const activeArea = document.querySelector(".area-tab.active").dataset.area;
   const query = document.getElementById("searchBox").value.trim().toLowerCase();
   const favs = getFavorites();
   let anyVisible = false;
@@ -986,7 +1008,8 @@ function applyFilter(){
       grid.querySelectorAll(".card").forEach(card=>{
         const matchesQuery = !query || card.dataset.name.includes(query);
         const matchesFav = active !== "favorites" || favs.includes(card.dataset.placename);
-        const visible = matchesQuery && matchesFav;
+        const matchesArea = activeArea === "all" || card.dataset.area === activeArea;
+        const visible = matchesQuery && matchesFav && matchesArea;
         card.style.display = visible ? "" : "none";
         if(visible) visibleInGrid++;
       });
@@ -1022,6 +1045,16 @@ tabs.forEach(tab=>{
   });
 });
 document.getElementById("searchBox").addEventListener("input", applyFilter);
+
+// North/South area filter
+const areaTabs = document.querySelectorAll(".area-tab");
+areaTabs.forEach(tab=>{
+  tab.addEventListener("click", ()=>{
+    areaTabs.forEach(t=>t.classList.remove("active"));
+    tab.classList.add("active");
+    applyFilter();
+  });
+});
 
 // Show/hide the less-common category buttons
 const catTabsToggle = document.getElementById("catTabsToggle");
@@ -1070,7 +1103,7 @@ const catColors = {
   phone:"#3f5c6b", cars:"#3f5c6b", furniture:"#c08a34", wine:"#a8482c"
 };
 
-const map = L.map('leafletMap').setView([33.2276, -117.3930], 12);
+const map = L.map('leafletMap').setView([33.30, -117.48], 10);
 window.leafletMapInstance = map;
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap contributors',
@@ -1091,15 +1124,20 @@ places.forEach(p=>{
     fillOpacity: 0.9
   });
   const dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`;
-  marker.bindPopup(`<b>${p.name}</b><br>${catLabels[p.cat]} · ${p.dist === 0 ? "On base" : milesFrom(p.dist) + " mi from base"}<br><a href="${dirUrl}" target="_blank" rel="noopener">Get directions →</a>`);
+  const areaLabel = p.area === "south" ? "South Area" : "North Area";
+  marker.bindPopup(`<b>${p.name}</b><br>${catLabels[p.cat]} · ${p.dist === 0 ? "On base" : milesFrom(p.dist) + " mi from " + areaLabel}<br><a href="${dirUrl}" target="_blank" rel="noopener">Get directions →</a>`);
   marker.addTo(map);
   markersByCat[p.cat].push(marker);
 });
 
-// Base marker (always visible, not part of the legend toggles)
+// Reference point markers (always visible, not part of the legend toggles)
 L.marker([33.2276, -117.3930], {
   icon: L.divIcon({ className: '', html: '<div style="background:#182420;width:14px;height:14px;border-radius:50%;border:2px solid #D9A24C;"></div>', iconSize:[14,14] })
-}).addTo(map).bindPopup("<b>Camp Pendleton</b><br>Reference point");
+}).addTo(map).bindPopup("<b>North Area</b><br>Reference point (Oceanside)");
+
+L.marker([33.3756458, -117.5647693], {
+  icon: L.divIcon({ className: '', html: '<div style="background:#182420;width:14px;height:14px;border-radius:50%;border:2px solid #C08A34;"></div>', iconSize:[14,14] })
+}).addTo(map).bindPopup("<b>South Area</b><br>Reference point (San Onofre)");
 
 // ---- Legend ----
 const legendItems = document.getElementById("legendItems");

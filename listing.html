@@ -200,11 +200,15 @@ function initPage(){
     ` : `<div class="rating-note">Not yet rated on Google — be the first to leave a review below.</div>`}
   `;
 
+  const refWordForPlace = (baseKey === "camppendleton")
+    ? (place.area === "south" ? "South Area" : "North Area")
+    : cfg.refWord;
+
   const distText = place.dist === 0
     ? `On ${cfg.refWord === "post" ? "post" : "base"}`
     : cfg.unit === "mi"
-      ? `${milesFrom(place.dist)} mi / ${place.dist.toFixed(1)} km from ${cfg.refWord}`
-      : `${place.dist.toFixed(1)} km / ${milesFrom(place.dist)} mi from ${cfg.refWord}`;
+      ? `${milesFrom(place.dist)} mi / ${place.dist.toFixed(1)} km from ${refWordForPlace}`
+      : `${place.dist.toFixed(1)} km / ${milesFrom(place.dist)} mi from ${refWordForPlace}`;
   const dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`;
   const callHref = place.phone ? `tel:${place.phone.replace(/\s+/g,'')}` : null;
 
@@ -213,7 +217,7 @@ function initPage(){
 
     <div class="detail-grid">
       <div class="detail-card"><div class="k">Address</div><div class="v">${place.addr}</div></div>
-      <div class="detail-card"><div class="k">Distance from ${cfg.refWord}</div><div class="v">${distText}</div></div>
+      <div class="detail-card"><div class="k">Distance from ${refWordForPlace}</div><div class="v">${distText}</div></div>
       <div class="detail-card"><div class="k">Hours</div><div class="v">${place.hours}</div></div>
       <div class="detail-card"><div class="k">Phone</div><div class="v">${place.phone ? place.phone : "Not listed"}</div></div>
     </div>
