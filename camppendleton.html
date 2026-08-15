@@ -511,8 +511,8 @@
       </div>
       <div class="coords-row">
         <span><b>33.2276° N, 117.3930° W</b> — Camp Pendleton (ref. point)</span>
-        <span><b>23</b> categories mapped</span>
-        <span><b>80</b> locations logged</span>
+        <span><b>26</b> categories mapped</span>
+        <span><b>104</b> locations logged</span>
       </div>
     </div>
   </header>
@@ -545,7 +545,11 @@
           <button class="cat-tab" data-cat="legal">Legal &amp; Financial Services</button>
           <button class="cat-tab" data-cat="education">Education &amp; Career</button>
           <button class="cat-tab" data-cat="bars">Bars &amp; Nightlife</button>
+          <button class="cat-tab" data-cat="schools">Schools &amp; Childcare</button>
+          <button class="cat-tab" data-cat="community">Community &amp; Spouse Groups</button>
+          <button class="cat-tab" data-cat="services">Base Services</button>
         </span>
+        <button class="cat-tab" data-cat="events" style="margin-left:8px;">Seasonal Events</button>
         <button class="cat-tab cat-tab-toggle" id="catTabsToggle" type="button">More categories ▾</button>
       </div>
       <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
@@ -648,6 +652,42 @@
 
       <div class="section-label">Bars &amp; Nightlife</div>
       <div class="grid" data-group="bars" id="grid-bars"></div>
+
+      <div class="section-label">Schools &amp; Childcare</div>
+      <div class="grid" data-group="schools" id="grid-schools"></div>
+
+      <div class="section-label">Community &amp; Spouse Groups</div>
+      <div class="grid" data-group="community" id="grid-community"></div>
+
+      <div class="section-label">Base Services</div>
+      <div class="grid" data-group="services" id="grid-services"></div>
+
+      <div class="section-label" id="eventsLabel">Seasonal Events</div>
+      <div class="help-grid" id="eventsGrid">
+        <div class="help-card">
+          <div class="h-name">Oceanside Sunset Market</div>
+          <div class="h-desc">A lively weekly street market with food trucks, live music, and local vendors along the pier — a genuine local favorite, not just a tourist stop.</div>
+          <div class="h-numbers"><span><span class="h-tag">Typical schedule</span>Thursdays, 5–9pm</span></div>
+        </div>
+        <div class="help-card">
+          <div class="h-name">Oceanside Pier Amphitheater Events</div>
+          <div class="h-desc">Concerts, fireworks practice sessions, and summer movie nights right on the beach — check the amphitheater's schedule for what's on.</div>
+          <div class="h-numbers"><span><span class="h-tag">Typical dates</span>Varies, mostly summer</span></div>
+        </div>
+        <div class="help-card">
+          <div class="h-name">Vista Strawberry Festival</div>
+          <div class="h-desc">A large regional festival with vendors, live music, and a strawberry run — very popular but crowded; wear good walking shoes and expect a shuttle from parking.</div>
+          <div class="h-numbers"><span><span class="h-tag">Typical dates</span>Late May</span></div>
+        </div>
+        <div class="help-card">
+          <div class="h-name">Vista Viking Festival</div>
+          <div class="h-desc">A fun, family-friendly Nordic-themed festival with archery, axe throwing, live music, and mead vendors — gets hot and crowded midday.</div>
+          <div class="h-numbers"><span><span class="h-tag">Typical dates</span>Varies, warm-weather months</span></div>
+        </div>
+      </div>
+      <p id="eventsNote" style="font-size:12px; color:#8a8578; margin-top:14px; max-width:700px;">
+        Dates shift year to year — treat these as a rough seasonal guide and confirm current dates closer to the time. Know of something else worth adding? Use the feedback form below.
+      </p>
     </div>
     <div class="empty-state" id="emptyState" style="display:none;">No matches — try a different search or category.</div>
 
@@ -904,7 +944,7 @@ function cardHTML(p){
 }
 
 function render(){
-  ["restaurant","grocery","attraction","auto","health","banking","housing","pets","fitness","religious","shopping","storage","museum","outdoors","kids","farmers","phone","cars","tailor","furniture","legal","education","bars"].forEach(cat=>{
+  ["restaurant","grocery","attraction","auto","health","banking","housing","pets","fitness","religious","shopping","storage","museum","outdoors","kids","farmers","phone","cars","tailor","furniture","legal","education","bars","schools","community","services"].forEach(cat=>{
     const el = document.getElementById("grid-"+cat);
     const items = places.filter(p=>p.cat===cat);
     el.innerHTML = items.map(cardHTML).join("");
