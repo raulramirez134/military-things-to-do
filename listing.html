@@ -21,31 +21,48 @@
   .mono{ font-family:'JetBrains Mono', monospace; }
 
   header.brief{
+    position:relative; overflow:hidden;
     background: radial-gradient(1200px 500px at 15% -10%, #22352c 0%, var(--ink) 55%), var(--ink);
-    color:var(--parchment); padding: 20px 24px 28px; border-bottom: 6px solid var(--brass);
+    color:var(--parchment); padding: 20px 24px 34px; border-bottom: 6px solid var(--brass);
   }
-  .topbar{ display:flex; align-items:center; justify-content:space-between; max-width:900px; margin:0 auto 20px;
-    font-family:'JetBrains Mono', monospace; font-size:12px; color: rgba(237,231,214,0.72); flex-wrap:wrap; gap:10px; }
+  .topbar{ display:flex; align-items:center; justify-content:space-between; max-width:900px; margin:0 auto 24px;
+    font-family:'JetBrains Mono', monospace; font-size:12px; color: rgba(237,231,214,0.72); flex-wrap:wrap; gap:10px; position:relative; z-index:2; }
   .brand{ display:flex; align-items:center; gap:9px; font-family:'Big Shoulders Display', sans-serif; font-weight:800;
     font-size:15px; letter-spacing:0.02em; color:var(--parchment); text-transform:uppercase; text-decoration:none; }
   .brand .mark{ width:22px; height:22px; border-radius:4px; background:var(--brass); display:inline-flex;
     align-items:center; justify-content:center; color:var(--ink); font-size:12px; font-weight:800; }
   .back-link{ color: rgba(237,231,214,0.8); text-decoration:none; font-size:12px; }
-  .header-inner{ max-width:900px; margin:0 auto; }
+  .header-inner{ max-width:900px; margin:0 auto; position:relative; z-index:2; display:flex; gap:28px; align-items:flex-end; }
+  .hero-icon{
+    flex-shrink:0; width:104px; height:104px; border-radius:50%;
+    background: rgba(217,162,76,0.10); border:1.5px solid rgba(217,162,76,0.35);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .hero-icon svg{ width:52px; height:52px; }
+  .header-copy{ flex:1; min-width:0; }
   .tag-inline{
     font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.06em; text-transform:uppercase;
     padding:4px 10px; border-radius:2px; background: rgba(217,162,76,0.18); color:var(--brass-bright); display:inline-block; margin-bottom:12px;
   }
   h1.title{ font-family:'Big Shoulders Display', sans-serif; font-weight:800; font-size: clamp(28px, 5vw, 44px); line-height:1.05; margin:0 0 10px; }
-  .rating-row{ display:flex; align-items:baseline; gap:8px; font-size:15px; margin-bottom:6px; }
+  .rating-row{ display:flex; align-items:baseline; gap:8px; font-size:15px; margin-bottom:10px; flex-wrap:wrap; }
   .rating-row .stars{ color:var(--brass-bright); letter-spacing:2px; font-size:18px; }
   .rating-row .num{ font-weight:700; }
   .rating-row .count{ color: rgba(237,231,214,0.6); font-size:13px; }
-  .rating-note{ font-size:11px; color: rgba(237,231,214,0.45); margin-top:2px; }
+  .rating-row .price-tier{ font-family:'JetBrains Mono', monospace; font-weight:700; color:var(--brass-bright); font-size:14px; }
+  .rating-row .price-tier .dim{ color: rgba(237,231,214,0.35); }
+  .rating-note{ font-size:11px; color: rgba(237,231,214,0.45); margin-top:2px; margin-bottom:10px; }
+  .context-tags{ display:flex; gap:8px; flex-wrap:wrap; }
+  .context-tag{
+    font-family:'JetBrains Mono', monospace; font-size:10.5px; letter-spacing:0.03em; text-transform:uppercase;
+    padding:5px 10px; border-radius:20px; border:1px solid rgba(237,231,214,0.25); color: rgba(237,231,214,0.85);
+  }
 
   main{ max-width:900px; margin:0 auto; padding: 34px 24px 80px; }
   .detail-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-bottom:28px; }
-  .detail-card{ background:#fff; border:1px solid var(--line); border-radius:4px; padding:16px 18px; }
+  .detail-card{ background:#fff; border:1px solid var(--line); border-radius:4px; padding:16px 18px; display:flex; gap:12px; align-items:flex-start; }
+  .detail-card .ic{ flex-shrink:0; width:18px; height:18px; margin-top:2px; color:var(--olive); opacity:0.6; }
+  .detail-card .ic svg{ width:100%; height:100%; }
   .detail-card .k{ font-family:'JetBrains Mono', monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:0.06em; color:#8a8578; margin-bottom:4px; }
   .detail-card .v{ font-size:14.5px; }
   .blurb-block{ font-size:15px; line-height:1.6; margin-bottom:24px; }
@@ -117,7 +134,12 @@
   footer{ background:var(--ink); color: rgba(237,231,214,0.55); padding: 26px 24px; font-size:12px; line-height:1.7; }
   footer .footer-inner{ max-width:900px; margin:0 auto; }
 
-  @media (max-width:600px){ .detail-grid{ grid-template-columns: 1fr; } }
+  @media (max-width:600px){
+    .detail-grid{ grid-template-columns: 1fr; }
+    .header-inner{ flex-direction:column; align-items:flex-start; gap:16px; }
+    .hero-icon{ width:76px; height:76px; }
+    .hero-icon svg{ width:38px; height:38px; }
+  }
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2511246091167745" crossorigin="anonymous"></script>
 </head>
@@ -146,6 +168,55 @@ const BASE_CONFIG = {
   fortbragg: { label: "Fort Bragg", hub: "fortbragg.html", dataFile: "data-fortbragg.js", refWord: "post", unit: "mi" },
   camppendleton: { label: "Camp Pendleton", hub: "camppendleton.html", dataFile: "data-camppendleton.js", refWord: "base", unit: "mi" },
   yokota: { label: "Yokota", hub: "yokota.html", dataFile: "data-yokota.js", refWord: "base", unit: "km" },
+};
+
+// Big category icons for the hero — same flat line-art set used on every base's map/cards
+const icons = {
+  restaurant: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v8a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M17 2c-1.5 0-3 1.5-3 4v4c0 1.5.8 2.3 2 2.6V22"/></svg>`,
+  grocery: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.5 3h2l2.6 12.4a2 2 0 0 0 2 1.6h8.8a2 2 0 0 0 2-1.6L22 7H6"/></svg>`,
+  language: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v14H6.5a2.5 2.5 0 0 0 0 5H20"/><path d="M8 7h7M8 11h5"/></svg>`,
+  attraction: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M5 21c0-4 3-6 7-6s7 2 7 6"/><circle cx="12" cy="11" r="5"/></svg>`,
+  auto: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14M5 17a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm14 0a2 2 0 1 0 4 0 2 2 0 0 0-4 0ZM3 17V11l2-5h10l3 5h3v6"/><path d="M5 11h14"/></svg>`,
+  health: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.5-1.5 3-3.5 3-6a4 4 0 0 0-7-2.5A4 4 0 0 0 8 8c0 2.5 1.5 4.5 3 6l1 1 1-1"/><path d="M4 20c1-4 4-6 4-6M4 20c-.5-3 1-6 1-6M4 20h5"/></svg>`,
+  banking: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M4 10v9M9 10v9M15 10v9M20 10v9"/><path d="M3 21h18"/></svg>`,
+  housing: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>`,
+  schools: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9l10-5 10 5-10 5-10-5Z"/><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg>`,
+  pets: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="9" r="1.6"/><circle cx="10" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="19" cy="9" r="1.6"/><path d="M8 16c0-2.5 2-4 4-4s4 1.5 4 4c0 2-2 3-4 3s-4-1-4-3Z"/></svg>`,
+  fitness: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7v10M18 7v10"/><path d="M2 10v4M22 10v4"/><path d="M6 12h12"/></svg>`,
+  community: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><path d="M14.5 14.5c2.5.3 4.5 2.3 4.5 5.5"/></svg>`,
+  religious: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M6 8h12"/><path d="M9 22l3-6 3 6"/></svg>`,
+  rec: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 15 0 0 1 0 18M12 3a9 15 0 0 0 0 18M3 12h18"/></svg>`,
+  services: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="1"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/></svg>`,
+  pcs: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="7" width="15" height="10" rx="1"/><path d="M16 10h4l3 3v4h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="17.5" cy="19" r="1.6"/></svg>`,
+  legal: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 7l-3 6a3 3 0 0 0 6 0Zm14 0l-3 6a3 3 0 0 0 6 0ZM3 7h18M8 3h8"/></svg>`,
+  education: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9l10-5 10 5-10 5-10-5Z"/><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg>`,
+  shopping: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4"/><path d="M3 6h18M9 10a3 3 0 0 0 6 0"/></svg>`,
+  kids: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><path d="M12 7v6M6 22l6-9 6 9M6 13h12"/></svg>`,
+  outdoors: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 17c1.5-3 4-3 5.5 0M9 17c1.5-3 4-3 5.5 0M16 17c1.5-3 4-3 5.5 0"/><path d="M4 12a2 2 0 1 1 0-4M9 10a1.6 1.6 0 1 1 0-3.2M14 10a1.6 1.6 0 1 1 0-3.2M19 12a2 2 0 1 0 0-4"/></svg>`,
+  tailor: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"/></svg>`,
+  museum: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M4 21V10M20 21V10M2 10l10-6 10 6"/><path d="M8 21v-7M12 21v-7M16 21v-7"/></svg>`,
+  storage: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="1"/><path d="M3 7l2-4h14l2 4M9 11v4M15 11v4"/></svg>`,
+  farmers: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c-3 3-3 6 0 8 3-2 3-5 0-8Z"/><path d="M12 10v12M7 22c0-3 2-5 5-5s5 2 5 5"/></svg>`,
+  bars: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14l-6 9v6h3v3H8v-3h3v-6Z"/></svg>`,
+  phone: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/><path d="M9 6l2 3 4-5"/></svg>`,
+  cars: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14M5 17a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm14 0a2 2 0 1 0 4 0 2 2 0 0 0-4 0ZM3 17V11l2-5h10l3 5h3v6"/><path d="M5 11h14"/></svg>`,
+  furniture: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/><path d="M2 11h20v5a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1Z"/><path d="M4 17v3M20 17v3"/></svg>`,
+  wine: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2h8l-1 8a3 3 0 0 1-6 0Z"/><path d="M12 13v7M8 22h8"/></svg>`,
+  tattoo: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20 15 9a3 3 0 0 0-4-4L2 16z"/><path d="M13.5 6.5 17.5 10.5"/><path d="M17 3c1 1 1 3 3 3"/></svg>`,
+  notary: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5"/><circle cx="12" cy="14.5" r="2.5"/><path d="M10 20l1-2.5h2l1 2.5"/></svg>`,
+  ski: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20l7-16 4 8-3 8"/><path d="M12 12l6-8 3 16"/><circle cx="15" cy="3" r="1.5"/></svg>`,
+  mountains: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20 9 8l4 6 2-3 6 9Z"/></svg>`,
+  coast: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20c1.5-2 3.5-2 5 0s3.5 2 5 0 3.5-2 5 0 3.5 2 5 0"/><path d="M12 2v10M8 6l4-4 4 4"/></svg>`,
+  beaches: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20c1.5-2 3.5-2 5 0s3.5 2 5 0 3.5-2 5 0 3.5 2 5 0"/><path d="M12 2v10M8 6l4-4 4 4"/></svg>`,
+  onsen: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16c1.5-2 3.5-2 5 0s3.5 2 5 0 3.5-2 5 0"/><path d="M8 10c-1-2 0-4 1-5-1 3 1 4 2 3-1 3 1 4 2 2 0 2-1 3-2 3-2 0-3-1-3-3Z"/></svg>`,
+  tokyo: `<svg viewBox="0 0 24 24" fill="none" stroke="#D9A24C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V9l4-4h8l4 4v12"/><path d="M9 21v-6h6v6M4 9h16"/></svg>`,
+};
+
+const fieldIcons = {
+  address: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>`,
+  distance: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8 2 5 6 5 10c0 6 7 12 7 12s7-6 7-12c0-4-3-8-7-8Z"/><circle cx="12" cy="10" r="2.5"/></svg>`,
+  hours: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>`,
+  phoneField: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 3a2 2 0 0 1-.4 2.1L8 10.3a16 16 0 0 0 6 6l1.5-1.5a2 2 0 0 1 2-.4c1 .4 2 .6 3 .7a2 2 0 0 1 1.7 2Z"/></svg>`,
 };
 
 const params = new URLSearchParams(window.location.search);
@@ -189,16 +260,25 @@ function initPage(){
   document.getElementById("canonicalTag").href = `https://militarythingstodo.com/listing.html?base=${baseKey}&id=${place.id}`;
 
   document.getElementById("headerInner").innerHTML = `
-    <div class="tag-inline">${catLabels[place.cat]}</div>
-    <h1 class="title">${place.name}</h1>
-    ${place.rating != null ? `
-      <div class="rating-row">
-        <span class="stars">${starGlyphs(place.rating)}</span>
-        <span class="num">${place.rating.toFixed(1)}</span>
-        <span class="count">(${place.reviewCount} Google ratings)</span>
-      </div>
-      <div class="rating-note">Google rating shown for reference — write your own review below.</div>
-    ` : `<div class="rating-note">Not yet rated on Google — be the first to leave a review below.</div>`}
+    <div class="hero-icon" aria-hidden="true">${icons[place.cat] || icons.attraction}</div>
+    <div class="header-copy">
+      <div class="tag-inline">${catLabels[place.cat]}</div>
+      <h1 class="title">${place.name}</h1>
+      ${place.rating != null ? `
+        <div class="rating-row">
+          <span class="stars">${starGlyphs(place.rating)}</span>
+          <span class="num">${place.rating.toFixed(1)}</span>
+          <span class="count">(${place.reviewCount} Google ratings)</span>
+          ${place.priceTier ? `<span class="price-tier">${place.priceTier}<span class="dim">${'$'.repeat(4-place.priceTier.length)}</span></span>` : ""}
+        </div>
+        <div class="rating-note">Google rating shown for reference — write your own review below.</div>
+      ` : `<div class="rating-note">Not yet rated on Google — be the first to leave a review below.</div>`}
+      ${place.tags && place.tags.length ? `
+        <div class="context-tags">
+          ${place.tags.map(t => `<span class="context-tag">${t}</span>`).join("")}
+        </div>
+      ` : ""}
+    </div>
   `;
 
   const refWordForPlace = (baseKey === "camppendleton")
@@ -217,10 +297,10 @@ function initPage(){
     <p class="blurb-block">${place.blurb}</p>
 
     <div class="detail-grid">
-      <div class="detail-card"><div class="k">Address</div><div class="v">${place.addr}</div></div>
-      <div class="detail-card"><div class="k">Distance from ${refWordForPlace}</div><div class="v">${distText}</div></div>
-      <div class="detail-card"><div class="k">Hours</div><div class="v">${place.hours}</div></div>
-      <div class="detail-card"><div class="k">Phone</div><div class="v">${place.phone ? place.phone : "Not listed"}</div></div>
+      <div class="detail-card"><span class="ic">${fieldIcons.address}</span><div><div class="k">Address</div><div class="v">${place.addr}</div></div></div>
+      <div class="detail-card"><span class="ic">${fieldIcons.distance}</span><div><div class="k">Distance from ${refWordForPlace}</div><div class="v">${distText}</div></div></div>
+      <div class="detail-card"><span class="ic">${fieldIcons.hours}</span><div><div class="k">Hours</div><div class="v">${place.hours}</div></div></div>
+      <div class="detail-card"><span class="ic">${fieldIcons.phoneField}</span><div><div class="k">Phone</div><div class="v">${place.phone ? place.phone : "Not listed"}</div></div></div>
     </div>
 
     <div class="action-row">
