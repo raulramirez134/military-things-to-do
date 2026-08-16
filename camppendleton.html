@@ -527,8 +527,8 @@
       <div class="coords-row">
         <span><b>33.2276° N, 117.3930° W</b> — North Area (ref. point)</span>
         <span><b>33.3756° N, 117.5648° W</b> — South Area / San Onofre (ref. point)</span>
-        <span><b>28</b> categories mapped</span>
-        <span><b>160</b> locations logged</span>
+        <span><b>29</b> categories mapped</span>
+        <span><b>167</b> locations logged</span>
       </div>
     </div>
   </header>
@@ -547,6 +547,7 @@
         <button class="cat-tab" data-cat="shopping">Exchange &amp; Shopping</button>
         <button class="cat-tab" data-cat="museum">Museums &amp; Local History</button>
         <button class="cat-tab" data-cat="rec">Recreation &amp; Entertainment</button>
+        <button class="cat-tab" data-cat="wine">Wine Country Day Trips</button>
         <span id="catTabsExtra" class="cat-tabs-extra">
           <button class="cat-tab" data-cat="banking">Banking &amp; Money</button>
           <button class="cat-tab" data-cat="pets">Pet Services</button>
@@ -652,6 +653,9 @@
 
       <div class="section-label">Recreation &amp; Entertainment</div>
       <div class="grid" data-group="rec" id="grid-rec"></div>
+
+      <div class="section-label">Wine Country Day Trips</div>
+      <div class="grid" data-group="wine" id="grid-wine"></div>
 
       <div class="section-label">Dog Parks &amp; Nature</div>
       <div class="grid" data-group="outdoors" id="grid-outdoors"></div>
@@ -976,7 +980,7 @@ function cardHTML(p){
 }
 
 function render(){
-  ["restaurant","grocery","attraction","beaches","auto","health","banking","housing","pets","fitness","religious","shopping","storage","museum","rec","outdoors","kids","farmers","phone","cars","tailor","furniture","legal","education","bars","schools","community","services"].forEach(cat=>{
+  ["restaurant","grocery","attraction","beaches","auto","health","banking","housing","pets","fitness","religious","shopping","storage","museum","rec","wine","outdoors","kids","farmers","phone","cars","tailor","furniture","legal","education","bars","schools","community","services"].forEach(cat=>{
     const el = document.getElementById("grid-"+cat);
     const items = places.filter(p=>p.cat===cat);
     el.innerHTML = items.map(cardHTML).join("");
