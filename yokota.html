@@ -224,6 +224,8 @@
   .emblem.fitness{ background: rgba(91,107,79,0.16); }
   .emblem.religious{ background: rgba(63,92,107,0.16); }
   .emblem.shopping{ background: rgba(192,138,52,0.16); }
+  .emblem.onsen{ background: rgba(168,72,44,0.14); }
+  .emblem.tokyo{ background: rgba(63,92,107,0.16); }
   .emblem.storage{ background: rgba(168,72,44,0.14); }
   .emblem.museum{ background: rgba(192,138,52,0.16); }
   .emblem.outdoors{ background: rgba(91,107,79,0.16); }
@@ -285,6 +287,8 @@
   .tag.fitness{ background: rgba(91,107,79,0.14); color:#41502f; }
   .tag.religious{ background: rgba(63,92,107,0.14); color:#2b4652; }
   .tag.shopping{ background: rgba(192,138,52,0.16); color:#8c621f; }
+  .tag.onsen{ background: rgba(168,72,44,0.13); color:#8a3a20; }
+  .tag.tokyo{ background: rgba(63,92,107,0.14); color:#2b4652; }
   .tag.storage{ background: rgba(168,72,44,0.13); color:#8a3a20; }
   .tag.museum{ background: rgba(192,138,52,0.16); color:#8c621f; }
   .tag.outdoors{ background: rgba(91,107,79,0.14); color:#41502f; }
@@ -519,8 +523,8 @@
       </div>
       <div class="coords-row">
         <span><b>35.7428° N, 139.3384° E</b> — Yokota AB (ref. point)</span>
-        <span><b>17</b> categories mapped</span>
-        <span><b>58</b> locations logged</span>
+        <span><b>20</b> categories mapped</span>
+        <span><b>73</b> locations logged</span>
       </div>
     </div>
   </header>
@@ -546,6 +550,9 @@
         <button class="cat-tab" data-cat="bars">Bars &amp; Nightlife</button>
         <button class="cat-tab" data-cat="rec">Recreation &amp; Entertainment</button>
         <button class="cat-tab" data-cat="shopping">Exchange &amp; Shopping</button>
+        <button class="cat-tab" data-cat="onsen">Onsen &amp; Mt. Fuji Day Trips</button>
+        <button class="cat-tab" data-cat="tokyo">Tokyo Sightseeing</button>
+        <button class="cat-tab" data-cat="outdoors">Hiking &amp; Nature</button>
       </div>
       <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
         <button class="cat-tab" data-cat="map">Map View</button>
@@ -630,6 +637,15 @@
 
       <div class="section-label">Exchange &amp; Shopping</div>
       <div class="grid" data-group="shopping" id="grid-shopping"></div>
+
+      <div class="section-label">Onsen &amp; Mt. Fuji Day Trips</div>
+      <div class="grid" data-group="onsen" id="grid-onsen"></div>
+
+      <div class="section-label">Tokyo Sightseeing</div>
+      <div class="grid" data-group="tokyo" id="grid-tokyo"></div>
+
+      <div class="section-label">Hiking &amp; Nature</div>
+      <div class="grid" data-group="outdoors" id="grid-outdoors"></div>
     </div>
     <div class="empty-state" id="emptyState" style="display:none;">No matches — try a different search or category.</div>
 
@@ -784,6 +800,8 @@ const icons = {
   legal: `<svg viewBox="0 0 24 24" fill="none" stroke="#2b4652" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 7l-3 6a3 3 0 0 0 6 0Zm14 0l-3 6a3 3 0 0 0 6 0ZM3 7h18M8 3h8"/></svg>`,
   education: `<svg viewBox="0 0 24 24" fill="none" stroke="#41502f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9l10-5 10 5-10 5-10-5Z"/><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg>`,
   shopping: `<svg viewBox="0 0 24 24" fill="none" stroke="#8c621f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4"/><path d="M3 6h18M9 10a3 3 0 0 0 6 0"/></svg>`,
+  onsen: `<svg viewBox="0 0 24 24" fill="none" stroke="#8a3a20" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16c1.5-2 3.5-2 5 0s3.5 2 5 0 3.5-2 5 0"/><path d="M8 10c-1-2 0-4 1-5-1 3 1 4 2 3-1 3 1 4 2 2 0 2-1 3-2 3-2 0-3-1-3-3Z"/></svg>`,
+  tokyo: `<svg viewBox="0 0 24 24" fill="none" stroke="#2b4652" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V9l4-4h8l4 4v12"/><path d="M9 21v-6h6v6M4 9h16"/></svg>`,
   kids: `<svg viewBox="0 0 24 24" fill="none" stroke="#8c621f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><path d="M12 7v6M6 22l6-9 6 9M6 13h12"/></svg>`,
   outdoors: `<svg viewBox="0 0 24 24" fill="none" stroke="#41502f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 17c1.5-3 4-3 5.5 0M9 17c1.5-3 4-3 5.5 0M16 17c1.5-3 4-3 5.5 0"/><path d="M4 12a2 2 0 1 1 0-4M9 10a1.6 1.6 0 1 1 0-3.2M14 10a1.6 1.6 0 1 1 0-3.2M19 12a2 2 0 1 0 0-4"/></svg>`,
   tailor: `<svg viewBox="0 0 24 24" fill="none" stroke="#2b4652" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"/></svg>`,
@@ -884,7 +902,7 @@ function cardHTML(p){
 }
 
 function render(){
-  ["restaurant","grocery","attraction","auto","health","banking","housing","pets","fitness","religious","museum","kids","phone","tailor","bars","rec","shopping"].forEach(cat=>{
+  ["restaurant","grocery","attraction","auto","health","banking","housing","pets","fitness","religious","museum","kids","phone","tailor","bars","rec","shopping","onsen","tokyo","outdoors"].forEach(cat=>{
     const el = document.getElementById("grid-"+cat);
     const items = places.filter(p=>p.cat===cat);
     el.innerHTML = items.map(cardHTML).join("");
@@ -999,7 +1017,7 @@ const catColors = {
   religious:"#3f5c6b", rec:"#c08a34", services:"#3f5c6b", pcs:"#a8482c",
   legal:"#3f5c6b", education:"#5b6b4f", shopping:"#c08a34", kids:"#c08a34", outdoors:"#5b6b4f",
   tailor:"#3f5c6b", museum:"#c08a34", storage:"#a8482c", farmers:"#5b6b4f", bars:"#a8482c",
-  phone:"#3f5c6b", cars:"#3f5c6b", furniture:"#c08a34", wine:"#a8482c"
+  phone:"#3f5c6b", cars:"#3f5c6b", furniture:"#c08a34", wine:"#a8482c", onsen:"#a8482c", tokyo:"#3f5c6b"
 };
 
 const map = L.map('leafletMap').setView([35.7428, 139.3384], 12);
