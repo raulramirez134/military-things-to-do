@@ -519,8 +519,8 @@
       </div>
       <div class="coords-row">
         <span><b>35.7428° N, 139.3384° E</b> — Yokota AB (ref. point)</span>
-        <span><b>15</b> categories mapped</span>
-        <span><b>54</b> locations logged</span>
+        <span><b>17</b> categories mapped</span>
+        <span><b>58</b> locations logged</span>
       </div>
     </div>
   </header>
@@ -544,6 +544,8 @@
         <button class="cat-tab" data-cat="phone">Phone &amp; Internet</button>
         <button class="cat-tab" data-cat="tailor">Tailoring &amp; Alterations</button>
         <button class="cat-tab" data-cat="bars">Bars &amp; Nightlife</button>
+        <button class="cat-tab" data-cat="rec">Recreation &amp; Entertainment</button>
+        <button class="cat-tab" data-cat="shopping">Exchange &amp; Shopping</button>
       </div>
       <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
         <button class="cat-tab" data-cat="map">Map View</button>
@@ -622,6 +624,12 @@
 
       <div class="section-label">Bars &amp; Nightlife</div>
       <div class="grid" data-group="bars" id="grid-bars"></div>
+
+      <div class="section-label">Recreation &amp; Entertainment</div>
+      <div class="grid" data-group="rec" id="grid-rec"></div>
+
+      <div class="section-label">Exchange &amp; Shopping</div>
+      <div class="grid" data-group="shopping" id="grid-shopping"></div>
     </div>
     <div class="empty-state" id="emptyState" style="display:none;">No matches — try a different search or category.</div>
 
@@ -876,7 +884,7 @@ function cardHTML(p){
 }
 
 function render(){
-  ["restaurant","grocery","attraction","auto","health","banking","housing","pets","fitness","religious","museum","kids","phone","tailor","bars"].forEach(cat=>{
+  ["restaurant","grocery","attraction","auto","health","banking","housing","pets","fitness","religious","museum","kids","phone","tailor","bars","rec","shopping"].forEach(cat=>{
     const el = document.getElementById("grid-"+cat);
     const items = places.filter(p=>p.cat===cat);
     el.innerHTML = items.map(cardHTML).join("");
