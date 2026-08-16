@@ -58,7 +58,34 @@
     padding:5px 10px; border-radius:20px; border:1px solid rgba(237,231,214,0.25); color: rgba(237,231,214,0.85);
   }
 
-  main{ max-width:900px; margin:0 auto; padding: 34px 24px 80px; }
+  main{ max-width:1180px; margin:0 auto; padding: 34px 24px 80px; display:flex; gap:36px; align-items:flex-start; }
+  .main-col{ flex:1; min-width:0; max-width:900px; }
+
+  /* ===== "More in this category" sidebar ===== */
+  .sidebar-col{ width:300px; flex-shrink:0; position:sticky; top:24px; }
+  .sidebar-col .section-label{ margin-bottom:12px; }
+  .sidebar-note{ font-size:12.5px; color:#8a8578; margin:-6px 0 14px; }
+  .sidebar-list{ display:flex; flex-direction:column; gap:10px; max-height:640px; overflow-y:auto; padding-right:4px; }
+  .sidebar-item{
+    display:flex; gap:12px; align-items:center; background:#fff; border:1px solid var(--line); border-radius:4px; padding:10px 12px;
+    text-decoration:none; color:var(--ink); transition:border-color .15s;
+  }
+  .sidebar-item:hover{ border-color:var(--brass); }
+  .si-thumb{ flex-shrink:0; width:44px; height:44px; border-radius:6px; display:flex; align-items:center; justify-content:center; }
+  .si-thumb svg{ width:22px; height:22px; }
+  .si-body{ min-width:0; }
+  .sidebar-item .si-name{ font-weight:600; font-size:14px; margin-bottom:3px; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sidebar-item .si-meta{ display:flex; align-items:center; gap:8px; font-size:12px; color:#6b6656; }
+  .sidebar-item .si-meta .stars{ color:var(--brass); letter-spacing:1px; }
+  .sidebar-item .si-dist{ font-family:'JetBrains Mono', monospace; }
+  .sidebar-item.current{ border-color:var(--olive); background: rgba(91,107,79,0.06); }
+  .sidebar-item.current .si-name::after{ content:" (viewing)"; font-weight:400; font-style:italic; color:#8a8578; font-size:11.5px; }
+
+  @media (max-width:860px){
+    main{ flex-direction:column; }
+    .sidebar-col{ width:100%; position:static; }
+    .sidebar-list{ max-height:none; }
+  }
   .detail-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-bottom:28px; }
   .detail-card{ background:#fff; border:1px solid var(--line); border-radius:4px; padding:16px 18px; display:flex; gap:12px; align-items:flex-start; }
   .detail-card .ic{ flex-shrink:0; width:18px; height:18px; margin-top:2px; color:var(--olive); opacity:0.6; }
@@ -154,7 +181,10 @@
     </div>
   </header>
 
-  <main id="mainContent"></main>
+  <main>
+    <div class="main-col" id="mainContent"></div>
+    <aside class="sidebar-col" id="sidebarContent"></aside>
+  </main>
 
   <footer>
     <div class="footer-inner">
@@ -217,6 +247,18 @@ const fieldIcons = {
   distance: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8 2 5 6 5 10c0 6 7 12 7 12s7-6 7-12c0-4-3-8-7-8Z"/><circle cx="12" cy="10" r="2.5"/></svg>`,
   hours: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>`,
   phoneField: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 3a2 2 0 0 1-.4 2.1L8 10.3a16 16 0 0 0 6 6l1.5-1.5a2 2 0 0 1 2-.4c1 .4 2 .6 3 .7a2 2 0 0 1 1.7 2Z"/></svg>`,
+};
+
+const catColors = {
+  restaurant:"#c85a32", grocery:"#5b6b4f", language:"#3f5c6b", attraction:"#c08a34",
+  auto:"#3f5c6b", health:"#a8482c", banking:"#5b6b4f", housing:"#c08a34",
+  schools:"#3f5c6b", pets:"#a8482c", fitness:"#5b6b4f", community:"#c08a34",
+  religious:"#3f5c6b", rec:"#c08a34", services:"#3f5c6b", pcs:"#a8482c",
+  legal:"#3f5c6b", education:"#5b6b4f", shopping:"#c08a34", kids:"#c08a34", outdoors:"#5b6b4f",
+  tailor:"#3f5c6b", museum:"#c08a34", storage:"#a8482c", farmers:"#5b6b4f", bars:"#a8482c",
+  phone:"#3f5c6b", cars:"#3f5c6b", furniture:"#c08a34", wine:"#a8482c",
+  tattoo:"#3f5c6b", notary:"#5b6b4f", ski:"#3f5c6b", beaches:"#3f5c6b", onsen:"#a8482c", tokyo:"#3f5c6b",
+  mountains:"#5b6b4f", coast:"#3f5c6b"
 };
 
 const params = new URLSearchParams(window.location.search);
@@ -339,6 +381,33 @@ function initPage(){
         <button type="submit" class="f-submit" id="rSubmit">Post review</button>
         <div class="form-msg" id="rMsg"></div>
       </form>
+    </div>
+  `;
+
+  // "More in this category" sidebar
+  const catMates = places
+    .filter(p => p.cat === place.cat)
+    .sort((a, b) => a.dist - b.dist);
+
+  document.getElementById("sidebarContent").innerHTML = `
+    <div class="section-label">More ${catLabels[place.cat]} Options</div>
+    <p class="sidebar-note">Other ${catLabels[place.cat].toLowerCase()} listings near ${cfg.label}, closest first.</p>
+    <div class="sidebar-list">
+      ${catMates.map(p => {
+        const isCurrent = p.id === place.id;
+        const pDist = p.dist === 0 ? "On base" : `${p.dist.toFixed(1)} km`;
+        return `
+        <a class="sidebar-item ${isCurrent ? 'current' : ''}" href="${isCurrent ? '#' : `listing.html?base=${baseKey}&id=${p.id}`}">
+          <span class="si-thumb" style="background:${catColors[p.cat] || '#3f5c6b'}22;">${icons[p.cat] || icons.attraction}</span>
+          <span class="si-body">
+            <span class="si-name">${p.name}</span>
+            <span class="si-meta">
+              ${p.rating != null ? `<span class="stars">${starGlyphs(p.rating)}</span><span>${p.rating.toFixed(1)}</span>` : ""}
+              <span class="si-dist">${pDist}</span>
+            </span>
+          </span>
+        </a>`;
+      }).join("")}
     </div>
   `;
 
