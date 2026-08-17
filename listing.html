@@ -169,7 +169,7 @@
   }
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2511246091167745" crossorigin="anonymous"></script>
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileApiReady&render=explicit" async defer></script>
 </head>
 <body>
   <header class="brief">
@@ -379,7 +379,7 @@ function initPage(){
           <label for="rText">Your review</label>
           <textarea id="rText" placeholder="What should other families know?" required></textarea>
         </div>
-        <div class="cf-turnstile" data-sitekey="0x4AAAAAAES3n_imC5191BBP" data-callback="onTurnstileSuccess" style="margin-bottom:14px;"></div>
+        <div id="turnstile-widget" style="margin-bottom:14px;"></div>
         <button type="submit" class="f-submit" id="rSubmit" disabled>Post review</button>
         <div class="form-msg" id="rMsg"></div>
       </form>
@@ -498,10 +498,29 @@ function initPage(){
 
   loadReviews();
 
-  // Turnstile enables the submit button only once the challenge is solved
+  // Turnstile enables the submit button only once the challenge is solved.
+  // The widget div is inserted dynamically (as part of mainContent's innerHTML),
+  // so we render it explicitly rather than relying on Turnstile's automatic
+  // page-scan, which can miss elements added after the script first loads.
   window.onTurnstileSuccess = function(){
     document.getElementById("rSubmit").disabled = false;
   };
+
+  window.turnstileWidgetId = null;
+  window.onTurnstileApiReady = function(){
+    window.turnstileApiReady = true;
+    tryRenderTurnstile();
+  };
+  function tryRenderTurnstile(){
+    const el = document.getElementById("turnstile-widget");
+    if (window.turnstileApiReady && el && window.turnstileWidgetId === null && typeof turnstile !== "undefined") {
+      window.turnstileWidgetId = turnstile.render(el, {
+        sitekey: "0x4AAAAAAES3n_imC5191BBP",
+        callback: window.onTurnstileSuccess,
+      });
+    }
+  }
+  tryRenderTurnstile();
 
   document.getElementById("reviewForm").addEventListener("submit", async (e)=>{
     e.preventDefault();
@@ -510,7 +529,7 @@ function initPage(){
     const name = document.getElementById("rName").value.trim();
     const rating = document.getElementById("rRating").value;
     const text = document.getElementById("rText").value.trim();
-    const turnstileToken = (typeof turnstile !== "undefined") ? turnstile.getResponse() : "";
+    const turnstileToken = (typeof turnstile !== "undefined" && window.turnstileWidgetId !== null) ? turnstile.getResponse(window.turnstileWidgetId) : "";
 
     if(!rating || !text){
       msgEl.textContent = "Please add a rating and a review.";
@@ -537,13 +556,13 @@ function initPage(){
       if(!res.ok){
         msgEl.textContent = data.error || "Something went wrong — try again.";
         msgEl.className = "form-msg error";
-        if(typeof turnstile !== "undefined") turnstile.reset();
+        if(typeof turnstile !== "undefined" && window.turnstileWidgetId !== null) turnstile.reset(window.turnstileWidgetId);
         submitBtn.disabled = true;
       } else {
         msgEl.textContent = "Review posted — thank you!";
         msgEl.className = "form-msg ok";
         document.getElementById("reviewForm").reset();
-        if(typeof turnstile !== "undefined") turnstile.reset();
+        if(typeof turnstile !== "undefined" && window.turnstileWidgetId !== null) turnstile.reset(window.turnstileWidgetId);
         submitBtn.disabled = true;
         loadReviews();
       }
