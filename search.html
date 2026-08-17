@@ -75,11 +75,17 @@
   .results-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:16px; }
   .card{
     background:#fff; border:1px solid var(--line); border-radius:4px; padding:16px 18px;
-    display:flex; flex-direction:column; gap:8px; text-decoration:none; color:var(--ink);
+    display:flex; flex-direction:column; gap:8px; position:relative;
     transition: transform .15s ease, box-shadow .15s ease;
   }
   .card:hover{ transform: translateY(-2px); box-shadow: 0 10px 24px rgba(24,36,32,0.08); }
-  .card-top{ display:flex; align-items:center; gap:11px; }
+  .card-link{ display:flex; flex-direction:column; gap:8px; text-decoration:none; color:var(--ink); }
+  .fav-star{
+    position:absolute; top:14px; right:14px; border:none; background:none; cursor:pointer;
+    font-size:18px; line-height:1; color:#cfc9b6; padding:0;
+  }
+  .fav-star.active{ color:var(--brass); }
+  .card-top{ display:flex; align-items:center; gap:11px; padding-right:24px; }
   .emblem{ flex-shrink:0; width:38px; height:38px; border-radius:6px; display:flex; align-items:center; justify-content:center; background: rgba(192,138,52,0.14); }
   .emblem svg{ width:20px; height:20px; }
   .card-name{ font-family:'Big Shoulders Display', sans-serif; font-weight:700; font-size:18px; line-height:1.15; flex:1 1 auto; min-width:0; overflow-wrap:break-word; }
@@ -133,6 +139,7 @@
         <button class="base-chip" data-base="fortbragg">Fort Bragg</button>
         <button class="base-chip" data-base="camppendleton">Camp Pendleton</button>
         <button class="base-chip" data-base="yokota">Yokota</button>
+        <button class="base-chip" id="favoritesChip" type="button" style="margin-left:8px;">★ My Favorites</button>
       </div>
     </div>
   </header>
@@ -477,11 +484,51 @@ function computeMatches(query, pool){
   return textMatches.concat(synonymOnlyMatches);
 }
 
+// ---- Favorites (shared with all 4 base pages via the same localStorage key) ----
+const FAV_KEY = "military_favorites";
+function getAllFavorites(){
+  try { return JSON.parse(localStorage.getItem(FAV_KEY)) || []; }
+  catch { return []; }
+}
+function setAllFavorites(list){
+  localStorage.setItem(FAV_KEY, JSON.stringify(list));
+}
+function isFavorited(baseKey, id){
+  return getAllFavorites().some(f => f.base === baseKey && f.id === id);
+}
+function toggleFavorite(baseKey, id, name, btn){
+  let favs = getAllFavorites();
+  const idx = favs.findIndex(f => f.base === baseKey && f.id === id);
+  if(idx !== -1){
+    favs.splice(idx, 1);
+    btn.classList.remove("active");
+  } else {
+    favs.push({ base: baseKey, id, name });
+    btn.classList.add("active");
+  }
+  setAllFavorites(favs);
+  if(showFavoritesOnly) render();
+}
+
+let showFavoritesOnly = false;
+
 function render(){
   const query = document.getElementById("searchInput").value.trim().toLowerCase();
   const grid = document.getElementById("resultsGrid");
   const emptyState = document.getElementById("emptyState");
   const resultCount = document.getElementById("resultCount");
+
+  let pool = activeBase !== "all" ? allPlaces.filter(p => p.baseKey === activeBase) : allPlaces;
+
+  if(showFavoritesOnly){
+    const favs = getAllFavorites();
+    let favMatches = pool.filter(p => favs.some(f => f.base === p.baseKey && f.id === p.id));
+    if(query){
+      favMatches = computeMatches(query, favMatches);
+    }
+    renderResults(favMatches, grid, emptyState, resultCount, true);
+    return;
+  }
 
   if(!query){
     grid.innerHTML = "";
@@ -491,19 +538,28 @@ function render(){
     return;
   }
 
-  let pool = activeBase !== "all" ? allPlaces.filter(p => p.baseKey === activeBase) : allPlaces;
   let matches = computeMatches(query, pool).slice(0, 60); // keep it snappy
+  renderResults(matches, grid, emptyState, resultCount, false);
+}
 
+function renderResults(matches, grid, emptyState, resultCount, isFavoritesView){
   if(matches.length === 0){
     grid.innerHTML = "";
-    resultCount.textContent = "";
-    emptyState.style.display = "block";
-    emptyState.innerHTML = "<b>No matches</b>Try a different search term or check a specific base's full listings.";
+    if(isFavoritesView){
+      resultCount.textContent = "";
+      emptyState.style.display = "block";
+      emptyState.innerHTML = "<b>No favorites yet</b>Tap the ★ on any listing to save it here — favorites are shared across all 4 bases.";
+    } else {
+      resultCount.textContent = "";
+      emptyState.style.display = "block";
+      emptyState.innerHTML = "<b>No matches</b>Try a different search term or check a specific base's full listings.";
+    }
     return;
   }
 
   emptyState.style.display = "none";
-  resultCount.textContent = matches.length + (matches.length === 60 ? "+ " : " ") + "result" + (matches.length === 1 ? "" : "s");
+  const cap = isFavoritesView ? matches.length : 60;
+  resultCount.textContent = matches.length + (matches.length >= cap && !isFavoritesView ? "+ " : " ") + "result" + (matches.length === 1 ? "" : "s");
 
   grid.innerHTML = matches.map(p => {
     const openStatus = getOpenStatus(p.hours, BASE_TIME_ZONES[p.baseKey]);
@@ -512,19 +568,23 @@ function render(){
       : openStatus === false
         ? `<span class="open-badge closed">● Closed now</span>`
         : "";
+    const isFav = isFavorited(p.baseKey, p.id);
     return `
-    <a class="card" href="listing.html?base=${p.baseKey}&id=${p.id}">
-      <div class="card-top">
-        <div class="emblem">${icons[p.cat] || icons.attraction}</div>
-        <div class="card-name">${p.name}</div>
-      </div>
-      <div class="card-meta-row">
-        <span class="base-badge">${p.baseLabel}</span>
-        <span class="cat-badge">${p.catLabel}</span>
-        ${openBadge}
-      </div>
-      <div class="card-blurb">${p.blurb ? p.blurb.slice(0, 120) + (p.blurb.length > 120 ? "…" : "") : ""}</div>
-    </a>
+    <div class="card">
+      <a class="card-link" href="listing.html?base=${p.baseKey}&id=${p.id}">
+        <div class="card-top">
+          <div class="emblem">${icons[p.cat] || icons.attraction}</div>
+          <div class="card-name">${p.name}</div>
+        </div>
+        <div class="card-meta-row">
+          <span class="base-badge">${p.baseLabel}</span>
+          <span class="cat-badge">${p.catLabel}</span>
+          ${openBadge}
+        </div>
+        <div class="card-blurb">${p.blurb ? p.blurb.slice(0, 120) + (p.blurb.length > 120 ? "…" : "") : ""}</div>
+      </a>
+      <button class="fav-star ${isFav ? 'active' : ''}" onclick="toggleFavorite('${p.baseKey}', '${p.id}', '${p.name.replace(/'/g,"\\'")}', this)" aria-label="Save to favorites" type="button">★</button>
+    </div>
   `;
   }).join("");
 }
@@ -581,13 +641,18 @@ document.addEventListener("click", (e) => {
 searchInputEl.addEventListener("keydown", (e) => {
   if(e.key === "Escape") document.getElementById("suggestDropdown").style.display = "none";
 });
-document.querySelectorAll(".base-chip").forEach(chip => {
+document.querySelectorAll(".base-chip:not(#favoritesChip)").forEach(chip => {
   chip.addEventListener("click", () => {
-    document.querySelectorAll(".base-chip").forEach(c => c.classList.remove("active"));
+    document.querySelectorAll(".base-chip:not(#favoritesChip)").forEach(c => c.classList.remove("active"));
     chip.classList.add("active");
     activeBase = chip.dataset.base;
     render();
   });
+});
+document.getElementById("favoritesChip").addEventListener("click", () => {
+  showFavoritesOnly = !showFavoritesOnly;
+  document.getElementById("favoritesChip").classList.toggle("active", showFavoritesOnly);
+  render();
 });
 
 init();

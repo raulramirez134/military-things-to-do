@@ -847,24 +847,32 @@ const claimIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" st
 const detailIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>`;
 
 // ---- Favorites (localStorage) ----
-const FAV_KEY = "readease_favorites_ramstein";
-function getFavorites(){
+// Shared across all 4 bases in one key, keyed by {base, id} pairs rather
+// than name alone — a real name collision between two different bases'
+// listings used to be able to cross-favorite them incorrectly.
+const FAV_KEY = "military_favorites";
+const CURRENT_BASE_KEY = "yokota";
+function getAllFavorites(){
   try { return JSON.parse(localStorage.getItem(FAV_KEY)) || []; }
   catch { return []; }
 }
-function setFavorites(list){
+function setAllFavorites(list){
   localStorage.setItem(FAV_KEY, JSON.stringify(list));
 }
-function toggleFavorite(name, btn){
-  let favs = getFavorites();
-  if(favs.includes(name)){
-    favs = favs.filter(f => f !== name);
+function isFavorited(id){
+  return getAllFavorites().some(f => f.base === CURRENT_BASE_KEY && f.id === id);
+}
+function toggleFavorite(id, name, btn){
+  let favs = getAllFavorites();
+  const idx = favs.findIndex(f => f.base === CURRENT_BASE_KEY && f.id === id);
+  if(idx !== -1){
+    favs.splice(idx, 1);
     btn.classList.remove("active");
   } else {
-    favs.push(name);
+    favs.push({ base: CURRENT_BASE_KEY, id, name });
     btn.classList.add("active");
   }
-  setFavorites(favs);
+  setAllFavorites(favs);
   if(document.querySelector('.cat-tab[data-cat="favorites"]').classList.contains("active")){
     applyFilter();
   }
@@ -1026,7 +1034,7 @@ function cardHTML(p){
   const distText = p.dist === 0 ? "On base" : `${p.dist.toFixed(1)} km / ${milesFrom(p.dist)} mi from base`;
   const dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`;
   const callHref = p.phone ? `tel:${p.phone.replace(/\s+/g,'')}` : null;
-  const isFav = getFavorites().includes(p.name);
+  const isFav = isFavorited(p.id);
   const openStatus = getOpenStatus(p.hours, HUB_TIME_ZONE);
   const openBadge = openStatus === true
     ? `<span class="open-badge open">● Open now</span>`
@@ -1034,13 +1042,13 @@ function cardHTML(p){
       ? `<span class="open-badge closed">● Closed now</span>`
       : "";
   return `
-    <div class="card" data-name="${p.name.toLowerCase()}" data-cat="${p.cat}" data-placename="${p.name}">
+    <div class="card" data-name="${p.name.toLowerCase()}" data-cat="${p.cat}" data-placename="${p.name}" data-placeid="${p.id}">
       <div class="card-top">
         <div class="name-row">
           <div class="emblem ${p.cat}">${icons[p.cat]}</div>
           <a class="card-name" href="listing.html?base=yokota&id=${p.id}">${p.name}</a>
         </div>
-        <button class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${p.name.replace(/'/g,"\\'")}', this)" aria-label="Save to favorites">★</button>
+        <button class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${p.id}', '${p.name.replace(/'/g,"\\'")}', this)" aria-label="Save to favorites">★</button>
       </div>
       <div class="tag ${p.cat}">${catLabels[p.cat]}</div>
       <div class="card-rating">${starsHTML(p)} ${openBadge}</div>
@@ -1079,7 +1087,7 @@ const emptyState = document.getElementById("emptyState");
 function applyFilter(){
   const active = document.querySelector(".cat-tab.active").dataset.cat;
   const query = document.getElementById("searchBox").value.trim().toLowerCase();
-  const favs = getFavorites();
+  const favs = getAllFavorites();
   let anyVisible = false;
 
   const mapSection = document.getElementById("map-section");
@@ -1104,7 +1112,7 @@ function applyFilter(){
       let visibleInGrid = 0;
       grid.querySelectorAll(".card").forEach(card=>{
         const matchesQuery = !query || card.dataset.name.includes(query);
-        const matchesFav = active !== "favorites" || favs.includes(card.dataset.placename);
+        const matchesFav = active !== "favorites" || favs.some(f => f.base === CURRENT_BASE_KEY && f.id === card.dataset.placeid);
         const visible = matchesQuery && matchesFav;
         card.style.display = visible ? "" : "none";
         if(visible) visibleInGrid++;
