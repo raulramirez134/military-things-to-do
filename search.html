@@ -45,6 +45,23 @@
   }
   .search-box-lg::placeholder{ color:#8a8578; }
 
+  .suggest-dropdown{
+    position:absolute; top:calc(100% + 4px); left:0; right:0; z-index:20;
+    background:#fff; border-radius:4px; box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+    max-height:320px; overflow-y:auto;
+  }
+  .suggest-item{
+    display:flex; align-items:center; gap:10px; padding:10px 16px; cursor:pointer;
+    font-size:14px; color:var(--ink); border-bottom:1px solid var(--line);
+  }
+  .suggest-item:last-child{ border-bottom:none; }
+  .suggest-item:hover, .suggest-item.highlighted{ background: var(--parchment-dim); }
+  .suggest-item .si-icon{ flex-shrink:0; width:20px; height:20px; opacity:0.6; }
+  .suggest-item .si-icon svg{ width:100%; height:100%; }
+  .suggest-item .si-text{ flex:1; min-width:0; }
+  .suggest-item .si-text b{ font-weight:700; }
+  .suggest-item .si-base{ font-family:'JetBrains Mono', monospace; font-size:10px; text-transform:uppercase; color:#8a8578; flex-shrink:0; }
+
   .base-filter-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:16px; }
   .base-chip{
     font-family:\'JetBrains Mono\', monospace; font-size:11.5px; letter-spacing:0.03em; text-transform:uppercase;
@@ -94,7 +111,10 @@
     <div class="header-inner">
       <div class="eyebrow">Search — All Bases</div>
       <h1 class="title">Find anything, anywhere.</h1>
-      <input type="text" class="search-box-lg" id="searchInput" placeholder="Search restaurants, attractions, services..." autofocus />
+      <div style="position:relative; max-width:640px;">
+        <input type="text" class="search-box-lg" id="searchInput" placeholder="Search restaurants, attractions, services..." autofocus autocomplete="off" />
+        <div id="suggestDropdown" class="suggest-dropdown" style="display:none;"></div>
+      </div>
       <div class="base-filter-row" id="baseFilterRow">
         <button class="base-chip active" data-base="all">All Bases</button>
         <button class="base-chip" data-base="ramstein">Ramstein</button>
@@ -240,6 +260,52 @@ const SEARCH_SYNONYMS = {
   "historic": ["museum", "castles"],
   "sightseeing": ["attraction", "castles", "tokyo", "sandiego"],
 };
+const SYNONYM_KEYS = Object.keys(SEARCH_SYNONYMS);
+
+// Small edit-distance helper for typo tolerance — cheap enough to run on
+// every keystroke against ~600 listings' worth of short words.
+function levenshtein(a, b){
+  if (a === b) return 0;
+  if (!a.length) return b.length;
+  if (!b.length) return a.length;
+  const prev = new Array(b.length + 1);
+  for (let j = 0; j <= b.length; j++) prev[j] = j;
+  for (let i = 1; i <= a.length; i++) {
+    let cur = [i];
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+    }
+    prev.splice(0, prev.length, ...cur);
+  }
+  return prev[b.length];
+}
+
+// A word "fuzzy-matches" a query if it starts with it (handles partial
+// typing like "foo" -> "food"), or is within a small edit distance (handles
+// typos like "restaraunt" -> "restaurant"). The allowed distance scales with
+// word length so short words stay strict and don't over-match.
+function fuzzyWordMatch(word, query){
+  if (!query) return false;
+  if (word.startsWith(query) || query.startsWith(word)) return true;
+  if (query.length < 4) return false; // too short for typo tolerance to be meaningful
+  const maxDist = query.length <= 5 ? 1 : 2;
+  return levenshtein(word.slice(0, query.length + 2), query) <= maxDist;
+}
+
+// Resolve which categories a (possibly partial or slightly misspelled) query
+// word should pull in, by fuzzy-matching it against the synonym dictionary's
+// own keys — not just an exact lookup.
+function synonymCategoriesFor(word){
+  const cats = new Set();
+  if (word.length < 3) return cats;
+  for (const key of SYNONYM_KEYS) {
+    if (fuzzyWordMatch(key, word)) {
+      SEARCH_SYNONYMS[key].forEach(c => cats.add(c));
+    }
+  }
+  return cats;
+}
 
 function render(){
   const query = document.getElementById("searchInput").value.trim().toLowerCase();
@@ -256,15 +322,28 @@ function render(){
   }
 
   const synonymCats = new Set();
-  query.split(/\s+/).forEach(word => {
-    (SEARCH_SYNONYMS[word] || []).forEach(cat => synonymCats.add(cat));
+  const queryWords = query.split(/\s+/);
+  queryWords.forEach(word => {
+    synonymCategoriesFor(word).forEach(cat => synonymCats.add(cat));
   });
 
-  const isTextMatch = p =>
-    p.name.toLowerCase().includes(query) ||
-    (p.blurb && p.blurb.toLowerCase().includes(query)) ||
-    (p.addr && p.addr.toLowerCase().includes(query)) ||
-    (p.catLabel && p.catLabel.toLowerCase().includes(query));
+  const isTextMatch = p => {
+    const name = p.name.toLowerCase();
+    const blurb = (p.blurb || "").toLowerCase();
+    const addr = (p.addr || "").toLowerCase();
+    const catLabel = (p.catLabel || "").toLowerCase();
+    // Fast path: plain substring match (handles most searches, including
+    // partial words like "coff" -> "coffee").
+    if (name.includes(query) || blurb.includes(query) || addr.includes(query) || catLabel.includes(query)) {
+      return true;
+    }
+    // Typo-tolerant path: only worth trying for real words, not tiny/multi-word queries.
+    if (queryWords.length === 1 && query.length >= 4) {
+      const words = (name + " " + blurb + " " + catLabel).split(/\s+/);
+      return words.some(w => fuzzyWordMatch(w, query));
+    }
+    return false;
+  };
 
   let pool = activeBase !== "all" ? allPlaces.filter(p => p.baseKey === activeBase) : allPlaces;
   const textMatches = pool.filter(isTextMatch);
@@ -298,7 +377,66 @@ function render(){
   `).join("");
 }
 
-document.getElementById("searchInput").addEventListener("input", render);
+function updateSuggestions(){
+  const input = document.getElementById("searchInput");
+  const dropdown = document.getElementById("suggestDropdown");
+  const query = input.value.trim().toLowerCase();
+
+  if(query.length < 2){
+    dropdown.style.display = "none";
+    dropdown.innerHTML = "";
+    return;
+  }
+
+  const pool = activeBase !== "all" ? allPlaces.filter(p => p.baseKey === activeBase) : allPlaces;
+  const suggestions = [];
+  const seen = new Set();
+  for(const p of pool){
+    const lname = p.name.toLowerCase();
+    const firstWord = lname.split(/\s+/)[0];
+    if(seen.has(lname)) continue;
+    if(lname.startsWith(query) || fuzzyWordMatch(firstWord, query)){
+      suggestions.push(p);
+      seen.add(lname);
+    }
+    if(suggestions.length >= 6) break;
+  }
+
+  if(suggestions.length === 0){
+    dropdown.style.display = "none";
+    dropdown.innerHTML = "";
+    return;
+  }
+
+  dropdown.innerHTML = suggestions.map(p => `
+    <div class="suggest-item" data-value="${p.name.replace(/"/g,'&quot;')}">
+      <span class="si-icon">${icons[p.cat] || icons.attraction}</span>
+      <span class="si-text">${p.name}</span>
+      <span class="si-base">${p.baseLabel}</span>
+    </div>
+  `).join("");
+  dropdown.style.display = "block";
+  dropdown.querySelectorAll(".suggest-item").forEach(item => {
+    item.addEventListener("mousedown", (e) => {
+      e.preventDefault(); // keep focus so the click registers before any blur-hide
+      input.value = item.dataset.value;
+      dropdown.style.display = "none";
+      render();
+    });
+  });
+}
+
+const searchInputEl = document.getElementById("searchInput");
+searchInputEl.addEventListener("input", () => { render(); updateSuggestions(); });
+searchInputEl.addEventListener("focus", () => { if(searchInputEl.value.trim().length >= 2) updateSuggestions(); });
+document.addEventListener("click", (e) => {
+  if(!e.target.closest(".suggest-dropdown") && e.target !== searchInputEl){
+    document.getElementById("suggestDropdown").style.display = "none";
+  }
+});
+searchInputEl.addEventListener("keydown", (e) => {
+  if(e.key === "Escape") document.getElementById("suggestDropdown").style.display = "none";
+});
 document.querySelectorAll(".base-chip").forEach(chip => {
   chip.addEventListener("click", () => {
     document.querySelectorAll(".base-chip").forEach(c => c.classList.remove("active"));
