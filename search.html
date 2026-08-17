@@ -197,6 +197,50 @@ async function init(){
   render();
 }
 
+// Broad umbrella terms people naturally search for, mapped to every category
+// that's genuinely relevant — so "food" surfaces every restaurant/grocery/bar,
+// not just listings whose name or blurb happens to contain that exact word.
+const SEARCH_SYNONYMS = {
+  "food": ["restaurant", "grocery", "farmers", "bars"],
+  "eat": ["restaurant", "farmers", "bars"],
+  "eating": ["restaurant", "farmers", "bars"],
+  "dining": ["restaurant", "bars"],
+  "hungry": ["restaurant", "farmers"],
+  "snack": ["grocery", "restaurant", "farmers"],
+  "snacks": ["grocery", "restaurant", "farmers"],
+  "dessert": ["restaurant", "grocery"],
+  "desserts": ["restaurant", "grocery"],
+  "sweet": ["restaurant", "grocery"],
+  "sweets": ["restaurant", "grocery"],
+  "drink": ["bars", "restaurant", "wine", "onsen"],
+  "drinks": ["bars", "restaurant", "wine"],
+  "beer": ["bars"],
+  "shopping": ["shopping", "farmers", "furniture", "tailor", "cars"],
+  "shop": ["shopping", "farmers", "furniture", "tailor"],
+  "kids": ["kids", "attraction", "rec"],
+  "children": ["kids", "attraction", "rec", "schools"],
+  "family": ["kids", "attraction", "rec"],
+  "hike": ["outdoors"],
+  "hiking": ["outdoors"],
+  "nature": ["outdoors", "beaches"],
+  "beach": ["beaches"],
+  "beaches": ["beaches"],
+  "doctor": ["health"],
+  "medical": ["health"],
+  "sick": ["health"],
+  "pet": ["pets"],
+  "pets": ["pets"],
+  "dog": ["pets"],
+  "cat": ["pets"],
+  "car": ["auto", "cars"],
+  "vehicle": ["auto", "cars"],
+  "gym": ["fitness"],
+  "workout": ["fitness"],
+  "history": ["museum", "castles"],
+  "historic": ["museum", "castles"],
+  "sightseeing": ["attraction", "castles", "tokyo", "sandiego"],
+};
+
 function render(){
   const query = document.getElementById("searchInput").value.trim().toLowerCase();
   const grid = document.getElementById("resultsGrid");
@@ -211,15 +255,21 @@ function render(){
     return;
   }
 
-  let matches = allPlaces.filter(p =>
+  const synonymCats = new Set();
+  query.split(/\s+/).forEach(word => {
+    (SEARCH_SYNONYMS[word] || []).forEach(cat => synonymCats.add(cat));
+  });
+
+  const isTextMatch = p =>
     p.name.toLowerCase().includes(query) ||
     (p.blurb && p.blurb.toLowerCase().includes(query)) ||
     (p.addr && p.addr.toLowerCase().includes(query)) ||
-    (p.catLabel && p.catLabel.toLowerCase().includes(query))
-  );
-  if(activeBase !== "all"){
-    matches = matches.filter(p => p.baseKey === activeBase);
-  }
+    (p.catLabel && p.catLabel.toLowerCase().includes(query));
+
+  let pool = activeBase !== "all" ? allPlaces.filter(p => p.baseKey === activeBase) : allPlaces;
+  const textMatches = pool.filter(isTextMatch);
+  const synonymOnlyMatches = pool.filter(p => !isTextMatch(p) && synonymCats.has(p.cat));
+  let matches = textMatches.concat(synonymOnlyMatches);
   matches = matches.slice(0, 60); // keep it snappy
 
   if(matches.length === 0){
