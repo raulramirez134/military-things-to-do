@@ -188,7 +188,7 @@
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2511246091167745" crossorigin="anonymous"></script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js" onerror="window.qrLibFailed = true;"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js" onerror="window.qrLibFailed = true;"></script>
 </head>
 <body>
   <header class="brief">
@@ -429,15 +429,34 @@ function initPage(){
   const nativeShareBtn = document.getElementById("nativeShareBtn");
   let qrSucceeded = false;
 
+  function showFallbackQrImage(){
+    // A plain <img> pointing at a public QR-generation service — no JS
+    // execution required on our end, so it works even if the in-browser
+    // library above fails to load for any reason. Only used as a fallback:
+    // this does send the listing's (already-public) URL to that service to
+    // render the image, unlike the client-side method above.
+    const qrCanvas = document.getElementById("qrCanvas");
+    const qrCaption = document.querySelector(".qr-caption");
+    const img = document.createElement("img");
+    img.width = 200;
+    img.height = 200;
+    img.alt = "QR code for this listing";
+    img.src = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + encodeURIComponent(shareUrl);
+    img.onload = () => { qrSucceeded = true; qrCaption.textContent = "Scan to open this listing on another phone"; };
+    img.onerror = () => { qrCaption.textContent = "QR code couldn't load — use Copy Link above instead."; };
+    qrCanvas.replaceWith(img);
+    img.id = "qrCanvas";
+  }
+
   function renderQrCode(){
     const qrCaption = document.querySelector(".qr-caption");
     if (window.qrLibFailed || typeof QRCode === "undefined") {
-      qrCaption.textContent = "QR code couldn't load right now — use Copy Link above instead.";
+      showFallbackQrImage();
       return;
     }
     QRCode.toCanvas(document.getElementById("qrCanvas"), shareUrl, { width: 200, margin: 1 }, (err) => {
       if (err) {
-        qrCaption.textContent = "QR code couldn't generate — use Copy Link above instead.";
+        showFallbackQrImage();
       } else {
         qrSucceeded = true;
         qrCaption.textContent = "Scan to open this listing on another phone";
