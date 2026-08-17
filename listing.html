@@ -92,6 +92,12 @@
   .detail-card .ic svg{ width:100%; height:100%; }
   .detail-card .k{ font-family:'JetBrains Mono', monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:0.06em; color:#8a8578; margin-bottom:4px; }
   .detail-card .v{ font-size:14.5px; }
+  .open-badge{
+    display:inline-block; font-family:'JetBrains Mono', monospace; font-size:11px; font-weight:600;
+    letter-spacing:0.03em; text-transform:uppercase; padding:2px 8px; border-radius:10px; margin-left:4px;
+  }
+  .open-badge.open{ background: rgba(91,107,79,0.16); color:#41502f; }
+  .open-badge.closed{ background: rgba(168,72,44,0.14); color:#8a3a20; }
   .blurb-block{ font-size:15px; line-height:1.6; margin-bottom:24px; }
   .action-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:36px; }
 
@@ -214,11 +220,138 @@
 
 <script>
 const BASE_CONFIG = {
-  ramstein: { label: "Ramstein", hub: "ramstein.html", dataFile: "data.js", refWord: "gate", unit: "km" },
-  fortbragg: { label: "Fort Bragg", hub: "fortbragg.html", dataFile: "data-fortbragg.js", refWord: "post", unit: "mi" },
-  camppendleton: { label: "Camp Pendleton", hub: "camppendleton.html", dataFile: "data-camppendleton.js", refWord: "base", unit: "mi" },
-  yokota: { label: "Yokota", hub: "yokota.html", dataFile: "data-yokota.js", refWord: "base", unit: "km" },
+  ramstein: { label: "Ramstein", hub: "ramstein.html", dataFile: "data.js", refWord: "gate", unit: "km", timeZone: "Europe/Berlin" },
+  fortbragg: { label: "Fort Bragg", hub: "fortbragg.html", dataFile: "data-fortbragg.js", refWord: "post", unit: "mi", timeZone: "America/New_York" },
+  camppendleton: { label: "Camp Pendleton", hub: "camppendleton.html", dataFile: "data-camppendleton.js", refWord: "base", unit: "mi", timeZone: "America/Los_Angeles" },
+  yokota: { label: "Yokota", hub: "yokota.html", dataFile: "data-yokota.js", refWord: "base", unit: "km", timeZone: "Asia/Tokyo" },
 };
+
+// ===== Open Now / Closed Now — parses the free-text hours field. Conservative
+// by design: any format it can't confidently parse (prose, "by appointment",
+// "varies", etc.) is simply skipped rather than risk showing wrong info. =====
+const DAY_ABBR_MAP = {
+  sun:0, sunday:0, mon:1, monday:1, tue:2, tues:2, tuesday:2, wed:3, wednesday:3,
+  thu:4, thur:4, thurs:4, thursday:4, fri:5, friday:5, sat:6, saturday:6
+};
+function parseDayToken(token){
+  token = token.trim().toLowerCase();
+  return DAY_ABBR_MAP[token] !== undefined ? DAY_ABBR_MAP[token] : null;
+}
+function parseDaySpec(spec){
+  spec = spec.trim().toLowerCase();
+  if (spec === "daily" || spec === "every day" || spec === "open") return [0,1,2,3,4,5,6];
+  const days = new Set();
+  for (let part of spec.split(",")) {
+    part = part.trim();
+    if (!part) continue;
+    if (part.includes("/")) {
+      for (const sp of part.split("/")) {
+        const d = parseDayToken(sp);
+        if (d === null) return null;
+        days.add(d);
+      }
+    } else if (/[–-]/.test(part)) {
+      const rangeParts = part.split(/[–-]/).map(s=>s.trim()).filter(Boolean);
+      if (rangeParts.length !== 2) return null;
+      const start = parseDayToken(rangeParts[0]);
+      const end = parseDayToken(rangeParts[1]);
+      if (start === null || end === null) return null;
+      let i = start;
+      while (true) { days.add(i); if (i === end) break; i = (i + 1) % 7; }
+    } else {
+      const d = parseDayToken(part);
+      if (d === null) return null;
+      days.add(d);
+    }
+  }
+  return Array.from(days);
+}
+function parseTimeToken(token){
+  const m = token.trim().match(/^(\d{1,2})(?::(\d{2}))?$/);
+  if (!m) return null;
+  const hour = parseInt(m[1], 10);
+  const minute = m[2] ? parseInt(m[2], 10) : 0;
+  if (hour > 24 || minute > 59) return null;
+  return hour * 60 + minute;
+}
+function parseTimeRanges(spec){
+  const ranges = [];
+  for (let group of spec.split(",")) {
+    group = group.trim();
+    if (!group) continue;
+    const parts = group.split(/[–-]/).map(s => s.trim()).filter(Boolean);
+    if (parts.length !== 2) return null;
+    const start = parseTimeToken(parts[0]);
+    let end = parseTimeToken(parts[1]);
+    if (start === null || end === null) return null;
+    if (end <= start) end += 24*60;
+    ranges.push([start, end]);
+  }
+  return ranges.length ? ranges : null;
+}
+const HOURS_UNCERTAINTY_MARKERS = ["check ahead", "vary", "varies", "call ahead", "by booking", "by appointment", "by arrangement", "seasonal hours", "morning", "afternoon", "evening", "eve hours", "eve.", "contact for hours"];
+function parseHoursString(hoursStr){
+  if (!hoursStr) return null;
+  let str = hoursStr.trim();
+  const lowerStr = str.toLowerCase();
+  for (const marker of HOURS_UNCERTAINTY_MARKERS) {
+    if (lowerStr.includes(marker)) return null;
+  }
+  if (/^open 24 hours/i.test(str)) return { type: "always_open" };
+  str = str.replace(/\([^)]*\)/g, "").trim();
+  const groups = str.split(/\s*·\s*|\s+\.\s+/).map(g=>g.trim()).filter(Boolean);
+  if (!groups.length) return null;
+  const schedule = {};
+  for (const group of groups) {
+    const closedMatch = group.match(/^closed\s+(.+)$/i);
+    if (closedMatch) {
+      const dayIndices = parseDaySpec(closedMatch[1]);
+      if (dayIndices === null) return null;
+      for (const d of dayIndices) schedule[d] = [];
+      continue;
+    }
+    const digitMatch = group.match(/\d/);
+    if (!digitMatch) return null;
+    const daySpec = group.slice(0, digitMatch.index).trim();
+    const timeSpec = group.slice(digitMatch.index).trim();
+    if (!daySpec) return null;
+    const dayIndices = parseDaySpec(daySpec);
+    if (dayIndices === null) return null;
+    const timeRanges = parseTimeRanges(timeSpec);
+    if (timeRanges === null) return null;
+    for (const d of dayIndices) schedule[d] = (schedule[d] || []).concat(timeRanges);
+  }
+  return { type: "schedule", schedule };
+}
+function getNowInTimeZone(timeZone){
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone, hour12: false, weekday: "short", hour: "2-digit", minute: "2-digit"
+  }).formatToParts(new Date());
+  const dayMap = { sun:0, mon:1, tue:2, wed:3, thu:4, fri:5, sat:6 };
+  const weekday = parts.find(p => p.type === "weekday").value.toLowerCase().slice(0,3);
+  const hour = parseInt(parts.find(p => p.type === "hour").value, 10);
+  const minute = parseInt(parts.find(p => p.type === "minute").value, 10);
+  return { day: dayMap[weekday], minutes: hour * 60 + minute };
+}
+function getOpenStatus(hoursStr, timeZone){
+  const parsed = parseHoursString(hoursStr);
+  if (!parsed) return null;
+  if (parsed.type === "always_open") return true;
+  const now = getNowInTimeZone(timeZone);
+  const todayRanges = parsed.schedule[now.day];
+  if (!todayRanges) return null;
+  for (const [start, end] of todayRanges) {
+    if (now.minutes >= start && now.minutes < end) return true;
+  }
+  const yesterday = (now.day + 6) % 7;
+  const yesterdayRanges = parsed.schedule[yesterday];
+  if (yesterdayRanges) {
+    for (const [start, end] of yesterdayRanges) {
+      if (end > 24*60 && now.minutes < end - 24*60) return true;
+    }
+  }
+  return todayRanges.length === 0 ? false : false;
+}
 
 // Big category icons for the hero — same flat line-art set used on every base's map/cards
 const icons = {
@@ -354,6 +487,12 @@ function initPage(){
       : `${place.dist.toFixed(1)} km / ${milesFrom(place.dist)} mi from ${refWordForPlace}`;
   const dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`;
   const callHref = place.phone ? `tel:${place.phone.replace(/\s+/g,'')}` : null;
+  const openStatus = getOpenStatus(place.hours, cfg.timeZone);
+  const openBadge = openStatus === true
+    ? `<span class="open-badge open">● Open now</span>`
+    : openStatus === false
+      ? `<span class="open-badge closed">● Closed now</span>`
+      : "";
 
   document.getElementById("mainContent").innerHTML = `
     <p class="blurb-block">${place.blurb}</p>
@@ -361,7 +500,7 @@ function initPage(){
     <div class="detail-grid">
       <div class="detail-card"><span class="ic">${fieldIcons.address}</span><div><div class="k">Address</div><div class="v">${place.addr}</div></div></div>
       <div class="detail-card"><span class="ic">${fieldIcons.distance}</span><div><div class="k">Distance from ${refWordForPlace}</div><div class="v">${distText}</div></div></div>
-      <div class="detail-card"><span class="ic">${fieldIcons.hours}</span><div><div class="k">Hours</div><div class="v">${place.hours}</div></div></div>
+      <div class="detail-card"><span class="ic">${fieldIcons.hours}</span><div><div class="k">Hours</div><div class="v">${place.hours} ${openBadge}</div></div></div>
       <div class="detail-card"><span class="ic">${fieldIcons.phoneField}</span><div><div class="k">Phone</div><div class="v">${place.phone ? place.phone : "Not listed"}</div></div></div>
     </div>
 
