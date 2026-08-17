@@ -307,6 +307,36 @@ function synonymCategoriesFor(word){
   return cats;
 }
 
+// Shared matching logic used by both the full results grid and the
+// autocomplete dropdown, so they never disagree about what counts as a match.
+function computeMatches(query, pool){
+  if(!query) return [];
+  const synonymCats = new Set();
+  const queryWords = query.split(/\s+/);
+  queryWords.forEach(word => {
+    synonymCategoriesFor(word).forEach(cat => synonymCats.add(cat));
+  });
+
+  const isTextMatch = p => {
+    const name = p.name.toLowerCase();
+    const blurb = (p.blurb || "").toLowerCase();
+    const addr = (p.addr || "").toLowerCase();
+    const catLabel = (p.catLabel || "").toLowerCase();
+    if (name.includes(query) || blurb.includes(query) || addr.includes(query) || catLabel.includes(query)) {
+      return true;
+    }
+    if (queryWords.length === 1 && query.length >= 4) {
+      const words = (name + " " + blurb + " " + catLabel).split(/\s+/);
+      return words.some(w => fuzzyWordMatch(w, query));
+    }
+    return false;
+  };
+
+  const textMatches = pool.filter(isTextMatch);
+  const synonymOnlyMatches = pool.filter(p => !isTextMatch(p) && synonymCats.has(p.cat));
+  return textMatches.concat(synonymOnlyMatches);
+}
+
 function render(){
   const query = document.getElementById("searchInput").value.trim().toLowerCase();
   const grid = document.getElementById("resultsGrid");
@@ -321,35 +351,8 @@ function render(){
     return;
   }
 
-  const synonymCats = new Set();
-  const queryWords = query.split(/\s+/);
-  queryWords.forEach(word => {
-    synonymCategoriesFor(word).forEach(cat => synonymCats.add(cat));
-  });
-
-  const isTextMatch = p => {
-    const name = p.name.toLowerCase();
-    const blurb = (p.blurb || "").toLowerCase();
-    const addr = (p.addr || "").toLowerCase();
-    const catLabel = (p.catLabel || "").toLowerCase();
-    // Fast path: plain substring match (handles most searches, including
-    // partial words like "coff" -> "coffee").
-    if (name.includes(query) || blurb.includes(query) || addr.includes(query) || catLabel.includes(query)) {
-      return true;
-    }
-    // Typo-tolerant path: only worth trying for real words, not tiny/multi-word queries.
-    if (queryWords.length === 1 && query.length >= 4) {
-      const words = (name + " " + blurb + " " + catLabel).split(/\s+/);
-      return words.some(w => fuzzyWordMatch(w, query));
-    }
-    return false;
-  };
-
   let pool = activeBase !== "all" ? allPlaces.filter(p => p.baseKey === activeBase) : allPlaces;
-  const textMatches = pool.filter(isTextMatch);
-  const synonymOnlyMatches = pool.filter(p => !isTextMatch(p) && synonymCats.has(p.cat));
-  let matches = textMatches.concat(synonymOnlyMatches);
-  matches = matches.slice(0, 60); // keep it snappy
+  let matches = computeMatches(query, pool).slice(0, 60); // keep it snappy
 
   if(matches.length === 0){
     grid.innerHTML = "";
@@ -389,18 +392,10 @@ function updateSuggestions(){
   }
 
   const pool = activeBase !== "all" ? allPlaces.filter(p => p.baseKey === activeBase) : allPlaces;
-  const suggestions = [];
-  const seen = new Set();
-  for(const p of pool){
-    const lname = p.name.toLowerCase();
-    const firstWord = lname.split(/\s+/)[0];
-    if(seen.has(lname)) continue;
-    if(lname.startsWith(query) || fuzzyWordMatch(firstWord, query)){
-      suggestions.push(p);
-      seen.add(lname);
-    }
-    if(suggestions.length >= 6) break;
-  }
+  // Reuse the exact same matching logic as the full results grid, so the
+  // dropdown never disagrees with what's actually about to show below —
+  // e.g. it now includes synonym-expanded matches, not just name matches.
+  const suggestions = computeMatches(query, pool).slice(0, 6);
 
   if(suggestions.length === 0){
     dropdown.style.display = "none";
