@@ -245,6 +245,7 @@
   .emblem.tattoo{ background: rgba(63,92,107,0.16); }
   .emblem.notary{ background: rgba(91,107,79,0.16); }
   .emblem.ski{ background: rgba(63,92,107,0.16); }
+  .emblem.castles{ background: rgba(192,138,52,0.16); }
   .card-name{ font-family:'Big Shoulders Display', sans-serif; font-weight:700; font-size:20px; line-height:1.1; text-decoration:none; color:var(--ink); }
   .card-name:hover{ color:var(--brass); }
   .card-rating{ display:flex; align-items:baseline; gap:6px; font-size:13px; }
@@ -289,6 +290,7 @@
   .tag.tattoo{ background: rgba(63,92,107,0.14); color:#2b4652; }
   .tag.notary{ background: rgba(91,107,79,0.14); color:#41502f; }
   .tag.ski{ background: rgba(63,92,107,0.14); color:#2b4652; }
+  .tag.castles{ background: rgba(192,138,52,0.16); color:#8c621f; }
 
   .card-blurb{ font-size:14px; line-height:1.5; color:#3b4640; }
   .card-addr{ font-size:12.5px; color:#7a8078; }
@@ -483,8 +485,8 @@
       </div>
       <div class="coords-row">
         <span><b>49.4513° N, 7.5845° E</b> — Ramstein AB (ref. point)</span>
-        <span><b>33</b> categories mapped</span>
-        <span><b>180</b> locations logged</span>
+        <span><b>34</b> categories mapped</span>
+        <span><b>190</b> locations logged</span>
       </div>
     </div>
   </header>
@@ -528,6 +530,7 @@
           <button class="cat-tab" data-cat="tattoo">Tattoo Shops</button>
           <button class="cat-tab" data-cat="notary">Notary &amp; Shipping</button>
           <button class="cat-tab" data-cat="ski">Ski &amp; Winter Sports</button>
+          <button class="cat-tab" data-cat="castles">Castles &amp; Historic Day Trips</button>
         </span>
         <button class="cat-tab cat-tab-toggle" id="catTabsToggle" type="button">More categories ▾</button>
       </div>
@@ -562,7 +565,7 @@
           <div class="legend-items" id="legendItems"></div>
         </div>
       </div>
-      <p style="font-size:12px; color:#8a8578; margin-top:8px;">All 180 logged locations at once — zoom, click a pin for details, or toggle categories in the legend.</p>
+      <p style="font-size:12px; color:#8a8578; margin-top:8px;">All 190 logged locations at once — zoom, click a pin for details, or toggle categories in the legend.</p>
     </div>
 
     <div id="listView">
@@ -664,6 +667,9 @@
 
       <div class="section-label">Ski &amp; Winter Sports</div>
       <div class="grid" data-group="ski" id="grid-ski"></div>
+
+      <div class="section-label">Castles &amp; Historic Day Trips</div>
+      <div class="grid" data-group="castles" id="grid-castles"></div>
 
       <div class="section-label" id="eventsLabel">Seasonal Events</div>
       <div class="help-grid" id="eventsGrid">
@@ -870,6 +876,7 @@ const icons = {
   tattoo: `<svg viewBox="0 0 24 24" fill="none" stroke="#2b4652" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20 15 9a3 3 0 0 0-4-4L2 16z"/><path d="M13.5 6.5 17.5 10.5"/><path d="M17 3c1 1 1 3 3 3"/></svg>`,
   notary: `<svg viewBox="0 0 24 24" fill="none" stroke="#41502f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5"/><circle cx="12" cy="14.5" r="2.5"/><path d="M10 20l1-2.5h2l1 2.5"/></svg>`,
   ski: `<svg viewBox="0 0 24 24" fill="none" stroke="#2b4652" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20l7-16 4 8-3 8"/><path d="M12 12l6-8 3 16"/><circle cx="15" cy="3" r="1.5"/></svg>`,
+  castles: `<svg viewBox="0 0 24 24" fill="none" stroke="#8c621f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V10l3-2v-3h3v2l3-2 3 2v-2h3v3l3 2v11Z"/><path d="M3 10h18M9 21v-6h6v6"/></svg>`,
 };
 
 const dirIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>`;
@@ -959,7 +966,7 @@ function cardHTML(p){
 }
 
 function render(){
-  ["restaurant","grocery","language","attraction","auto","health","banking","housing","schools","pets","fitness","community","religious","rec","services","pcs","legal","education","shopping","kids","outdoors","tailor","museum","storage","farmers","bars","phone","cars","furniture","wine","tattoo","notary","ski"].forEach(cat=>{
+  ["restaurant","grocery","language","attraction","auto","health","banking","housing","schools","pets","fitness","community","religious","rec","services","pcs","legal","education","shopping","kids","outdoors","tailor","museum","storage","farmers","bars","phone","cars","furniture","wine","tattoo","notary","ski","castles"].forEach(cat=>{
     const el = document.getElementById("grid-"+cat);
     const items = places.filter(p=>p.cat===cat);
     el.innerHTML = items.map(cardHTML).join("");
@@ -1081,7 +1088,7 @@ const catColors = {
   legal:"#3f5c6b", education:"#5b6b4f", shopping:"#c08a34", kids:"#c08a34", outdoors:"#5b6b4f",
   tailor:"#3f5c6b", museum:"#c08a34", storage:"#a8482c", farmers:"#5b6b4f", bars:"#a8482c",
   phone:"#3f5c6b", cars:"#3f5c6b", furniture:"#c08a34", wine:"#a8482c",
-  tattoo:"#3f5c6b", notary:"#5b6b4f", ski:"#3f5c6b"
+  tattoo:"#3f5c6b", notary:"#5b6b4f", ski:"#3f5c6b", castles:"#c08a34"
 };
 
 const map = L.map('leafletMap').setView([49.4512593, 7.5844778], 12);
