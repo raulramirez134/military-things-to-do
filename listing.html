@@ -94,6 +94,24 @@
   .detail-card .v{ font-size:14.5px; }
   .blurb-block{ font-size:15px; line-height:1.6; margin-bottom:24px; }
   .action-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:36px; }
+
+  .share-popover{
+    position:fixed; inset:0; z-index:100; background: rgba(24,36,32,0.45);
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .share-popover-inner{
+    background:#fff; border-radius:6px; padding:28px 26px; max-width:340px; width:100%;
+    position:relative; text-align:center;
+  }
+  .share-close{
+    position:absolute; top:10px; right:12px; border:none; background:none; cursor:pointer;
+    font-size:22px; line-height:1; color:#8a8578;
+  }
+  .share-close:hover{ color:var(--ink); }
+  .share-row{ display:flex; gap:10px; justify-content:center; margin-bottom:20px; flex-wrap:wrap; }
+  .qr-wrap{ display:flex; justify-content:center; margin-bottom:10px; }
+  .qr-wrap canvas{ border:1px solid var(--line); border-radius:4px; }
+  .qr-caption{ font-size:12px; color:#8a8578; margin:0; }
   .action-btn{
     display:inline-flex; align-items:center; gap:6px;
     font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:0.03em; text-transform:uppercase;
@@ -170,6 +188,7 @@
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2511246091167745" crossorigin="anonymous"></script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 </head>
 <body>
   <header class="brief">
@@ -349,7 +368,22 @@ function initPage(){
     <div class="action-row">
       <a class="action-btn primary" href="${dirUrl}" target="_blank" rel="noopener">Get directions →</a>
       ${callHref ? `<a class="action-btn" href="${callHref}">Call ${place.phone}</a>` : ""}
+      <button class="action-btn" id="shareBtn" type="button">Share / QR code</button>
       <a class="action-btn" href="${cfg.hub}#feedback-section">Claim / report this listing</a>
+    </div>
+
+    <div id="sharePopover" class="share-popover" style="display:none;">
+      <div class="share-popover-inner">
+        <button class="share-close" id="shareCloseBtn" aria-label="Close">×</button>
+        <div class="share-row">
+          <button class="action-btn" id="copyLinkBtn" type="button">📋 Copy link</button>
+          <button class="action-btn" id="nativeShareBtn" type="button" style="display:none;">Share…</button>
+        </div>
+        <div class="qr-wrap">
+          <canvas id="qrCanvas"></canvas>
+        </div>
+        <p class="qr-caption">Scan to open this listing on another phone</p>
+      </div>
     </div>
 
     <div id="reviews-section">
@@ -385,6 +419,53 @@ function initPage(){
       </form>
     </div>
   `;
+
+  // Share / QR code
+  const shareUrl = window.location.origin + window.location.pathname + window.location.search;
+  const shareBtn = document.getElementById("shareBtn");
+  const sharePopover = document.getElementById("sharePopover");
+  const shareCloseBtn = document.getElementById("shareCloseBtn");
+  const copyLinkBtn = document.getElementById("copyLinkBtn");
+  const nativeShareBtn = document.getElementById("nativeShareBtn");
+  let qrRendered = false;
+
+  if (shareBtn) {
+    shareBtn.addEventListener("click", () => {
+      sharePopover.style.display = "flex";
+      if (!qrRendered && typeof QRCode !== "undefined") {
+        QRCode.toCanvas(document.getElementById("qrCanvas"), shareUrl, { width: 200, margin: 1 }, () => {});
+        qrRendered = true;
+      }
+    });
+  }
+  if (shareCloseBtn) {
+    shareCloseBtn.addEventListener("click", () => { sharePopover.style.display = "none"; });
+  }
+  if (sharePopover) {
+    sharePopover.addEventListener("click", (e) => {
+      if (e.target === sharePopover) sharePopover.style.display = "none";
+    });
+  }
+  if (copyLinkBtn) {
+    copyLinkBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        copyLinkBtn.textContent = "✓ Copied!";
+        setTimeout(() => { copyLinkBtn.textContent = "📋 Copy link"; }, 2000);
+      } catch {
+        copyLinkBtn.textContent = "Couldn't copy — long-press the link bar instead";
+      }
+    });
+  }
+  if (nativeShareBtn && navigator.share) {
+    nativeShareBtn.style.display = "inline-flex";
+    nativeShareBtn.addEventListener("click", () => {
+      navigator.share({ title: place.name, url: shareUrl }).catch(() => {});
+    });
+  }
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && sharePopover) sharePopover.style.display = "none";
+  });
 
   // "More in this category" sidebar
   const catMates = places
