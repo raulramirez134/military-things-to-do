@@ -188,7 +188,7 @@
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2511246091167745" crossorigin="anonymous"></script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js" onerror="window.qrLibFailed = true;"></script>
 </head>
 <body>
   <header class="brief">
@@ -427,14 +427,31 @@ function initPage(){
   const shareCloseBtn = document.getElementById("shareCloseBtn");
   const copyLinkBtn = document.getElementById("copyLinkBtn");
   const nativeShareBtn = document.getElementById("nativeShareBtn");
-  let qrRendered = false;
+  let qrSucceeded = false;
+
+  function renderQrCode(){
+    const qrCaption = document.querySelector(".qr-caption");
+    if (window.qrLibFailed || typeof QRCode === "undefined") {
+      qrCaption.textContent = "QR code couldn't load right now — use Copy Link above instead.";
+      return;
+    }
+    QRCode.toCanvas(document.getElementById("qrCanvas"), shareUrl, { width: 200, margin: 1 }, (err) => {
+      if (err) {
+        qrCaption.textContent = "QR code couldn't generate — use Copy Link above instead.";
+      } else {
+        qrSucceeded = true;
+        qrCaption.textContent = "Scan to open this listing on another phone";
+      }
+    });
+  }
 
   if (shareBtn) {
     shareBtn.addEventListener("click", () => {
       sharePopover.style.display = "flex";
-      if (!qrRendered && typeof QRCode !== "undefined") {
-        QRCode.toCanvas(document.getElementById("qrCanvas"), shareUrl, { width: 200, margin: 1 }, () => {});
-        qrRendered = true;
+      if (!qrSucceeded) {
+        // Give the library a brief moment in case the click happens the instant
+        // the page loads and the script hasn't finished executing yet.
+        setTimeout(renderQrCode, typeof QRCode === "undefined" && !window.qrLibFailed ? 300 : 0);
       }
     });
   }
