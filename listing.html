@@ -169,7 +169,7 @@
   }
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2511246091167745" crossorigin="anonymous"></script>
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileApiReady&render=explicit" async defer></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 </head>
 <body>
   <header class="brief">
@@ -502,22 +502,25 @@ function initPage(){
   // The widget div is inserted dynamically (as part of mainContent's innerHTML),
   // so we render it explicitly rather than relying on Turnstile's automatic
   // page-scan, which can miss elements added after the script first loads.
+  // We poll rather than relying on Cloudflare's ?onload= callback, since that
+  // callback can fire before this code has even defined it (a race condition
+  // depending on how long the async data fetch above takes) — polling can't
+  // miss the signal the way a one-shot callback can.
   window.onTurnstileSuccess = function(){
     document.getElementById("rSubmit").disabled = false;
   };
 
   window.turnstileWidgetId = null;
-  window.onTurnstileApiReady = function(){
-    window.turnstileApiReady = true;
-    tryRenderTurnstile();
-  };
   function tryRenderTurnstile(){
+    if (window.turnstileWidgetId !== null) return; // already rendered
     const el = document.getElementById("turnstile-widget");
-    if (window.turnstileApiReady && el && window.turnstileWidgetId === null && typeof turnstile !== "undefined") {
+    if (el && typeof turnstile !== "undefined" && turnstile.render) {
       window.turnstileWidgetId = turnstile.render(el, {
         sitekey: "0x4AAAAAAES5Rg7OaO37hy9p",
         callback: window.onTurnstileSuccess,
       });
+    } else {
+      setTimeout(tryRenderTurnstile, 150);
     }
   }
   tryRenderTurnstile();
