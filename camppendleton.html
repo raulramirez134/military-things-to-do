@@ -285,6 +285,7 @@
   .tag{
     font-family:'JetBrains Mono', monospace; font-size:10px; letter-spacing:0.06em; text-transform:uppercase;
     padding:4px 8px; border-radius:2px; white-space:nowrap; flex-shrink:0;
+    display:inline-block; align-self:flex-start;
   }
   .tag.restaurant{ background: rgba(200,90,50,0.12); color:#8a3a20; }
   .tag.grocery{ background: rgba(91,107,79,0.14); color:#41502f; }
@@ -983,8 +984,8 @@ function cardHTML(p){
           <a class="card-name" href="listing.html?base=camppendleton&id=${p.id}">${p.name}</a>
         </div>
         <button class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${p.name.replace(/'/g,"\\'")}', this)" aria-label="Save to favorites">★</button>
-        <div class="tag ${p.cat}">${catLabels[p.cat]}</div>
       </div>
+      <div class="tag ${p.cat}">${catLabels[p.cat]}</div>
       <div class="card-rating">${starsHTML(p)} <span class="area-badge ${p.area}">${areaLabel}</span></div>
       <div class="card-blurb">${p.blurb}</div>
       <div class="card-addr">${p.addr}</div>
