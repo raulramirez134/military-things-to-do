@@ -279,7 +279,13 @@
   .emblem.wine{ background: rgba(168,72,44,0.14); }
   .card-name{ font-family:'Big Shoulders Display', sans-serif; font-weight:700; font-size:20px; line-height:1.15; text-decoration:none; color:var(--ink); flex:1 1 auto; min-width:0; overflow-wrap:break-word; }
   .card-name:hover{ color:var(--brass); }
-  .card-rating{ display:flex; align-items:baseline; gap:6px; font-size:13px; }
+  .card-rating{ display:flex; align-items:baseline; gap:6px; font-size:13px; flex-wrap:wrap; }
+  .open-badge{
+    display:inline-block; font-family:'JetBrains Mono', monospace; font-size:10.5px; font-weight:600;
+    letter-spacing:0.03em; text-transform:uppercase; padding:2px 8px; border-radius:10px;
+  }
+  .open-badge.open{ background: rgba(91,107,79,0.16); color:#41502f; }
+  .open-badge.closed{ background: rgba(168,72,44,0.14); color:#8a3a20; }
   .card-rating .stars{ color:var(--brass); letter-spacing:1px; font-size:14px; }
   .card-rating .stars-num{ font-family:'JetBrains Mono', monospace; font-weight:600; color:var(--ink); }
   .card-rating .stars-count{ color:#8a8578; font-size:12px; }
@@ -887,11 +893,146 @@ function starsHTML(p){
   return `<span class="stars">${stars}</span> <span class="stars-num">${p.rating.toFixed(1)}</span> <span class="stars-count">(${p.reviewCount})</span>`;
 }
 
+const HUB_TIME_ZONE = "Asia/Tokyo";
+
+// ===== Open Now / Closed Now — parses the free-text hours field. Conservative
+// by design: any format it can't confidently parse (prose, "by appointment",
+// "varies", etc.) is simply skipped rather than risk showing wrong info. =====
+const DAY_ABBR_MAP = {
+  sun:0, sunday:0, mon:1, monday:1, tue:2, tues:2, tuesday:2, wed:3, wednesday:3,
+  thu:4, thur:4, thurs:4, thursday:4, fri:5, friday:5, sat:6, saturday:6
+};
+function parseDayToken(token){
+  token = token.trim().toLowerCase();
+  return DAY_ABBR_MAP[token] !== undefined ? DAY_ABBR_MAP[token] : null;
+}
+function parseDaySpec(spec){
+  spec = spec.trim().toLowerCase();
+  if (spec === "daily" || spec === "every day" || spec === "open") return [0,1,2,3,4,5,6];
+  const days = new Set();
+  for (let part of spec.split(",")) {
+    part = part.trim();
+    if (!part) continue;
+    if (part.includes("/")) {
+      for (const sp of part.split("/")) {
+        const d = parseDayToken(sp);
+        if (d === null) return null;
+        days.add(d);
+      }
+    } else if (/[–-]/.test(part)) {
+      const rangeParts = part.split(/[–-]/).map(s=>s.trim()).filter(Boolean);
+      if (rangeParts.length !== 2) return null;
+      const start = parseDayToken(rangeParts[0]);
+      const end = parseDayToken(rangeParts[1]);
+      if (start === null || end === null) return null;
+      let i = start;
+      while (true) { days.add(i); if (i === end) break; i = (i + 1) % 7; }
+    } else {
+      const d = parseDayToken(part);
+      if (d === null) return null;
+      days.add(d);
+    }
+  }
+  return Array.from(days);
+}
+function parseTimeToken(token){
+  const m = token.trim().match(/^(\d{1,2})(?::(\d{2}))?$/);
+  if (!m) return null;
+  const hour = parseInt(m[1], 10);
+  const minute = m[2] ? parseInt(m[2], 10) : 0;
+  if (hour > 24 || minute > 59) return null;
+  return hour * 60 + minute;
+}
+function parseTimeRanges(spec){
+  const ranges = [];
+  for (let group of spec.split(",")) {
+    group = group.trim();
+    if (!group) continue;
+    const parts = group.split(/[–-]/).map(s => s.trim()).filter(Boolean);
+    if (parts.length !== 2) return null;
+    const start = parseTimeToken(parts[0]);
+    let end = parseTimeToken(parts[1]);
+    if (start === null || end === null) return null;
+    if (end <= start) end += 24*60;
+    ranges.push([start, end]);
+  }
+  return ranges.length ? ranges : null;
+}
+const HOURS_UNCERTAINTY_MARKERS = ["check ahead", "vary", "varies", "call ahead", "by booking", "by appointment", "by arrangement", "seasonal hours", "morning", "afternoon", "evening", "eve hours", "eve.", "contact for hours"];
+function parseHoursString(hoursStr){
+  if (!hoursStr) return null;
+  let str = hoursStr.trim();
+  const lowerStr = str.toLowerCase();
+  for (const marker of HOURS_UNCERTAINTY_MARKERS) {
+    if (lowerStr.includes(marker)) return null;
+  }
+  if (/^open 24 hours/i.test(str)) return { type: "always_open" };
+  str = str.replace(/\([^)]*\)/g, "").trim();
+  const groups = str.split(/\s*·\s*|\s+\.\s+/).map(g=>g.trim()).filter(Boolean);
+  if (!groups.length) return null;
+  const schedule = {};
+  for (const group of groups) {
+    const closedMatch = group.match(/^closed\s+(.+)$/i);
+    if (closedMatch) {
+      const dayIndices = parseDaySpec(closedMatch[1]);
+      if (dayIndices === null) return null;
+      for (const d of dayIndices) schedule[d] = [];
+      continue;
+    }
+    const digitMatch = group.match(/\d/);
+    if (!digitMatch) return null;
+    const daySpec = group.slice(0, digitMatch.index).trim();
+    const timeSpec = group.slice(digitMatch.index).trim();
+    if (!daySpec) return null;
+    const dayIndices = parseDaySpec(daySpec);
+    if (dayIndices === null) return null;
+    const timeRanges = parseTimeRanges(timeSpec);
+    if (timeRanges === null) return null;
+    for (const d of dayIndices) schedule[d] = (schedule[d] || []).concat(timeRanges);
+  }
+  return { type: "schedule", schedule };
+}
+function getNowInTimeZone(timeZone){
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone, hour12: false, weekday: "short", hour: "2-digit", minute: "2-digit"
+  }).formatToParts(new Date());
+  const dayMap = { sun:0, mon:1, tue:2, wed:3, thu:4, fri:5, sat:6 };
+  const weekday = parts.find(p => p.type === "weekday").value.toLowerCase().slice(0,3);
+  const hour = parseInt(parts.find(p => p.type === "hour").value, 10);
+  const minute = parseInt(parts.find(p => p.type === "minute").value, 10);
+  return { day: dayMap[weekday], minutes: hour * 60 + minute };
+}
+function getOpenStatus(hoursStr, timeZone){
+  const parsed = parseHoursString(hoursStr);
+  if (!parsed) return null;
+  if (parsed.type === "always_open") return true;
+  const now = getNowInTimeZone(timeZone);
+  const todayRanges = parsed.schedule[now.day];
+  if (!todayRanges) return null;
+  for (const [start, end] of todayRanges) {
+    if (now.minutes >= start && now.minutes < end) return true;
+  }
+  const yesterday = (now.day + 6) % 7;
+  const yesterdayRanges = parsed.schedule[yesterday];
+  if (yesterdayRanges) {
+    for (const [start, end] of yesterdayRanges) {
+      if (end > 24*60 && now.minutes < end - 24*60) return true;
+    }
+  }
+  return todayRanges.length === 0 ? false : false;
+}
+
 function cardHTML(p){
   const distText = p.dist === 0 ? "On base" : `${p.dist.toFixed(1)} km / ${milesFrom(p.dist)} mi from base`;
   const dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`;
   const callHref = p.phone ? `tel:${p.phone.replace(/\s+/g,'')}` : null;
   const isFav = getFavorites().includes(p.name);
+  const openStatus = getOpenStatus(p.hours, HUB_TIME_ZONE);
+  const openBadge = openStatus === true
+    ? `<span class="open-badge open">● Open now</span>`
+    : openStatus === false
+      ? `<span class="open-badge closed">● Closed now</span>`
+      : "";
   return `
     <div class="card" data-name="${p.name.toLowerCase()}" data-cat="${p.cat}" data-placename="${p.name}">
       <div class="card-top">
@@ -902,7 +1043,7 @@ function cardHTML(p){
         <button class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${p.name.replace(/'/g,"\\'")}', this)" aria-label="Save to favorites">★</button>
       </div>
       <div class="tag ${p.cat}">${catLabels[p.cat]}</div>
-      <div class="card-rating">${starsHTML(p)}</div>
+      <div class="card-rating">${starsHTML(p)} ${openBadge}</div>
       <div class="card-blurb">${p.blurb}</div>
       <div class="card-addr">${p.addr}</div>
       <div class="card-meta">
