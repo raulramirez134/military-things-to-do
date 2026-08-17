@@ -169,6 +169,7 @@
   }
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2511246091167745" crossorigin="anonymous"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
   <header class="brief">
@@ -378,7 +379,8 @@ function initPage(){
           <label for="rText">Your review</label>
           <textarea id="rText" placeholder="What should other families know?" required></textarea>
         </div>
-        <button type="submit" class="f-submit" id="rSubmit">Post review</button>
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAAES3n_imC5191BBP" data-callback="onTurnstileSuccess" style="margin-bottom:14px;"></div>
+        <button type="submit" class="f-submit" id="rSubmit" disabled>Post review</button>
         <div class="form-msg" id="rMsg"></div>
       </form>
     </div>
@@ -496,6 +498,11 @@ function initPage(){
 
   loadReviews();
 
+  // Turnstile enables the submit button only once the challenge is solved
+  window.onTurnstileSuccess = function(){
+    document.getElementById("rSubmit").disabled = false;
+  };
+
   document.getElementById("reviewForm").addEventListener("submit", async (e)=>{
     e.preventDefault();
     const submitBtn = document.getElementById("rSubmit");
@@ -503,9 +510,15 @@ function initPage(){
     const name = document.getElementById("rName").value.trim();
     const rating = document.getElementById("rRating").value;
     const text = document.getElementById("rText").value.trim();
+    const turnstileToken = (typeof turnstile !== "undefined") ? turnstile.getResponse() : "";
 
     if(!rating || !text){
       msgEl.textContent = "Please add a rating and a review.";
+      msgEl.className = "form-msg error";
+      return;
+    }
+    if(!turnstileToken){
+      msgEl.textContent = "Please complete the verification challenge above.";
       msgEl.className = "form-msg error";
       return;
     }
@@ -518,23 +531,26 @@ function initPage(){
       const res = await fetch("/api/reviews", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: fullId, name, rating, text })
+        body: JSON.stringify({ id: fullId, name, rating, text, turnstileToken })
       });
       const data = await res.json();
       if(!res.ok){
         msgEl.textContent = data.error || "Something went wrong — try again.";
         msgEl.className = "form-msg error";
+        if(typeof turnstile !== "undefined") turnstile.reset();
+        submitBtn.disabled = true;
       } else {
         msgEl.textContent = "Review posted — thank you!";
         msgEl.className = "form-msg ok";
         document.getElementById("reviewForm").reset();
+        if(typeof turnstile !== "undefined") turnstile.reset();
+        submitBtn.disabled = true;
         loadReviews();
       }
     } catch (err) {
       msgEl.textContent = "Couldn't reach the server — check your connection and try again.";
       msgEl.className = "form-msg error";
     }
-    submitBtn.disabled = false;
   });
 }
 </script>
