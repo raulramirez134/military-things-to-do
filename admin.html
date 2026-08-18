@@ -67,6 +67,10 @@
     <h1>Suggested Listings</h1>
     <div class="count-line" id="countLine"></div>
     <div id="cardsContainer"></div>
+
+    <h1 style="margin-top:48px;">Feedback Messages</h1>
+    <div class="count-line" id="feedbackCountLine"></div>
+    <div id="feedbackCardsContainer"></div>
   </div>
 
 <script>
@@ -86,6 +90,10 @@ async function loadSuggestions(){
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("suggestionsList").style.display = "block";
     renderSuggestions(data.suggestions || []);
+
+    const fbRes = await fetch(`/api/feedback?adminKey=${encodeURIComponent(adminKey)}`);
+    const fbData = await fbRes.json();
+    if (fbRes.ok) renderFeedback(fbData.feedback || []);
   } catch {
     errEl.textContent = "Couldn't reach the server — check your connection.";
   }
@@ -142,6 +150,55 @@ window.markHandled = async function(id){
       document.getElementById("countLine").textContent = `${remaining} pending suggestion${remaining === 1 ? "" : "s"}`;
       if (remaining === 0) {
         document.getElementById("cardsContainer").innerHTML = `<p class="empty-msg">No pending suggestions right now.</p>`;
+      }
+    }
+  } catch {}
+};
+
+function renderFeedback(items){
+  const pending = items.filter(f => !f.handled);
+  const countLine = document.getElementById("feedbackCountLine");
+  const container = document.getElementById("feedbackCardsContainer");
+  countLine.textContent = `${pending.length} pending message${pending.length === 1 ? "" : "s"}`;
+
+  if (pending.length === 0) {
+    container.innerHTML = `<p class="empty-msg">No pending feedback right now.</p>`;
+    return;
+  }
+
+  container.innerHTML = pending.map(f => `
+    <div class="suggestion-card" id="feedback-card-${f.id}">
+      <div class="sc-top">
+        <div class="sc-name">${escapeHtml(f.type || "General feedback")}</div>
+        ${f.base ? `<div class="sc-base">${BASE_LABELS[f.base] || f.base}</div>` : ""}
+      </div>
+      <div class="sc-meta">${new Date(f.date).toLocaleString()}</div>
+      <div class="sc-details">${escapeHtml(f.message)}</div>
+      ${(f.name || f.email) ? `
+        <div class="sc-submitter">
+          From: ${escapeHtml(f.name || "Anonymous")}
+          ${f.email ? ` — ${escapeHtml(f.email)}` : ""}
+        </div>
+      ` : ""}
+      <button class="sc-handle-btn" onclick="markFeedbackHandled('${f.id}')">Mark as handled</button>
+    </div>
+  `).join("");
+}
+
+window.markFeedbackHandled = async function(id){
+  try {
+    const res = await fetch("/api/feedback", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ adminKey, id }),
+    });
+    if (res.ok) {
+      const card = document.getElementById(`feedback-card-${id}`);
+      if (card) card.remove();
+      const remaining = document.querySelectorAll("#feedbackCardsContainer .suggestion-card").length;
+      document.getElementById("feedbackCountLine").textContent = `${remaining} pending message${remaining === 1 ? "" : "s"}`;
+      if (remaining === 0) {
+        document.getElementById("feedbackCardsContainer").innerHTML = `<p class="empty-msg">No pending feedback right now.</p>`;
       }
     }
   } catch {}

@@ -340,6 +340,118 @@ async function handleMarkSuggestionHandled(request, env) {
   return jsonResponse({ ok: true }, 200, request);
 }
 
+const MAX_FEEDBACK_STORED = 500;
+const VALID_FEEDBACK_TYPES = [
+  "Suggest a new listing",
+  "Correction (hours, phone, address, etc.)",
+  "Claim this listing",
+  "Complaint",
+  "General feedback",
+];
+
+async function handlePostFeedback(request, env) {
+  if (!env.REVIEWS_KV) {
+    return jsonResponse({ error: "Storage isn't set up yet (REVIEWS_KV binding missing)." }, 503, request);
+  }
+
+  const ip = request.headers.get("CF-Connecting-IP");
+  const rateLimitKey = ip ? `ratelimit-feedback:${ip}` : null;
+  if (rateLimitKey) {
+    const raw = await env.REVIEWS_KV.get(rateLimitKey);
+    const count = raw ? parseInt(raw, 10) || 0 : 0;
+    if (count >= RATE_LIMIT_MAX_PER_HOUR) {
+      return jsonResponse({ error: "Too many messages submitted recently — please try again later." }, 429, request);
+    }
+    await env.REVIEWS_KV.put(rateLimitKey, String(count + 1), { expirationTtl: 3600 });
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ error: "Invalid JSON" }, 400, request);
+  }
+
+  const turnstileResult = await verifyTurnstile(body.turnstileToken, ip, env);
+  if (!turnstileResult.ok) {
+    return jsonResponse({ error: "Verification failed — please try again." }, 400, request);
+  }
+
+  const base = (body.base || "").toString();
+  const type = VALID_FEEDBACK_TYPES.includes(body.type) ? body.type : "General feedback";
+  const name = (body.name || "").toString().slice(0, MAX_NAME_LENGTH);
+  const email = (body.email || "").toString().slice(0, MAX_SUGGESTION_FIELD_LENGTH);
+  const message = (body.message || "").toString().slice(0, MAX_TEXT_LENGTH);
+
+  if (!message.trim()) return jsonResponse({ error: "Please enter a message." }, 400, request);
+  if (containsBlockedWords(message) || containsBlockedWords(name)) {
+    return jsonResponse({ error: "Your message couldn't be sent because it contains language that isn't allowed here." }, 400, request);
+  }
+
+  const key = "feedback";
+  const raw = await env.REVIEWS_KV.get(key);
+  const items = raw ? JSON.parse(raw) : [];
+
+  items.unshift({
+    id: crypto.randomUUID(),
+    base: VALID_BASE_KEYS.includes(base) ? base : null,
+    type, name, email, message,
+    date: new Date().toISOString(),
+    handled: false,
+  });
+  const trimmed = items.slice(0, MAX_FEEDBACK_STORED);
+
+  await env.REVIEWS_KV.put(key, JSON.stringify(trimmed));
+  return jsonResponse({ ok: true }, 200, request);
+}
+
+async function handleGetFeedback(request, env) {
+  if (!env.REVIEWS_KV) {
+    return jsonResponse({ error: "Storage isn't set up yet (REVIEWS_KV binding missing)." }, 503, request);
+  }
+  if (!env.ADMIN_KEY) {
+    return jsonResponse({ error: "Admin access isn't set up yet (ADMIN_KEY secret missing)." }, 503, request);
+  }
+  const url = new URL(request.url);
+  const adminKey = url.searchParams.get("adminKey") || "";
+  if (adminKey !== env.ADMIN_KEY) {
+    return jsonResponse({ error: "Incorrect admin password." }, 401, request);
+  }
+  const raw = await env.REVIEWS_KV.get("feedback");
+  const items = raw ? JSON.parse(raw) : [];
+  return jsonResponse({ feedback: items }, 200, request);
+}
+
+async function handleMarkFeedbackHandled(request, env) {
+  if (!env.REVIEWS_KV) {
+    return jsonResponse({ error: "Storage isn't set up yet (REVIEWS_KV binding missing)." }, 503, request);
+  }
+  if (!env.ADMIN_KEY) {
+    return jsonResponse({ error: "Admin access isn't set up yet (ADMIN_KEY secret missing)." }, 503, request);
+  }
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ error: "Invalid JSON" }, 400, request);
+  }
+  const adminKey = (body.adminKey || "").toString();
+  const id = (body.id || "").toString();
+  if (adminKey !== env.ADMIN_KEY) {
+    return jsonResponse({ error: "Incorrect admin password." }, 401, request);
+  }
+  if (!id) return jsonResponse({ error: "Missing id" }, 400, request);
+
+  const raw = await env.REVIEWS_KV.get("feedback");
+  const items = raw ? JSON.parse(raw) : [];
+  const idx = items.findIndex(s => s.id === id);
+  if (idx === -1) return jsonResponse({ error: "Feedback item not found" }, 404, request);
+
+  items[idx].handled = true;
+  await env.REVIEWS_KV.put("feedback", JSON.stringify(items));
+  return jsonResponse({ ok: true }, 200, request);
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -379,6 +491,22 @@ export default {
       if (request.method === "POST") return handlePostSuggestion(request, env);
       if (request.method === "GET") return handleGetSuggestions(request, env);
       if (request.method === "PATCH") return handleMarkSuggestionHandled(request, env);
+      return jsonResponse({ error: "Method not allowed" }, 405, request);
+    }
+
+    if (url.pathname === "/api/feedback") {
+      if (request.method === "OPTIONS") {
+        return new Response(null, {
+          headers: {
+            ...corsHeaders(request),
+            "Access-Control-Allow-Methods": "GET, POST, PATCH, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+          },
+        });
+      }
+      if (request.method === "POST") return handlePostFeedback(request, env);
+      if (request.method === "GET") return handleGetFeedback(request, env);
+      if (request.method === "PATCH") return handleMarkFeedbackHandled(request, env);
       return jsonResponse({ error: "Method not allowed" }, 405, request);
     }
 

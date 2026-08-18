@@ -454,7 +454,11 @@
     cursor:pointer;
   }
   .f-submit:hover{ background:var(--ink-soft); }
+  .f-submit:disabled{ opacity:0.5; cursor:default; }
   .f-note{ font-size:11.5px; color:#8a8578; margin-top:10px; }
+  .form-msg{ font-size:12.5px; margin-top:10px; }
+  .form-msg.error{ color:var(--rust); }
+  .form-msg.ok{ color:var(--olive); }
 
   .events-note{
     background: var(--parchment-dim); border:1px dashed var(--olive); border-radius:4px;
@@ -489,6 +493,7 @@
     .base-suggest-dropdown{ left:0; right:0; min-width:0; }
   }
 </style>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 </head>
 <body>
 
@@ -889,8 +894,10 @@
             <label for="fMessage">Message</label>
             <textarea id="fMessage" placeholder="What should we know?"></textarea>
           </div>
-          <button type="submit" class="f-submit">Send feedback</button>
-          <p class="f-note">This opens your email app with the message pre-filled — nothing is sent automatically.</p>
+          <div id="feedback-turnstile-widget" style="margin-bottom:14px;"></div>
+          <button type="submit" class="f-submit" id="fSubmit" disabled>Send feedback</button>
+          <p class="f-note">Sent directly and privately — no email app required.</p>
+          <div class="form-msg" id="fMsg"></div>
         </form>
       </div>
     </div>
@@ -1357,17 +1364,74 @@ const baseDropdown = document.getElementById("baseDropdown");
 basePicker.addEventListener("click", (e)=>{ baseDropdown.classList.toggle("open"); e.stopPropagation(); });
 document.addEventListener("click", ()=> baseDropdown.classList.remove("open"));
 
-// Feedback form — builds a mailto: link (swap for a real form backend once hosted)
+// Feedback form — submitted directly to the server, Turnstile-protected
+window.onFeedbackTurnstileSuccess = function(){
+  document.getElementById("fSubmit").disabled = false;
+};
+window.feedbackTurnstileWidgetId = null;
+function tryRenderFeedbackTurnstile(){
+  if (window.feedbackTurnstileWidgetId !== null) return;
+  const el = document.getElementById("feedback-turnstile-widget");
+  if (el && typeof turnstile !== "undefined" && turnstile.render) {
+    window.feedbackTurnstileWidgetId = turnstile.render(el, {
+      sitekey: "0x4AAAAAAES5Rg7OaO37hy9p",
+      callback: window.onFeedbackTurnstileSuccess,
+    });
+  } else {
+    setTimeout(tryRenderFeedbackTurnstile, 150);
+  }
+}
+tryRenderFeedbackTurnstile();
+
 const feedbackForm = document.getElementById("feedbackForm");
-feedbackForm.addEventListener("submit", (e)=>{
+feedbackForm.addEventListener("submit", async (e)=>{
   e.preventDefault();
+  const submitBtn = document.getElementById("fSubmit");
+  const msgEl = document.getElementById("fMsg");
   const type = document.getElementById("fType").value;
-  const name = document.getElementById("fName").value || "(not provided)";
-  const email = document.getElementById("fEmail").value || "(not provided)";
-  const message = document.getElementById("fMessage").value;
-  const subject = encodeURIComponent(`[Military Things To Do] ${type}`);
-  const body = encodeURIComponent(`Type: ${type}\nName: ${name}\nEmail: ${email}\n\nMessage:\n${message}`);
-  window.location.href = `mailto:raulramirez134@outlook.com?subject=${subject}&body=${body}`;
+  const name = document.getElementById("fName").value.trim();
+  const email = document.getElementById("fEmail").value.trim();
+  const message = document.getElementById("fMessage").value.trim();
+  const turnstileToken = (typeof turnstile !== "undefined" && window.feedbackTurnstileWidgetId !== null) ? turnstile.getResponse(window.feedbackTurnstileWidgetId) : "";
+
+  if(!message){
+    msgEl.textContent = "Please enter a message.";
+    msgEl.className = "form-msg error";
+    return;
+  }
+  if(!turnstileToken){
+    msgEl.textContent = "Please complete the verification challenge above.";
+    msgEl.className = "form-msg error";
+    return;
+  }
+
+  submitBtn.disabled = true;
+  msgEl.textContent = "Sending…";
+  msgEl.className = "form-msg";
+
+  try {
+    const res = await fetch("/api/feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ base: CURRENT_BASE_KEY, type, name, email, message, turnstileToken }),
+    });
+    const data = await res.json();
+    if(!res.ok){
+      msgEl.textContent = data.error || "Something went wrong — try again.";
+      msgEl.className = "form-msg error";
+      if(typeof turnstile !== "undefined" && window.feedbackTurnstileWidgetId !== null) turnstile.reset(window.feedbackTurnstileWidgetId);
+      submitBtn.disabled = true;
+    } else {
+      msgEl.textContent = "Thanks — your message has been sent.";
+      msgEl.className = "form-msg ok";
+      feedbackForm.reset();
+      if(typeof turnstile !== "undefined" && window.feedbackTurnstileWidgetId !== null) turnstile.reset(window.feedbackTurnstileWidgetId);
+      submitBtn.disabled = true;
+    }
+  } catch (err) {
+    msgEl.textContent = "Couldn't reach the server — check your connection and try again.";
+    msgEl.className = "form-msg error";
+  }
 });
 
 // Interstitial ad — once per session
