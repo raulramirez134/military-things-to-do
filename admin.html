@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow">
+<title>Admin — Suggested Listings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Source+Sans+3:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#182420; --parchment:#EDE7D6; --parchment-dim:#E1DAC4;
+    --olive:#5B6B4F; --brass:#C08A34; --rust:#A8472C; --line: rgba(24,36,32,0.14);
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:var(--parchment); color:var(--ink); font-family:'Source Sans 3', sans-serif; }
+  h1{ font-family:'Big Shoulders Display', sans-serif; font-weight:800; font-size:28px; margin:0 0 6px; }
+  .wrap{ max-width:800px; margin:0 auto; padding:32px 24px 80px; }
+  .mono{ font-family:'JetBrains Mono', monospace; }
+
+  #loginBox{ max-width:360px; margin:60px auto; text-align:center; }
+  #loginBox input{
+    width:100%; font-size:16px; padding:10px 12px; border:1px solid var(--line); border-radius:3px;
+    margin-bottom:10px; box-sizing:border-box;
+  }
+  #loginBox button{
+    font-family:'JetBrains Mono', monospace; font-size:13px; text-transform:uppercase; padding:10px 20px;
+    border:none; border-radius:3px; background:var(--ink); color:var(--parchment); cursor:pointer; width:100%;
+  }
+  #loginError{ color:var(--rust); font-size:13px; margin-top:8px; min-height:18px; }
+
+  #suggestionsList{ display:none; }
+  .count-line{ font-family:'JetBrains Mono', monospace; font-size:13px; color:#6b7268; margin-bottom:20px; }
+  .suggestion-card{
+    background:#fff; border:1px solid var(--line); border-radius:4px; padding:18px 20px; margin-bottom:14px;
+  }
+  .sc-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:8px; }
+  .sc-name{ font-family:'Big Shoulders Display', sans-serif; font-weight:800; font-size:19px; }
+  .sc-base{
+    font-family:'JetBrains Mono', monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:0.04em;
+    padding:3px 9px; border-radius:2px; background: rgba(192,138,52,0.16); color:#8c621f; white-space:nowrap;
+  }
+  .sc-meta{ font-size:12.5px; color:#8a8578; margin-bottom:10px; }
+  .sc-category{ font-family:'JetBrains Mono', monospace; font-size:11px; text-transform:uppercase; color:var(--olive); margin-bottom:8px; }
+  .sc-details{ font-size:14px; line-height:1.55; color:#3b4640; margin-bottom:12px; white-space:pre-wrap; }
+  .sc-submitter{ font-size:12.5px; color:#6b7268; border-top:1px solid var(--line); padding-top:10px; margin-bottom:12px; }
+  .sc-handle-btn{
+    font-family:'JetBrains Mono', monospace; font-size:11.5px; text-transform:uppercase; padding:7px 14px;
+    border:1px solid var(--line); border-radius:3px; background:var(--parchment-dim); cursor:pointer;
+  }
+  .sc-handle-btn:hover{ background: rgba(91,107,79,0.14); }
+  .empty-msg{ color:#8a8578; font-style:italic; }
+</style>
+</head>
+<body>
+
+  <div id="loginBox">
+    <h1>Admin</h1>
+    <p class="mono" style="font-size:12px; color:#6b7268;">Suggested Listings Review</p>
+    <input type="password" id="adminPw" placeholder="Admin password" autofocus />
+    <button id="loginBtn" type="button">View suggestions</button>
+    <div id="loginError"></div>
+  </div>
+
+  <div class="wrap" id="suggestionsList">
+    <h1>Suggested Listings</h1>
+    <div class="count-line" id="countLine"></div>
+    <div id="cardsContainer"></div>
+  </div>
+
+<script>
+let adminKey = "";
+const BASE_LABELS = { ramstein: "Ramstein", fortbragg: "Fort Bragg", camppendleton: "Camp Pendleton", yokota: "Yokota" };
+
+async function loadSuggestions(){
+  const errEl = document.getElementById("loginError");
+  errEl.textContent = "";
+  try {
+    const res = await fetch(`/api/suggestions?adminKey=${encodeURIComponent(adminKey)}`);
+    const data = await res.json();
+    if (!res.ok) {
+      errEl.textContent = data.error || "Something went wrong.";
+      return;
+    }
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("suggestionsList").style.display = "block";
+    renderSuggestions(data.suggestions || []);
+  } catch {
+    errEl.textContent = "Couldn't reach the server — check your connection.";
+  }
+}
+
+function renderSuggestions(suggestions){
+  const pending = suggestions.filter(s => !s.handled);
+  const countLine = document.getElementById("countLine");
+  const container = document.getElementById("cardsContainer");
+  countLine.textContent = `${pending.length} pending suggestion${pending.length === 1 ? "" : "s"}`;
+
+  if (pending.length === 0) {
+    container.innerHTML = `<p class="empty-msg">No pending suggestions right now.</p>`;
+    return;
+  }
+
+  container.innerHTML = pending.map(s => `
+    <div class="suggestion-card" id="card-${s.id}">
+      <div class="sc-top">
+        <div class="sc-name">${escapeHtml(s.name)}</div>
+        <div class="sc-base">${BASE_LABELS[s.base] || s.base}</div>
+      </div>
+      <div class="sc-meta">${new Date(s.date).toLocaleString()}</div>
+      ${s.category ? `<div class="sc-category">${escapeHtml(s.category)}</div>` : ""}
+      ${s.details ? `<div class="sc-details">${escapeHtml(s.details)}</div>` : ""}
+      ${(s.submitterName || s.submitterContact) ? `
+        <div class="sc-submitter">
+          Submitted by: ${escapeHtml(s.submitterName || "Anonymous")}
+          ${s.submitterContact ? ` — ${escapeHtml(s.submitterContact)}` : ""}
+        </div>
+      ` : ""}
+      <button class="sc-handle-btn" onclick="markHandled('${s.id}')">Mark as handled</button>
+    </div>
+  `).join("");
+}
+
+function escapeHtml(str){
+  const div = document.createElement("div");
+  div.textContent = str || "";
+  return div.innerHTML;
+}
+
+window.markHandled = async function(id){
+  try {
+    const res = await fetch("/api/suggestions", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ adminKey, id }),
+    });
+    if (res.ok) {
+      const card = document.getElementById(`card-${id}`);
+      if (card) card.remove();
+      const remaining = document.querySelectorAll(".suggestion-card").length;
+      document.getElementById("countLine").textContent = `${remaining} pending suggestion${remaining === 1 ? "" : "s"}`;
+      if (remaining === 0) {
+        document.getElementById("cardsContainer").innerHTML = `<p class="empty-msg">No pending suggestions right now.</p>`;
+      }
+    }
+  } catch {}
+};
+
+document.getElementById("loginBtn").addEventListener("click", () => {
+  adminKey = document.getElementById("adminPw").value;
+  loadSuggestions();
+});
+document.getElementById("adminPw").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") document.getElementById("loginBtn").click();
+});
+</script>
+</body>
+</html>

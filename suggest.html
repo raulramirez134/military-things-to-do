@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Suggest a Listing — Military Things To Do</title>
+<meta name="description" content="Know a great restaurant, shop, or activity near one of our bases that isn't on the site yet? Suggest it here.">
+<link rel="canonical" href="https://militarythingstodo.com/suggest.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+<style>
+  :root{
+    --ink:#182420; --parchment:#EDE7D6; --parchment-dim:#E1DAC4;
+    --olive:#5B6B4F; --brass:#C08A34; --brass-bright:#D9A24C; --rust:#A8472C; --steel:#3F5C6B;
+    --line: rgba(24,36,32,0.14);
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:var(--parchment); color:var(--ink); font-family:'Source Sans 3', sans-serif; -webkit-font-smoothing:antialiased; }
+  a{ color:var(--olive); }
+
+  header.brief{
+    background: radial-gradient(1200px 500px at 15% -10%, #22352c 0%, var(--ink) 55%), var(--ink);
+    color:var(--parchment); padding: 20px 24px 34px; border-bottom: 6px solid var(--brass);
+  }
+  .topbar{ display:flex; align-items:center; justify-content:space-between; max-width:700px; margin:0 auto 24px;
+    font-family:'JetBrains Mono', monospace; font-size:12px; color: rgba(237,231,214,0.72); flex-wrap:wrap; gap:10px; }
+  .brand{ display:flex; align-items:center; gap:9px; font-family:'Big Shoulders Display', sans-serif; font-weight:800;
+    font-size:15px; letter-spacing:0.02em; color:var(--parchment); text-transform:uppercase; text-decoration:none; }
+  .brand .mark{ width:22px; height:22px; border-radius:4px; background:var(--brass); display:inline-flex;
+    align-items:center; justify-content:center; color:var(--ink); font-size:12px; font-weight:800; }
+  .back-link{ color: rgba(237,231,214,0.8); text-decoration:none; font-size:12px; }
+  .header-inner{ max-width:700px; margin:0 auto; }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:0.14em; color: var(--brass-bright);
+    text-transform:uppercase; margin-bottom:14px; display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{ content:""; width:22px; height:1px; background:var(--brass-bright); display:inline-block; }
+  h1.title{ font-family:'Big Shoulders Display', sans-serif; font-weight:800; font-size: clamp(28px, 5vw, 40px); line-height:1.05; margin:0 0 14px; }
+  .brief-sub{ font-size:15px; line-height:1.5; color: rgba(237,231,214,0.85); max-width:560px; }
+
+  main{ max-width:700px; margin:0 auto; padding: 34px 24px 80px; }
+
+  .f-row{ margin-bottom:16px; display:flex; flex-direction:column; gap:6px; }
+  .f-row label{ font-family:'JetBrains Mono', monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.04em; color:#6b7268; }
+  .f-row .hint{ font-size:12px; color:#8a8578; font-weight:400; text-transform:none; letter-spacing:normal; }
+  .f-row input, .f-row select, .f-row textarea{
+    font-family:'Source Sans 3', sans-serif; font-size:16px; padding:10px 12px;
+    border:1px solid var(--line); border-radius:3px; background:#fff; color:var(--ink);
+  }
+  .f-row textarea{ min-height:110px; resize:vertical; }
+  .f-submit{
+    font-family:'JetBrains Mono', monospace; font-size:13px; letter-spacing:0.03em; text-transform:uppercase;
+    padding:12px 20px; border-radius:3px; border:none; background:var(--ink); color:var(--parchment); cursor:pointer;
+  }
+  .f-submit:hover{ background:#223129; }
+  .f-submit:disabled{ opacity:0.5; cursor:default; }
+  .form-msg{ font-size:12.5px; margin-top:10px; }
+  .form-msg.error{ color:var(--rust); }
+  .form-msg.ok{ color:var(--olive); }
+
+  .info-box{
+    background:#fff; border:1px solid var(--line); border-radius:4px; padding:16px 18px;
+    font-size:13.5px; line-height:1.55; color:#3b4640; margin-bottom:28px;
+  }
+
+  footer{ background:var(--ink); color: rgba(237,231,214,0.55); padding: 26px 24px; font-size:12px; line-height:1.7; }
+  footer .footer-inner{ max-width:700px; margin:0 auto; }
+</style>
+</head>
+<body>
+
+  <header class="brief">
+    <div class="topbar">
+      <a class="brand" href="index.html"><span class="mark">M</span> Military Things To Do</a>
+      <a class="back-link" href="search.html">← Back to search</a>
+    </div>
+    <div class="header-inner">
+      <div class="eyebrow">Community Contribution</div>
+      <h1 class="title">Know a spot we're missing?</h1>
+      <p class="brief-sub">
+        Suggest a restaurant, shop, or activity near one of our bases and we'll take a look —
+        every submission gets reviewed by a real person before anything goes live.
+      </p>
+    </div>
+  </header>
+
+  <main>
+    <div class="info-box">
+      This isn't automated — a person reads every suggestion and does their own research before
+      adding anything to the site. That means it won't show up instantly, but it also means
+      what's on the site stays accurate and trustworthy.
+    </div>
+
+    <form id="suggestForm">
+      <div class="f-row">
+        <label for="sBase">Which base is this near?</label>
+        <select id="sBase" required>
+          <option value="" disabled selected>Select a base</option>
+          <option value="ramstein">Ramstein Air Base, Germany</option>
+          <option value="fortbragg">Fort Bragg, NC</option>
+          <option value="camppendleton">Camp Pendleton, CA</option>
+          <option value="yokota">Yokota Air Base, Japan</option>
+        </select>
+      </div>
+      <div class="f-row">
+        <label for="sName">Business / place name</label>
+        <input type="text" id="sName" placeholder="e.g. The Blue Door Cafe" required />
+      </div>
+      <div class="f-row">
+        <label for="sCategory">What kind of place is it? <span class="hint">— optional, your best guess is fine</span></label>
+        <input type="text" id="sCategory" placeholder="e.g. restaurant, hiking trail, auto repair" />
+      </div>
+      <div class="f-row">
+        <label for="sDetails">Why should it be added? <span class="hint">— address, what makes it worth visiting, anything helpful</span></label>
+        <textarea id="sDetails" placeholder="Tell us a bit about the place — where it is, what's good about it, anything else worth knowing."></textarea>
+      </div>
+      <div class="f-row">
+        <label for="sSubmitterName">Your name <span class="hint">— optional</span></label>
+        <input type="text" id="sSubmitterName" placeholder="Your name" />
+      </div>
+      <div class="f-row">
+        <label for="sSubmitterContact">Email <span class="hint">— optional, only if you'd like a reply</span></label>
+        <input type="text" id="sSubmitterContact" placeholder="you@example.com" />
+      </div>
+      <div id="turnstile-widget" style="margin-bottom:16px;"></div>
+      <button type="submit" class="f-submit" id="sSubmit" disabled>Submit suggestion</button>
+      <div class="form-msg" id="sMsg"></div>
+    </form>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <p><b>Military Things To Do</b> is an independent community resource. Not an official U.S. Department of Defense publication.</p>
+    </div>
+  </footer>
+
+<script>
+window.onTurnstileSuccess = function(){
+  document.getElementById("sSubmit").disabled = false;
+};
+window.turnstileWidgetId = null;
+function tryRenderTurnstile(){
+  if (window.turnstileWidgetId !== null) return;
+  const el = document.getElementById("turnstile-widget");
+  if (el && typeof turnstile !== "undefined" && turnstile.render) {
+    window.turnstileWidgetId = turnstile.render(el, {
+      sitekey: "0x4AAAAAAES5Rg7OaO37hy9p",
+      callback: window.onTurnstileSuccess,
+    });
+  } else {
+    setTimeout(tryRenderTurnstile, 150);
+  }
+}
+tryRenderTurnstile();
+
+document.getElementById("suggestForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const submitBtn = document.getElementById("sSubmit");
+  const msgEl = document.getElementById("sMsg");
+  const base = document.getElementById("sBase").value;
+  const name = document.getElementById("sName").value.trim();
+  const category = document.getElementById("sCategory").value.trim();
+  const details = document.getElementById("sDetails").value.trim();
+  const submitterName = document.getElementById("sSubmitterName").value.trim();
+  const submitterContact = document.getElementById("sSubmitterContact").value.trim();
+  const turnstileToken = (typeof turnstile !== "undefined" && window.turnstileWidgetId !== null) ? turnstile.getResponse(window.turnstileWidgetId) : "";
+
+  if (!base || !name) {
+    msgEl.textContent = "Please select a base and enter a name.";
+    msgEl.className = "form-msg error";
+    return;
+  }
+  if (!turnstileToken) {
+    msgEl.textContent = "Please complete the verification challenge above.";
+    msgEl.className = "form-msg error";
+    return;
+  }
+
+  submitBtn.disabled = true;
+  msgEl.textContent = "Submitting…";
+  msgEl.className = "form-msg";
+
+  try {
+    const res = await fetch("/api/suggestions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ base, name, category, details, submitterName, submitterContact, turnstileToken }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      msgEl.textContent = data.error || "Something went wrong — try again.";
+      msgEl.className = "form-msg error";
+      if (typeof turnstile !== "undefined" && window.turnstileWidgetId !== null) turnstile.reset(window.turnstileWidgetId);
+      submitBtn.disabled = true;
+    } else {
+      msgEl.textContent = "Thanks! Your suggestion has been submitted for review.";
+      msgEl.className = "form-msg ok";
+      document.getElementById("suggestForm").reset();
+      if (typeof turnstile !== "undefined" && window.turnstileWidgetId !== null) turnstile.reset(window.turnstileWidgetId);
+      submitBtn.disabled = true;
+    }
+  } catch {
+    msgEl.textContent = "Couldn't reach the server — check your connection and try again.";
+    msgEl.className = "form-msg error";
+  }
+});
+</script>
+</body>
+</html>

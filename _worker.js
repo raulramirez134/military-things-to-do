@@ -231,6 +231,115 @@ async function handleDeleteReview(request, env) {
   return jsonResponse({ ok: true, reviews }, 200, request);
 }
 
+const MAX_SUGGESTIONS_STORED = 500;
+const MAX_SUGGESTION_FIELD_LENGTH = 500;
+const VALID_BASE_KEYS = ["ramstein", "fortbragg", "camppendleton", "yokota"];
+
+async function handlePostSuggestion(request, env) {
+  if (!env.REVIEWS_KV) {
+    return jsonResponse({ error: "Storage isn't set up yet (REVIEWS_KV binding missing)." }, 503, request);
+  }
+
+  const ip = request.headers.get("CF-Connecting-IP");
+  const rateLimitKey = ip ? `ratelimit-suggest:${ip}` : null;
+  if (rateLimitKey) {
+    const raw = await env.REVIEWS_KV.get(rateLimitKey);
+    const count = raw ? parseInt(raw, 10) || 0 : 0;
+    if (count >= RATE_LIMIT_MAX_PER_HOUR) {
+      return jsonResponse({ error: "Too many suggestions submitted recently — please try again later." }, 429, request);
+    }
+    await env.REVIEWS_KV.put(rateLimitKey, String(count + 1), { expirationTtl: 3600 });
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ error: "Invalid JSON" }, 400, request);
+  }
+
+  const turnstileResult = await verifyTurnstile(body.turnstileToken, ip, env);
+  if (!turnstileResult.ok) {
+    return jsonResponse({ error: "Verification failed — please try again." }, 400, request);
+  }
+
+  const base = (body.base || "").toString();
+  const name = (body.name || "").toString().slice(0, MAX_SUGGESTION_FIELD_LENGTH);
+  const category = (body.category || "").toString().slice(0, MAX_SUGGESTION_FIELD_LENGTH);
+  const details = (body.details || "").toString().slice(0, MAX_TEXT_LENGTH);
+  const submitterName = (body.submitterName || "").toString().slice(0, MAX_NAME_LENGTH);
+  const submitterContact = (body.submitterContact || "").toString().slice(0, MAX_SUGGESTION_FIELD_LENGTH);
+
+  if (!VALID_BASE_KEYS.includes(base)) return jsonResponse({ error: "Please select a valid base." }, 400, request);
+  if (!name.trim()) return jsonResponse({ error: "Business/place name is required." }, 400, request);
+
+  if (containsBlockedWords(name) || containsBlockedWords(details) || containsBlockedWords(submitterName)) {
+    return jsonResponse({ error: "Your submission couldn't be posted because it contains language that isn't allowed here." }, 400, request);
+  }
+
+  const key = "suggestions";
+  const raw = await env.REVIEWS_KV.get(key);
+  const suggestions = raw ? JSON.parse(raw) : [];
+
+  suggestions.unshift({
+    id: crypto.randomUUID(),
+    base, name, category, details, submitterName, submitterContact,
+    date: new Date().toISOString(),
+    handled: false,
+  });
+  const trimmed = suggestions.slice(0, MAX_SUGGESTIONS_STORED);
+
+  await env.REVIEWS_KV.put(key, JSON.stringify(trimmed));
+  return jsonResponse({ ok: true }, 200, request);
+}
+
+async function handleGetSuggestions(request, env) {
+  if (!env.REVIEWS_KV) {
+    return jsonResponse({ error: "Storage isn't set up yet (REVIEWS_KV binding missing)." }, 503, request);
+  }
+  if (!env.ADMIN_KEY) {
+    return jsonResponse({ error: "Admin access isn't set up yet (ADMIN_KEY secret missing)." }, 503, request);
+  }
+  const url = new URL(request.url);
+  const adminKey = url.searchParams.get("adminKey") || "";
+  if (adminKey !== env.ADMIN_KEY) {
+    return jsonResponse({ error: "Incorrect admin password." }, 401, request);
+  }
+  const raw = await env.REVIEWS_KV.get("suggestions");
+  const suggestions = raw ? JSON.parse(raw) : [];
+  return jsonResponse({ suggestions }, 200, request);
+}
+
+async function handleMarkSuggestionHandled(request, env) {
+  if (!env.REVIEWS_KV) {
+    return jsonResponse({ error: "Storage isn't set up yet (REVIEWS_KV binding missing)." }, 503, request);
+  }
+  if (!env.ADMIN_KEY) {
+    return jsonResponse({ error: "Admin access isn't set up yet (ADMIN_KEY secret missing)." }, 503, request);
+  }
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ error: "Invalid JSON" }, 400, request);
+  }
+  const adminKey = (body.adminKey || "").toString();
+  const id = (body.id || "").toString();
+  if (adminKey !== env.ADMIN_KEY) {
+    return jsonResponse({ error: "Incorrect admin password." }, 401, request);
+  }
+  if (!id) return jsonResponse({ error: "Missing id" }, 400, request);
+
+  const raw = await env.REVIEWS_KV.get("suggestions");
+  const suggestions = raw ? JSON.parse(raw) : [];
+  const idx = suggestions.findIndex(s => s.id === id);
+  if (idx === -1) return jsonResponse({ error: "Suggestion not found" }, 404, request);
+
+  suggestions[idx].handled = true;
+  await env.REVIEWS_KV.put("suggestions", JSON.stringify(suggestions));
+  return jsonResponse({ ok: true }, 200, request);
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -255,6 +364,22 @@ export default {
       const photoKey = decodeURIComponent(url.pathname.slice("/api/photo/".length));
       if (request.method === "GET") return handlePhoto(request, env, photoKey);
       return new Response("Method not allowed", { status: 405 });
+    }
+
+    if (url.pathname === "/api/suggestions") {
+      if (request.method === "OPTIONS") {
+        return new Response(null, {
+          headers: {
+            ...corsHeaders(request),
+            "Access-Control-Allow-Methods": "GET, POST, PATCH, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+          },
+        });
+      }
+      if (request.method === "POST") return handlePostSuggestion(request, env);
+      if (request.method === "GET") return handleGetSuggestions(request, env);
+      if (request.method === "PATCH") return handleMarkSuggestionHandled(request, env);
+      return jsonResponse({ error: "Method not allowed" }, 405, request);
     }
 
     return env.ASSETS.fetch(request);
