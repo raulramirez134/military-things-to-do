@@ -1,5 +1,7 @@
 // Cloudflare Worker — serves the static site and handles the reviews API.
 // Requires a KV binding named REVIEWS_KV (Settings → Bindings → Add binding → KV).
+// Requires an R2 binding named PHOTOS_BUCKET (Settings → Bindings → Add binding → R2)
+// for review photo uploads.
 // Requires a secret variable named ADMIN_KEY (Settings → Variables and Secrets →
 // Add variable → type: Secret) — this is your personal password for removing reviews.
 // Requires a secret variable named TURNSTILE_SECRET_KEY (same place, type: Secret) —
@@ -11,6 +13,8 @@ const MAX_TEXT_LENGTH = 1000;
 const MAX_NAME_LENGTH = 60;
 const ALLOWED_ORIGIN = "https://militarythingstodo.com";
 const RATE_LIMIT_MAX_PER_HOUR = 5;
+const MAX_PHOTO_BYTES = 8 * 1024 * 1024; // 8MB — the client compresses before upload, this is a server-side safety net
+const ALLOWED_PHOTO_TYPES = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
 
 // Basic automatic filter — blocks the most obvious profanity/slurs outright.
 // This is a first line of defense, not a complete solution; you can still
@@ -108,22 +112,22 @@ async function handlePostReview(request, env) {
     return jsonResponse({ error: "Too many reviews submitted recently — please try again later." }, 429, request);
   }
 
-  let body;
+  let formData;
   try {
-    body = await request.json();
+    formData = await request.formData();
   } catch {
-    return jsonResponse({ error: "Invalid JSON" }, 400, request);
+    return jsonResponse({ error: "Invalid form submission" }, 400, request);
   }
 
-  const turnstileResult = await verifyTurnstile(body.turnstileToken, ip, env);
+  const turnstileResult = await verifyTurnstile(formData.get("turnstileToken"), ip, env);
   if (!turnstileResult.ok) {
     return jsonResponse({ error: "Verification failed — please try again." }, 400, request);
   }
 
-  const id = (body.id || "").toString().slice(0, 200);
-  const name = (body.name || "Anonymous").toString().slice(0, MAX_NAME_LENGTH);
-  const text = (body.text || "").toString().slice(0, MAX_TEXT_LENGTH);
-  let rating = Number(body.rating);
+  const id = (formData.get("id") || "").toString().slice(0, 200);
+  const name = (formData.get("name") || "Anonymous").toString().slice(0, MAX_NAME_LENGTH);
+  const text = (formData.get("text") || "").toString().slice(0, MAX_TEXT_LENGTH);
+  let rating = Number(formData.get("rating"));
 
   if (!id) return jsonResponse({ error: "Missing id" }, 400, request);
   if (!text.trim()) return jsonResponse({ error: "Review text is required" }, 400, request);
@@ -136,15 +140,50 @@ async function handlePostReview(request, env) {
     return jsonResponse({ error: "Your review couldn't be posted because it contains language that isn't allowed here." }, 400, request);
   }
 
+  // Optional photo upload
+  let photoKey = null;
+  const photo = formData.get("photo");
+  if (photo && typeof photo === "object" && photo.size > 0) {
+    if (!env.PHOTOS_BUCKET) {
+      return jsonResponse({ error: "Photo uploads aren't set up yet (PHOTOS_BUCKET binding missing)." }, 503, request);
+    }
+    if (photo.size > MAX_PHOTO_BYTES) {
+      return jsonResponse({ error: "Photo is too large — please use a smaller image." }, 400, request);
+    }
+    const ext = ALLOWED_PHOTO_TYPES[photo.type];
+    if (!ext) {
+      return jsonResponse({ error: "Photo must be a JPEG, PNG, or WebP image." }, 400, request);
+    }
+    photoKey = `photos/${id}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
+    await env.PHOTOS_BUCKET.put(photoKey, photo.stream(), {
+      httpMetadata: { contentType: photo.type },
+    });
+  }
+
   const key = `reviews:${id}`;
   const raw = await env.REVIEWS_KV.get(key);
   const reviews = raw ? JSON.parse(raw) : [];
 
-  reviews.unshift({ name, rating, text, date: new Date().toISOString(), removed: false });
+  reviews.unshift({ name, rating, text, date: new Date().toISOString(), removed: false, photoKey });
   const trimmed = reviews.slice(0, MAX_REVIEWS_PER_LISTING);
 
   await env.REVIEWS_KV.put(key, JSON.stringify(trimmed));
   return jsonResponse({ ok: true, reviews: trimmed }, 200, request);
+}
+
+async function handlePhoto(request, env, photoKey) {
+  if (!env.PHOTOS_BUCKET) {
+    return new Response("Photo storage not configured", { status: 503 });
+  }
+  const object = await env.PHOTOS_BUCKET.get(photoKey);
+  if (!object) {
+    return new Response("Not found", { status: 404 });
+  }
+  const headers = new Headers();
+  object.writeHttpMetadata(headers);
+  headers.set("Cache-Control", "public, max-age=31536000, immutable");
+  headers.set("ETag", object.httpEtag);
+  return new Response(object.body, { headers });
 }
 
 async function handleDeleteReview(request, env) {
@@ -178,6 +217,11 @@ async function handleDeleteReview(request, env) {
   const idx = reviews.findIndex(r => r.date === date);
   if (idx === -1) return jsonResponse({ error: "Review not found" }, 404, request);
 
+  // Clean up the associated photo in R2, if any, so removed content is fully gone.
+  if (reviews[idx].photoKey && env.PHOTOS_BUCKET) {
+    await env.PHOTOS_BUCKET.delete(reviews[idx].photoKey).catch(() => {});
+  }
+
   reviews[idx] = {
     date: reviews[idx].date,
     removed: true,
@@ -205,6 +249,12 @@ export default {
       if (request.method === "POST") return handlePostReview(request, env);
       if (request.method === "DELETE") return handleDeleteReview(request, env);
       return jsonResponse({ error: "Method not allowed" }, 405, request);
+    }
+
+    if (url.pathname.startsWith("/api/photo/")) {
+      const photoKey = decodeURIComponent(url.pathname.slice("/api/photo/".length));
+      if (request.method === "GET") return handlePhoto(request, env, photoKey);
+      return new Response("Method not allowed", { status: 405 });
     }
 
     return env.ASSETS.fetch(request);

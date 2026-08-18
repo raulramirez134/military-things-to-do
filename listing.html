@@ -139,6 +139,15 @@
   .review-stars{ color:var(--brass); letter-spacing:1px; }
   .review-date{ font-family:'JetBrains Mono', monospace; font-size:10.5px; color:#8a8578; }
   .review-text{ font-size:14px; line-height:1.55; color:#3b4640; }
+  .review-photo{
+    display:block; max-width:220px; max-height:220px; border-radius:4px; margin:10px 0;
+    cursor:zoom-in; border:1px solid var(--line); object-fit:cover;
+  }
+  .lightbox-overlay{
+    position:fixed; inset:0; z-index:200; background:rgba(24,36,32,0.85);
+    display:flex; align-items:center; justify-content:center; padding:24px; cursor:zoom-out;
+  }
+  .lightbox-overlay img{ max-width:100%; max-height:100%; border-radius:4px; }
   .no-reviews{ font-size:13.5px; color:#8a8578; font-style:italic; margin-bottom:20px; }
   .admin-remove-btn{
     border:none; background:none; color:#c9c3af; font-size:10.5px; cursor:pointer; padding:6px 0 0;
@@ -552,6 +561,14 @@ function initPage(){
           <label for="rText">Your review</label>
           <textarea id="rText" placeholder="What should other families know?" required></textarea>
         </div>
+        <div class="f-row">
+          <label for="rPhoto">Add a photo (optional)</label>
+          <input type="file" id="rPhoto" accept="image/jpeg,image/png,image/webp" />
+          <div id="rPhotoPreview" style="display:none; margin-top:8px;">
+            <img id="rPhotoPreviewImg" style="max-width:160px; max-height:160px; border-radius:4px; border:1px solid var(--line);" />
+            <button type="button" id="rPhotoRemove" class="action-btn" style="margin-top:6px; padding:4px 10px; font-size:11px;">Remove photo</button>
+          </div>
+        </div>
         <div id="turnstile-widget" style="margin-bottom:14px;"></div>
         <button type="submit" class="f-submit" id="rSubmit" disabled>Post review</button>
         <div class="form-msg" id="rMsg"></div>
@@ -696,6 +713,7 @@ function initPage(){
           </div>
           <div class="review-stars">${starGlyphs(r.rating)}</div>
           <p class="review-text">${escapeHtml(r.text)}</p>
+          ${r.photoKey ? `<img class="review-photo" src="/api/photo/${encodeURIComponent(r.photoKey)}" alt="Photo from ${escapeHtml(r.name || "Anonymous")}'s review" loading="lazy" onclick="openLightbox(this.src)" />` : ""}
           <button class="admin-remove-btn" data-date="${r.date}" onclick="showRemoveRow(${i})">Remove (admin)</button>
           <div class="admin-remove-row" id="removeRow${i}" style="display:none;">
             <input type="password" class="admin-pw-input" id="pw${i}" placeholder="Admin password">
@@ -710,6 +728,17 @@ function initPage(){
       listEl.innerHTML = `<p class="no-reviews">Couldn't load reviews right now — try again in a moment.</p>`;
     }
   }
+
+  window.openLightbox = function(src){
+    const overlay = document.createElement("div");
+    overlay.className = "lightbox-overlay";
+    overlay.innerHTML = `<img src="${src}" alt="Enlarged review photo" />`;
+    overlay.addEventListener("click", () => overlay.remove());
+    document.addEventListener("keydown", function esc(e){
+      if(e.key === "Escape"){ overlay.remove(); document.removeEventListener("keydown", esc); }
+    });
+    document.body.appendChild(overlay);
+  };
 
   function escapeHtml(str){
     const div = document.createElement("div");
@@ -781,6 +810,59 @@ function initPage(){
   }
   tryRenderTurnstile();
 
+  // Photo selection + preview
+  let selectedPhotoBlob = null;
+  const rPhotoInput = document.getElementById("rPhoto");
+  const rPhotoPreview = document.getElementById("rPhotoPreview");
+  const rPhotoPreviewImg = document.getElementById("rPhotoPreviewImg");
+  const rPhotoRemove = document.getElementById("rPhotoRemove");
+
+  async function compressPhoto(file){
+    const MAX_DIMENSION = 1200;
+    const QUALITY = 0.8;
+    const objectUrl = URL.createObjectURL(file);
+    const img = await new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.onerror = reject;
+      image.src = objectUrl;
+    });
+    let { width, height } = img;
+    if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+      if (width > height) { height = Math.round(height * (MAX_DIMENSION / width)); width = MAX_DIMENSION; }
+      else { width = Math.round(width * (MAX_DIMENSION / height)); height = MAX_DIMENSION; }
+    }
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+    URL.revokeObjectURL(objectUrl);
+    return new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", QUALITY));
+  }
+
+  if (rPhotoInput) {
+    rPhotoInput.addEventListener("change", async () => {
+      const file = rPhotoInput.files[0];
+      if (!file) return;
+      try {
+        selectedPhotoBlob = await compressPhoto(file);
+        rPhotoPreviewImg.src = URL.createObjectURL(selectedPhotoBlob);
+        rPhotoPreview.style.display = "block";
+      } catch {
+        selectedPhotoBlob = null;
+        document.getElementById("rMsg").textContent = "Couldn't process that photo — try a different one.";
+        document.getElementById("rMsg").className = "form-msg error";
+      }
+    });
+  }
+  if (rPhotoRemove) {
+    rPhotoRemove.addEventListener("click", () => {
+      selectedPhotoBlob = null;
+      rPhotoInput.value = "";
+      rPhotoPreview.style.display = "none";
+    });
+  }
+
   document.getElementById("reviewForm").addEventListener("submit", async (e)=>{
     e.preventDefault();
     const submitBtn = document.getElementById("rSubmit");
@@ -806,11 +888,15 @@ function initPage(){
     msgEl.className = "form-msg";
 
     try {
-      const res = await fetch("/api/reviews", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: fullId, name, rating, text, turnstileToken })
-      });
+      const formData = new FormData();
+      formData.append("id", fullId);
+      formData.append("name", name);
+      formData.append("rating", rating);
+      formData.append("text", text);
+      formData.append("turnstileToken", turnstileToken);
+      if (selectedPhotoBlob) formData.append("photo", selectedPhotoBlob, "review-photo.jpg");
+
+      const res = await fetch("/api/reviews", { method: "POST", body: formData });
       const data = await res.json();
       if(!res.ok){
         msgEl.textContent = data.error || "Something went wrong — try again.";
@@ -821,6 +907,8 @@ function initPage(){
         msgEl.textContent = "Review posted — thank you!";
         msgEl.className = "form-msg ok";
         document.getElementById("reviewForm").reset();
+        selectedPhotoBlob = null;
+        rPhotoPreview.style.display = "none";
         if(typeof turnstile !== "undefined" && window.turnstileWidgetId !== null) turnstile.reset(window.turnstileWidgetId);
         submitBtn.disabled = true;
         loadReviews();
