@@ -382,9 +382,11 @@ async function handlePostFeedback(request, env) {
   const name = (body.name || "").toString().slice(0, MAX_NAME_LENGTH);
   const email = (body.email || "").toString().slice(0, MAX_SUGGESTION_FIELD_LENGTH);
   const message = (body.message || "").toString().slice(0, MAX_TEXT_LENGTH);
+  const listingName = (body.listingName || "").toString().slice(0, MAX_SUGGESTION_FIELD_LENGTH);
+  const listingId = (body.listingId || "").toString().slice(0, 200);
 
   if (!message.trim()) return jsonResponse({ error: "Please enter a message." }, 400, request);
-  if (containsBlockedWords(message) || containsBlockedWords(name)) {
+  if (containsBlockedWords(message) || containsBlockedWords(name) || containsBlockedWords(listingName)) {
     return jsonResponse({ error: "Your message couldn't be sent because it contains language that isn't allowed here." }, 400, request);
   }
 
@@ -395,6 +397,8 @@ async function handlePostFeedback(request, env) {
   items.unshift({
     id: crypto.randomUUID(),
     base: VALID_BASE_KEYS.includes(base) ? base : null,
+    listingName: listingName || null,
+    listingId: listingId || null,
     type, name, email, message,
     date: new Date().toISOString(),
     handled: false,

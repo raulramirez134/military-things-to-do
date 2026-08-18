@@ -44,6 +44,8 @@
   .sc-meta{ font-size:12.5px; color:#8a8578; margin-bottom:10px; }
   .sc-category{ font-family:'JetBrains Mono', monospace; font-size:11px; text-transform:uppercase; color:var(--olive); margin-bottom:8px; }
   .sc-details{ font-size:14px; line-height:1.55; color:#3b4640; margin-bottom:12px; white-space:pre-wrap; }
+  .sc-listing{ font-size:13px; color:#3b4640; margin-bottom:10px; background:var(--parchment-dim); padding:8px 10px; border-radius:3px; }
+  .sc-listing a{ color:var(--olive); }
   .sc-submitter{ font-size:12.5px; color:#6b7268; border-top:1px solid var(--line); padding-top:10px; margin-bottom:12px; }
   .sc-handle-btn{
     font-family:'JetBrains Mono', monospace; font-size:11.5px; text-transform:uppercase; padding:7px 14px;
@@ -173,6 +175,12 @@ function renderFeedback(items){
         ${f.base ? `<div class="sc-base">${BASE_LABELS[f.base] || f.base}</div>` : ""}
       </div>
       <div class="sc-meta">${new Date(f.date).toLocaleString()}</div>
+      ${f.listingName ? `
+        <div class="sc-listing">
+          Regarding: <b>${escapeHtml(f.listingName)}</b>
+          ${(f.listingId && f.base) ? ` — <a href="https://militarythingstodo.com/listing.html?base=${encodeURIComponent(f.base)}&id=${encodeURIComponent(f.listingId)}" target="_blank" rel="noopener">View live listing →</a>` : ""}
+        </div>
+      ` : ""}
       <div class="sc-details">${escapeHtml(f.message)}</div>
       ${(f.name || f.email) ? `
         <div class="sc-submitter">

@@ -443,6 +443,7 @@
   .feedback-wrap p.lead{ font-size:14px; color:#3b4640; margin:0 0 18px; line-height:1.55; }
   .f-row{ margin-bottom:14px; display:flex; flex-direction:column; gap:6px; }
   .f-row label{ font-family:'JetBrains Mono', monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.04em; color:#6b7268; }
+  .f-row label .hint{ font-size:11px; color:#8a8578; font-weight:400; text-transform:none; letter-spacing:normal; }
   .f-row input, .f-row select, .f-row textarea{
     font-family:'Source Sans 3', sans-serif; font-size:14px; padding:10px 12px;
     border:1px solid var(--line); border-radius:3px; background:var(--parchment); color:var(--ink);
@@ -883,6 +884,14 @@
             </select>
           </div>
           <div class="f-row">
+            <label for="fListing">Which listing? <span class="hint">— optional, start typing a name</span></label>
+            <div style="position:relative;">
+              <input type="text" id="fListing" placeholder="e.g. Romano's Macaroni Grill" autocomplete="off">
+              <div id="feedbackListingDropdown" class="base-suggest-dropdown" style="display:none;"></div>
+            </div>
+            <input type="hidden" id="fListingId" value="">
+          </div>
+          <div class="f-row">
             <label for="fName">Name (optional)</label>
             <input type="text" id="fName" placeholder="Your name">
           </div>
@@ -989,11 +998,15 @@ function toggleFavorite(id, name, btn){
 }
 
 // ---- Claim / report a listing ----
-function claimListing(name){
+function claimListing(name, id){
   const typeSelect = document.getElementById("fType");
   const messageBox = document.getElementById("fMessage");
+  const listingBox = document.getElementById("fListing");
+  const listingIdBox = document.getElementById("fListingId");
   typeSelect.value = "Claim this listing";
   messageBox.value = `I'd like to claim or update the listing for: ${name}\n\n`;
+  if (listingBox) listingBox.value = name;
+  if (listingIdBox) listingIdBox.value = id || "";
   messageBox.focus();
 }
 
@@ -1175,7 +1188,7 @@ function cardHTML(p){
         ${callHref
           ? `<a class="action-btn" href="${callHref}">${callIcon} ${p.phone}</a>`
           : `<span class="action-btn disabled">${callIcon} No phone listed</span>`}
-        <a class="action-btn" href="#feedback-section" onclick="claimListing('${p.name.replace(/'/g,"\\'")}')">${claimIcon} Claim / report</a>
+        <a class="action-btn" href="#feedback-section" onclick="claimListing('${p.name.replace(/'/g,"\\'")}', '${p.id}')">${claimIcon} Claim / report</a>
       </div>
     </div>
   `;
@@ -1383,6 +1396,64 @@ function tryRenderFeedbackTurnstile(){
 }
 tryRenderFeedbackTurnstile();
 
+// "Which listing?" autocomplete on the feedback form
+function updateFeedbackListingSuggestions(){
+  const input = document.getElementById("fListing");
+  const dropdown = document.getElementById("feedbackListingDropdown");
+  const idBox = document.getElementById("fListingId");
+  const query = input.value.trim().toLowerCase();
+
+  idBox.value = ""; // typing without picking a suggestion clears the linked id
+
+  if(query.length < 2){
+    dropdown.style.display = "none";
+    dropdown.innerHTML = "";
+    return;
+  }
+  const suggestions = [];
+  const seen = new Set();
+  for(const p of places){
+    const lname = p.name.toLowerCase();
+    const firstWord = lname.split(/\s+/)[0];
+    if(seen.has(lname)) continue;
+    if(lname.startsWith(query) || fuzzyWordMatch(firstWord, query)){
+      suggestions.push(p);
+      seen.add(lname);
+    }
+    if(suggestions.length >= 6) break;
+  }
+  if(suggestions.length === 0){
+    dropdown.style.display = "none";
+    dropdown.innerHTML = "";
+    return;
+  }
+  dropdown.innerHTML = suggestions.map(p => `
+    <div class="base-suggest-item" data-value="${p.name.replace(/"/g,'&quot;')}" data-id="${p.id}">
+      <span class="bsi-icon">${icons[p.cat] || icons.attraction}</span>
+      <span>${p.name}</span>
+    </div>
+  `).join("");
+  dropdown.style.display = "block";
+  dropdown.querySelectorAll(".base-suggest-item").forEach(item => {
+    item.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+      input.value = item.dataset.value;
+      idBox.value = item.dataset.id;
+      dropdown.style.display = "none";
+    });
+  });
+}
+const fListingEl = document.getElementById("fListing");
+if(fListingEl){
+  fListingEl.addEventListener("input", updateFeedbackListingSuggestions);
+  fListingEl.addEventListener("focus", () => { if(fListingEl.value.trim().length >= 2) updateFeedbackListingSuggestions(); });
+  document.addEventListener("click", (e) => {
+    if(!e.target.closest("#feedbackListingDropdown") && e.target !== fListingEl){
+      document.getElementById("feedbackListingDropdown").style.display = "none";
+    }
+  });
+}
+
 const feedbackForm = document.getElementById("feedbackForm");
 feedbackForm.addEventListener("submit", async (e)=>{
   e.preventDefault();
@@ -1392,6 +1463,8 @@ feedbackForm.addEventListener("submit", async (e)=>{
   const name = document.getElementById("fName").value.trim();
   const email = document.getElementById("fEmail").value.trim();
   const message = document.getElementById("fMessage").value.trim();
+  const listingName = document.getElementById("fListing").value.trim();
+  const listingId = document.getElementById("fListingId").value.trim();
   const turnstileToken = (typeof turnstile !== "undefined" && window.feedbackTurnstileWidgetId !== null) ? turnstile.getResponse(window.feedbackTurnstileWidgetId) : "";
 
   if(!message){
@@ -1413,7 +1486,7 @@ feedbackForm.addEventListener("submit", async (e)=>{
     const res = await fetch("/api/feedback", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ base: CURRENT_BASE_KEY, type, name, email, message, turnstileToken }),
+      body: JSON.stringify({ base: CURRENT_BASE_KEY, type, name, email, message, listingName, listingId, turnstileToken }),
     });
     const data = await res.json();
     if(!res.ok){
@@ -1425,6 +1498,7 @@ feedbackForm.addEventListener("submit", async (e)=>{
       msgEl.textContent = "Thanks — your message has been sent.";
       msgEl.className = "form-msg ok";
       feedbackForm.reset();
+      document.getElementById("fListingId").value = "";
       if(typeof turnstile !== "undefined" && window.feedbackTurnstileWidgetId !== null) turnstile.reset(window.feedbackTurnstileWidgetId);
       submitBtn.disabled = true;
     }
