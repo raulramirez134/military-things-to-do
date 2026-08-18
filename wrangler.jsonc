@@ -12,5 +12,11 @@
       "binding": "REVIEWS_KV",
       "id": "5b9b4727f737408a9ce49bd5b8f83631"
     }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "PHOTOS_BUCKET",
+      "bucket_name": "military-photos"
+    }
   ]
 }
