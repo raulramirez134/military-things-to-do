@@ -70,6 +70,10 @@
   </div>
 
   <div class="wrap" id="suggestionsList">
+    <div id="exportSection" style="margin-bottom:32px; padding-bottom:24px; border-bottom:1px solid var(--line);">
+      <button id="exportBtn" type="button" class="sc-handle-btn" style="padding:9px 16px;">⬇ Download full data backup (.json)</button>
+      <p style="font-size:12px; color:#8a8578; margin-top:8px;">Includes every review, suggestion, and feedback message currently stored — worth downloading periodically.</p>
+    </div>
     <h1>Suggested Listings</h1>
     <div class="count-line" id="countLine"></div>
     <div id="cardsContainer"></div>
@@ -222,6 +226,9 @@ document.getElementById("loginBtn").addEventListener("click", () => {
 });
 document.getElementById("adminPw").addEventListener("keydown", (e) => {
   if (e.key === "Enter") document.getElementById("loginBtn").click();
+});
+document.getElementById("exportBtn").addEventListener("click", () => {
+  window.location.href = "/api/export?adminKey=" + encodeURIComponent(adminKey);
 });
 </script>
 <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "accc7ee5b3ea402cabc45138d3ff02bf"}'></script><!-- End Cloudflare Web Analytics -->

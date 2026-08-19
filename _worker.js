@@ -537,6 +537,61 @@ async function handleListingPage(request, env) {
   });
 }
 
+// Full backup export — pulls every review (stored per-listing under "reviews:{id}"),
+// every suggestion, and every feedback message into one downloadable JSON file, so
+// there's a real way to recover this data if anything ever goes wrong on Cloudflare's
+// end. Admin-only, same password as everything else in admin.html.
+async function handleExportData(request, env) {
+  if (!env.REVIEWS_KV) {
+    return jsonResponse({ error: "Storage isn't set up yet (REVIEWS_KV binding missing)." }, 503, request);
+  }
+  if (!env.ADMIN_KEY) {
+    return jsonResponse({ error: "Admin access isn't set up yet (ADMIN_KEY secret missing)." }, 503, request);
+  }
+  const url = new URL(request.url);
+  const adminKey = url.searchParams.get("adminKey") || "";
+  if (adminKey !== env.ADMIN_KEY) {
+    return jsonResponse({ error: "Incorrect admin password." }, 401, request);
+  }
+
+  const reviews = {};
+  let cursor;
+  do {
+    const listResult = await env.REVIEWS_KV.list({ prefix: "reviews:", cursor });
+    for (const key of listResult.keys) {
+      const value = await env.REVIEWS_KV.get(key.name);
+      if (value) {
+        const listingId = key.name.slice("reviews:".length);
+        try { reviews[listingId] = JSON.parse(value); } catch { /* skip malformed entries rather than fail the whole export */ }
+      }
+    }
+    cursor = listResult.list_complete ? undefined : listResult.cursor;
+  } while (cursor);
+
+  const suggestionsRaw = await env.REVIEWS_KV.get("suggestions");
+  const feedbackRaw = await env.REVIEWS_KV.get("feedback");
+
+  let suggestions = [], feedback = [];
+  try { suggestions = suggestionsRaw ? JSON.parse(suggestionsRaw) : []; } catch { /* leave empty if malformed */ }
+  try { feedback = feedbackRaw ? JSON.parse(feedbackRaw) : []; } catch { /* leave empty if malformed */ }
+
+  const exportData = {
+    exportedAt: new Date().toISOString(),
+    reviewCount: Object.values(reviews).reduce((sum, arr) => sum + arr.length, 0),
+    reviews,
+    suggestions,
+    feedback,
+  };
+
+  const dateStamp = new Date().toISOString().slice(0, 10);
+  return new Response(JSON.stringify(exportData, null, 2), {
+    headers: {
+      "Content-Type": "application/json",
+      "Content-Disposition": `attachment; filename="military-things-backup-${dateStamp}.json"`,
+    },
+  });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -593,6 +648,10 @@ export default {
       if (request.method === "GET") return handleGetFeedback(request, env);
       if (request.method === "PATCH") return handleMarkFeedbackHandled(request, env);
       return jsonResponse({ error: "Method not allowed" }, 405, request);
+    }
+
+    if (url.pathname === "/api/export" && request.method === "GET") {
+      return handleExportData(request, env);
     }
 
     if (url.pathname === "/listing.html" && request.method === "GET") {
