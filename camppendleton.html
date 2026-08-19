@@ -44,6 +44,13 @@
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
+  .skip-link{
+    position:absolute; left:-9999px; top:0; z-index:1000;
+    background:var(--brass); color:var(--ink); padding:12px 20px;
+    font-family:'JetBrains Mono', monospace; font-weight:700; font-size:13px; text-decoration:none;
+    border-radius:0 0 4px 0;
+  }
+  .skip-link:focus{ left:0; }
   body{
     margin:0;
     background:var(--parchment);
@@ -512,6 +519,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 </head>
 <body>
+  <a href="#listView" class="skip-link">Skip to listings</a>
 
   <!-- Interstitial ad: shows once per browser session -->
   <div class="ad-overlay hidden" id="adOverlay">
@@ -670,7 +678,7 @@
 
   <main>
     <div id="map-section" style="display:none;">
-      <div class="section-label">Map View</div>
+      <h2 class="section-label">Map View</h2>
       <div class="map-wrap">
         <div id="leafletMap"></div>
         <div class="map-legend" id="mapLegend">
@@ -681,104 +689,104 @@
       <p style="font-size:12px; color:#69665B; margin-top:8px;">All 185 logged locations at once — zoom, click a pin for details, or toggle categories in the legend.</p>
     </div>
 
-    <div id="listView">
-      <div class="section-label">Restaurants &amp; Cafés</div>
+    <div id="listView" tabindex="-1">
+      <h2 class="section-label">Restaurants &amp; Cafés</h2>
       <div class="grid" data-group="restaurant" id="grid-restaurant"></div>
 
-      <div class="section-label">Grocery &amp; Food Stores</div>
+      <h2 class="section-label">Grocery &amp; Food Stores</h2>
       <div class="grid" data-group="grocery" id="grid-grocery"></div>
 
-      <div class="section-label">Parks &amp; Attractions</div>
+      <h2 class="section-label">Parks &amp; Attractions</h2>
       <div class="grid" data-group="attraction" id="grid-attraction"></div>
 
-      <div class="section-label">Beaches &amp; Water Activities</div>
+      <h2 class="section-label">Beaches &amp; Water Activities</h2>
       <div class="grid" data-group="beaches" id="grid-beaches"></div>
 
-      <div class="section-label">Auto &amp; Transportation</div>
+      <h2 class="section-label">Auto &amp; Transportation</h2>
       <div class="grid" data-group="auto" id="grid-auto"></div>
 
-      <div class="section-label">Health &amp; Personal Care</div>
+      <h2 class="section-label">Health &amp; Personal Care</h2>
       <div class="grid" data-group="health" id="grid-health"></div>
 
-      <div class="section-label">Banking &amp; Money</div>
+      <h2 class="section-label">Banking &amp; Money</h2>
       <div class="grid" data-group="banking" id="grid-banking"></div>
 
-      <div class="section-label">Housing &amp; Off-Base Living</div>
+      <h2 class="section-label">Housing &amp; Off-Base Living</h2>
       <div class="grid" data-group="housing" id="grid-housing"></div>
 
-      <div class="section-label">Pet Services</div>
+      <h2 class="section-label">Pet Services</h2>
       <div class="grid" data-group="pets" id="grid-pets"></div>
 
-      <div class="section-label">Fitness &amp; Recreation</div>
+      <h2 class="section-label">Fitness &amp; Recreation</h2>
       <div class="grid" data-group="fitness" id="grid-fitness"></div>
 
-      <div class="section-label">Religious Services</div>
+      <h2 class="section-label">Religious Services</h2>
       <div class="grid" data-group="religious" id="grid-religious"></div>
 
-      <div class="section-label">Exchange &amp; Shopping</div>
+      <h2 class="section-label">Exchange &amp; Shopping</h2>
       <div class="grid" data-group="shopping" id="grid-shopping"></div>
 
-      <div class="section-label">Storage &amp; Moving</div>
+      <h2 class="section-label">Storage &amp; Moving</h2>
       <div class="grid" data-group="storage" id="grid-storage"></div>
 
-      <div class="section-label">Museums &amp; Local History</div>
+      <h2 class="section-label">Museums &amp; Local History</h2>
       <div class="grid" data-group="museum" id="grid-museum"></div>
 
-      <div class="section-label">Recreation &amp; Entertainment</div>
+      <h2 class="section-label">Recreation &amp; Entertainment</h2>
       <div class="grid" data-group="rec" id="grid-rec"></div>
 
-      <div class="section-label">Wine Country Day Trips</div>
+      <h2 class="section-label">Wine Country Day Trips</h2>
       <div class="grid" data-group="wine" id="grid-wine"></div>
 
-      <div class="section-label">San Diego Day Trips</div>
+      <h2 class="section-label">San Diego Day Trips</h2>
       <div class="grid" data-group="sandiego" id="grid-sandiego"></div>
 
-      <div class="section-label">Tattoo Shops</div>
+      <h2 class="section-label">Tattoo Shops</h2>
       <div class="grid" data-group="tattoo" id="grid-tattoo"></div>
 
-      <div class="section-label">Notary &amp; Shipping Services</div>
+      <h2 class="section-label">Notary &amp; Shipping Services</h2>
       <div class="grid" data-group="notary" id="grid-notary"></div>
 
-      <div class="section-label">Dog Parks &amp; Nature</div>
+      <h2 class="section-label">Dog Parks &amp; Nature</h2>
       <div class="grid" data-group="outdoors" id="grid-outdoors"></div>
 
-      <div class="section-label">Kids &amp; Playgrounds</div>
+      <h2 class="section-label">Kids &amp; Playgrounds</h2>
       <div class="grid" data-group="kids" id="grid-kids"></div>
 
-      <div class="section-label">Farmers Markets</div>
+      <h2 class="section-label">Farmers Markets</h2>
       <div class="grid" data-group="farmers" id="grid-farmers"></div>
 
-      <div class="section-label">Phone &amp; Internet Providers</div>
+      <h2 class="section-label">Phone &amp; Internet Providers</h2>
       <div class="grid" data-group="phone" id="grid-phone"></div>
 
-      <div class="section-label">Car Dealerships</div>
+      <h2 class="section-label">Car Dealerships</h2>
       <div class="grid" data-group="cars" id="grid-cars"></div>
 
-      <div class="section-label">Tailoring &amp; Alterations</div>
+      <h2 class="section-label">Tailoring &amp; Alterations</h2>
       <div class="grid" data-group="tailor" id="grid-tailor"></div>
 
-      <div class="section-label">Furniture &amp; Home Goods</div>
+      <h2 class="section-label">Furniture &amp; Home Goods</h2>
       <div class="grid" data-group="furniture" id="grid-furniture"></div>
 
-      <div class="section-label">Legal &amp; Financial Services</div>
+      <h2 class="section-label">Legal &amp; Financial Services</h2>
       <div class="grid" data-group="legal" id="grid-legal"></div>
 
-      <div class="section-label">Education &amp; Career</div>
+      <h2 class="section-label">Education &amp; Career</h2>
       <div class="grid" data-group="education" id="grid-education"></div>
 
-      <div class="section-label">Bars &amp; Nightlife</div>
+      <h2 class="section-label">Bars &amp; Nightlife</h2>
       <div class="grid" data-group="bars" id="grid-bars"></div>
 
-      <div class="section-label">Schools &amp; Childcare</div>
+      <h2 class="section-label">Schools &amp; Childcare</h2>
       <div class="grid" data-group="schools" id="grid-schools"></div>
 
-      <div class="section-label">Community &amp; Spouse Groups</div>
+      <h2 class="section-label">Community &amp; Spouse Groups</h2>
       <div class="grid" data-group="community" id="grid-community"></div>
 
-      <div class="section-label">Base Services</div>
+      <h2 class="section-label">Base Services</h2>
       <div class="grid" data-group="services" id="grid-services"></div>
 
-      <div class="section-label" id="eventsLabel">Seasonal Events</div>
+      <h2 class="section-label" id="eventsLabel">Seasonal Events</h2>
       <div class="help-grid" id="eventsGrid">
         <div class="help-card">
           <div class="h-name">Oceanside Sunset Market</div>
@@ -808,7 +816,7 @@
     <div class="empty-state" id="emptyState" style="display:none;">No matches — try a different search or category.</div>
 
     <div id="help-section">
-      <div class="section-label" style="margin-top:54px;">Emergency &amp; Medical</div>
+      <h2 class="section-label" style="margin-top:54px;">Emergency &amp; Medical</h2>
       <div class="help-grid">
         <div class="help-card">
           <div class="h-name">Life-threatening emergency</div>
@@ -841,7 +849,7 @@
         </div>
       </div>
 
-      <div class="section-label" style="margin-top:40px;">Support &amp; Well-Being</div>
+      <h2 class="section-label" style="margin-top:40px;">Support &amp; Well-Being</h2>
       <div class="help-grid">
         <div class="help-card">
           <div class="h-name">Veterans / Military Crisis Line</div>
@@ -896,7 +904,7 @@
     </div>
 
     <div id="feedback-section">
-      <div class="section-label" style="margin-top:54px;">Suggestions &amp; Feedback</div>
+      <h2 class="section-label" style="margin-top:54px;">Suggestions &amp; Feedback</h2>
       <div class="feedback-wrap">
         <p class="lead">Found something wrong, know a place that should be listed, or have an idea to make this more useful? Tell us.</p>
         <form id="feedbackForm">

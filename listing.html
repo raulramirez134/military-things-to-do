@@ -611,12 +611,12 @@ function initPage(){
     </div>
 
     <div id="reviews-section">
-      <div class="section-label">Reviews from this site</div>
+      <h2 class="section-label">Reviews from this site</h2>
       <div id="reviewsList"><p class="no-reviews">Loading reviews…</p></div>
     </div>
 
     <div class="review-form">
-      <div class="section-label" style="margin-bottom:16px;">Write a review</div>
+      <h2 class="section-label" style="margin-bottom:16px;">Write a review</h2>
       <form id="reviewForm">
         <div class="f-row">
           <label for="rName">Name (optional)</label>
@@ -741,7 +741,7 @@ function initPage(){
     .sort((a, b) => a.dist - b.dist);
 
   document.getElementById("sidebarContent").innerHTML = `
-    <div class="section-label">More ${catLabels[place.cat]} Options</div>
+    <h2 class="section-label">More ${catLabels[place.cat]} Options</h2>
     <p class="sidebar-note">Other ${catLabels[place.cat].toLowerCase()} listings near ${cfg.label}, closest first.</p>
     <div class="sidebar-list">
       ${catMates.map(p => {
