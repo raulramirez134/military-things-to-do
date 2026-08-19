@@ -439,6 +439,77 @@ dataScript.src = cfg.dataFile;
 dataScript.onload = initPage;
 document.body.appendChild(dataScript);
 
+// ===== Structured data (schema.org) for search engine rich snippets =====
+const SCHEMA_TYPE_MAP = {
+  restaurant: "Restaurant", bars: "BarOrPub", grocery: "GroceryStore",
+  shopping: "Store", farmers: "Store", furniture: "Store", tailor: "Store",
+  cars: "AutomotiveBusiness", auto: "AutomotiveBusiness", phone: "Store",
+  health: "MedicalBusiness", banking: "BankOrCreditUnion", religious: "PlaceOfWorship",
+  fitness: "ExerciseGym", wine: "Winery", attraction: "TouristAttraction",
+  museum: "Museum", castles: "TouristAttraction", tokyo: "TouristAttraction",
+  sandiego: "TouristAttraction", onsen: "TouristAttraction", outdoors: "TouristAttraction",
+  beaches: "TouristAttraction", rec: "TouristAttraction", ski: "TouristAttraction",
+  mountains: "TouristAttraction", coast: "TouristAttraction", pets: "Store", kids: "TouristAttraction",
+};
+const DAY_NAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+function minutesToTimeStr(mins){
+  const m = ((mins % (24*60)) + 24*60) % (24*60);
+  const h = Math.floor(m / 60);
+  const mm = m % 60;
+  return String(h).padStart(2,'0') + ':' + String(mm).padStart(2,'0');
+}
+
+function buildOpeningHoursSpec(hoursStr){
+  const parsed = parseHoursString(hoursStr);
+  if (!parsed) return undefined; // unparseable — omit rather than guess
+  if (parsed.type === "always_open") {
+    return [{ "@type": "OpeningHoursSpecification", dayOfWeek: DAY_NAMES, opens: "00:00", closes: "23:59" }];
+  }
+  const specs = [];
+  for (const [dayIdx, ranges] of Object.entries(parsed.schedule)) {
+    for (const [start, end] of ranges) {
+      specs.push({
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: DAY_NAMES[dayIdx],
+        opens: minutesToTimeStr(start),
+        closes: minutesToTimeStr(end),
+      });
+    }
+  }
+  return specs.length ? specs : undefined;
+}
+
+function injectStructuredData(place, cfg, baseKey){
+  const schemaType = SCHEMA_TYPE_MAP[place.cat] || "LocalBusiness";
+  const data = {
+    "@context": "https://schema.org",
+    "@type": schemaType,
+    name: place.name,
+    description: place.blurb,
+    address: { "@type": "PostalAddress", streetAddress: place.addr },
+    geo: { "@type": "GeoCoordinates", latitude: place.lat, longitude: place.lng },
+    url: window.location.origin + window.location.pathname + window.location.search,
+  };
+  if (place.phone) data.telephone = place.phone;
+  if (place.rating != null && place.reviewCount) {
+    data.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: place.rating,
+      reviewCount: place.reviewCount,
+      bestRating: 5,
+      worstRating: 1,
+    };
+  }
+  const hoursSpec = buildOpeningHoursSpec(place.hours);
+  if (hoursSpec) data.openingHoursSpecification = hoursSpec;
+
+  const script = document.createElement("script");
+  script.type = "application/ld+json";
+  script.textContent = JSON.stringify(data);
+  document.head.appendChild(script);
+}
+
 function initPage(){
   const place = places.find(p => p.id === id);
   const fullId = baseKey === "ramstein" ? place?.id : `${baseKey}:${place?.id}`;
@@ -458,6 +529,7 @@ function initPage(){
     return;
   }
 
+  injectStructuredData(place, cfg, baseKey);
   document.title = `${place.name} — Military Things To Do`;
 
   document.getElementById("metaDescTag").content = `${place.name}: ${place.blurb} Distance from ${cfg.label} ${cfg.refWord}, hours, contact info, and reviews.`;
