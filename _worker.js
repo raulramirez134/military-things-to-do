@@ -456,6 +456,87 @@ async function handleMarkFeedbackHandled(request, env) {
   return jsonResponse({ ok: true }, 200, request);
 }
 
+const LISTING_BASE_CONFIG = {
+  ramstein: { label: "Ramstein", refWord: "gate", dataFile: "data.js" },
+  fortbragg: { label: "Fort Bragg", refWord: "post", dataFile: "data-fortbragg.js" },
+  camppendleton: { label: "Camp Pendleton", refWord: "base", dataFile: "data-camppendleton.js" },
+  yokota: { label: "Yokota", refWord: "base", dataFile: "data-yokota.js" },
+};
+
+function escapeHtmlAttr(str){
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+// Social media / messaging apps (Facebook, X, iMessage, Slack, Discord, etc.) don't
+// execute JavaScript when generating link previews — they read the raw HTML that's
+// actually sent over the wire. Since listing.html is a client-rendered page, the
+// title/description it updates via JS is invisible to those crawlers, so every
+// shared listing link showed the same generic preview. This intercepts the request
+// server-side and injects the correct per-listing tags before the HTML is sent,
+// so previews (and non-JS search engines) see the real listing every time.
+async function handleListingPage(request, env) {
+  const url = new URL(request.url);
+  const assetResponse = await env.ASSETS.fetch(request);
+  const contentType = assetResponse.headers.get("Content-Type") || "";
+  if (!contentType.includes("text/html")) return assetResponse;
+
+  const baseKey = LISTING_BASE_CONFIG[url.searchParams.get("base")] ? url.searchParams.get("base") : "ramstein";
+  const id = url.searchParams.get("id");
+  if (!id) return assetResponse;
+
+  const cfg = LISTING_BASE_CONFIG[baseKey];
+  let html = await assetResponse.text();
+
+  try {
+    const dataUrl = new URL("/" + cfg.dataFile, url);
+    const dataResponse = await env.ASSETS.fetch(new Request(dataUrl, request));
+    const dataText = await dataResponse.text();
+    const places = new Function(dataText + "\nreturn places;")();
+    const place = places.find(p => p.id === id);
+    if (!place) return new Response(html, assetResponse);
+
+    const title = `${place.name} — Military Things To Do`;
+    const description = `${place.name}: ${place.blurb} Distance from ${cfg.label} ${cfg.refWord}, hours, contact info, and reviews.`;
+    const canonicalUrl = `https://militarythingstodo.com/listing.html?base=${baseKey}&id=${id}`;
+
+    html = html.replace(
+      "<title>Listing — Military Things To Do</title>",
+      `<title>${escapeHtmlAttr(title)}</title>`
+    );
+    html = html.replace(
+      /<meta name="description" content="[^"]*" id="metaDescTag">/,
+      `<meta name="description" content="${escapeHtmlAttr(description)}" id="metaDescTag">`
+    );
+    html = html.replace(
+      /<link rel="canonical" href="[^"]*" id="canonicalTag">/,
+      `<link rel="canonical" href="${escapeHtmlAttr(canonicalUrl)}" id="canonicalTag">`
+    );
+    const ogTags = `<meta property="og:title" content="${escapeHtmlAttr(title)}">
+<meta property="og:description" content="${escapeHtmlAttr(description)}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="${escapeHtmlAttr(canonicalUrl)}">
+<meta property="og:site_name" content="Military Things To Do">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="${escapeHtmlAttr(title)}">
+<meta name="twitter:description" content="${escapeHtmlAttr(description)}">
+</head>`;
+    html = html.replace("</head>", ogTags);
+  } catch {
+    // If anything goes wrong (malformed data file, unexpected place shape, etc.),
+    // just serve the original page unchanged rather than risk a broken response.
+    return assetResponse;
+  }
+
+  return new Response(html, {
+    status: assetResponse.status,
+    headers: assetResponse.headers,
+  });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -512,6 +593,10 @@ export default {
       if (request.method === "GET") return handleGetFeedback(request, env);
       if (request.method === "PATCH") return handleMarkFeedbackHandled(request, env);
       return jsonResponse({ error: "Method not allowed" }, 405, request);
+    }
+
+    if (url.pathname === "/listing.html" && request.method === "GET") {
+      return handleListingPage(request, env);
     }
 
     return env.ASSETS.fetch(request);
