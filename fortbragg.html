@@ -498,6 +498,20 @@
     .search-box{ width:100%; }
     .base-suggest-dropdown{ left:0; right:0; min-width:0; }
   }
+
+  @media print{
+    /* Print a clean category listing, not the site chrome. */
+    header.brief{ background:none; color:var(--ink); border-bottom:2px solid var(--ink); }
+    .topbar, .cat-tabs, #catTabsExtra, .search-wrap, .sort-filter-row,
+    #map-section, .ad-overlay, footer, #help-section, #feedback-section,
+    .fav-btn, .skip-link{
+      display:none !important;
+    }
+    body{ background:#fff; }
+    .card{ border:1px solid #999; box-shadow:none; break-inside:avoid; }
+    a{ color:var(--ink); text-decoration:underline; }
+    .open-badge{ border:1px solid currentColor; background:none !important; }
+  }
 </style>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">

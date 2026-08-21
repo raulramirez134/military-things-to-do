@@ -200,6 +200,25 @@
     .hero-icon{ width:76px; height:76px; }
     .hero-icon svg{ width:38px; height:38px; }
   }
+
+  @media print{
+    /* Someone printing this is after one thing: the address, hours, and phone
+       number to bring with them — not the site chrome or interactive widgets. */
+    header.brief{ background:none; color:var(--ink); border-bottom:2px solid var(--ink); padding:12px 0; }
+    .topbar{ display:none; }
+    .hero-icon, .rating-row, .tag-inline{ color:var(--ink); }
+    aside.sidebar-col, .action-row, .review-form, #turnstile-widget,
+    .fav-btn, .admin-remove-btn, .admin-remove-row, #sharePopover,
+    footer, .adsbygoogle{
+      display:none !important;
+    }
+    main{ display:block; }
+    .main-col{ max-width:100%; }
+    body{ background:#fff; }
+    .card, .detail-card{ border:1px solid #999; box-shadow:none; break-inside:avoid; }
+    a{ color:var(--ink); text-decoration:underline; }
+    .open-badge{ border:1px solid currentColor; background:none !important; }
+  }
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2511246091167745" crossorigin="anonymous"></script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
