@@ -235,6 +235,22 @@ const MAX_SUGGESTIONS_STORED = 500;
 const MAX_SUGGESTION_FIELD_LENGTH = 500;
 const VALID_BASE_KEYS = ["ramstein", "fortbragg", "camppendleton", "yokota"];
 
+// Owner notification via Discord webhook — best-effort only. If the webhook
+// isn't configured yet, or Discord is briefly unreachable, this never blocks
+// or breaks the actual submission; it just quietly does nothing.
+async function notifyDiscord(message, env) {
+  if (!env.DISCORD_WEBHOOK_URL) return;
+  try {
+    await fetch(env.DISCORD_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: message }),
+    });
+  } catch {
+    // Notification failures should never affect the actual submission.
+  }
+}
+
 async function handlePostSuggestion(request, env) {
   if (!env.REVIEWS_KV) {
     return jsonResponse({ error: "Storage isn't set up yet (REVIEWS_KV binding missing)." }, 503, request);
@@ -290,6 +306,13 @@ async function handlePostSuggestion(request, env) {
   const trimmed = suggestions.slice(0, MAX_SUGGESTIONS_STORED);
 
   await env.REVIEWS_KV.put(key, JSON.stringify(trimmed));
+
+  const baseLabel = LISTING_BASE_CONFIG[base] ? LISTING_BASE_CONFIG[base].label : base;
+  await notifyDiscord(
+    `💡 **New listing suggestion** — ${baseLabel}\n**${name}**${category ? ` (${category})` : ""}\n${details ? details.slice(0, 200) : "No details provided."}\nReview it: https://militarythingstodo.com/admin.html`,
+    env
+  );
+
   return jsonResponse({ ok: true }, 200, request);
 }
 
@@ -406,6 +429,13 @@ async function handlePostFeedback(request, env) {
   const trimmed = items.slice(0, MAX_FEEDBACK_STORED);
 
   await env.REVIEWS_KV.put(key, JSON.stringify(trimmed));
+
+  const baseLabel = VALID_BASE_KEYS.includes(base) && LISTING_BASE_CONFIG[base] ? LISTING_BASE_CONFIG[base].label : "General";
+  await notifyDiscord(
+    `📬 **New feedback** (${type}) — ${baseLabel}${listingName ? `\nRegarding: **${listingName}**` : ""}\n${message.slice(0, 200)}\nReview it: https://militarythingstodo.com/admin.html`,
+    env
+  );
+
   return jsonResponse({ ok: true }, 200, request);
 }
 
