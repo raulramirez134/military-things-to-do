@@ -457,9 +457,25 @@ document.querySelector(".back-link").setAttribute("href", cfg.hub);
 document.querySelector(".back-link").textContent = `← Back to ${cfg.label} listings`;
 
 // Dynamically load the correct base's data file, then run the page
+function showDataLoadError(){
+  document.getElementById("headerInner").innerHTML = `<h1 class="title">Couldn't load this listing</h1>`;
+  document.getElementById("mainContent").innerHTML = `
+    <div class="not-found">
+      <p>Something went wrong loading this page — likely a connection hiccup rather than the listing itself.</p>
+      <p><button type="button" class="action-btn" onclick="window.location.reload()">↻ Try again</button> &nbsp; <a href="${cfg.hub}">← Back to the full ${cfg.label} list</a></p>
+    </div>
+  `;
+}
 const dataScript = document.createElement("script");
 dataScript.src = cfg.dataFile;
-dataScript.onload = initPage;
+dataScript.onload = () => {
+  try {
+    initPage();
+  } catch (err) {
+    showDataLoadError();
+  }
+};
+dataScript.onerror = showDataLoadError;
 document.body.appendChild(dataScript);
 
 // ===== Structured data (schema.org) for search engine rich snippets =====
