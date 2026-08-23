@@ -174,6 +174,7 @@
   .review-form{ background:#fff; border:1px solid var(--line); border-radius:4px; padding:22px; margin-top:24px; }
   .f-row{ margin-bottom:14px; display:flex; flex-direction:column; gap:6px; }
   .f-row label{ font-family:'JetBrains Mono', monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.04em; color:#6b7268; }
+  .f-row label .hint{ font-size:11px; color:#69665B; font-weight:400; text-transform:none; letter-spacing:normal; }
   .f-row input, .f-row select, .f-row textarea{
     font-family:'Source Sans 3', sans-serif; font-size:16px; padding:10px 12px;
     border:1px solid var(--line); border-radius:3px; background:var(--parchment); color:var(--ink);
@@ -628,7 +629,34 @@ function initPage(){
       <a class="action-btn primary" href="${dirUrl}" target="_blank" rel="noopener">Get directions →</a>
       ${callHref ? `<a class="action-btn" href="${callHref}">Call ${place.phone}</a>` : ""}
       <button class="action-btn" id="shareBtn" type="button">Share / QR code</button>
+      <button class="action-btn" id="reportOutdatedBtn" type="button">🚩 Report outdated info</button>
       <a class="action-btn" href="${cfg.hub}#feedback-section">Claim / report this listing</a>
+    </div>
+
+    <div id="reportPopover" class="share-popover" style="display:none;">
+      <div class="share-popover-inner">
+        <button class="share-close" id="reportCloseBtn" aria-label="Close">×</button>
+        <div class="section-label" style="margin-top:0;">Report outdated info</div>
+        <form id="reportForm">
+          <div class="f-row">
+            <label for="reportType">What's outdated?</label>
+            <select id="reportType">
+              <option>Hours are wrong</option>
+              <option>Phone number is wrong</option>
+              <option>Address is wrong</option>
+              <option>Permanently closed</option>
+              <option>Something else</option>
+            </select>
+          </div>
+          <div class="f-row">
+            <label for="reportDetails">Details <span class="hint">— optional</span></label>
+            <textarea id="reportDetails" placeholder="Anything that would help us fix it faster" style="min-height:70px;"></textarea>
+          </div>
+          <div id="report-turnstile-widget" style="margin-bottom:12px;"></div>
+          <button type="submit" class="f-submit" id="reportSubmit" disabled>Submit report</button>
+          <div class="form-msg" id="reportMsg"></div>
+        </form>
+      </div>
     </div>
 
     <div id="sharePopover" class="share-popover" style="display:none;">
@@ -768,7 +796,98 @@ function initPage(){
   }
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && sharePopover) sharePopover.style.display = "none";
+    if (e.key === "Escape" && reportPopover) reportPopover.style.display = "none";
   });
+
+  // Report outdated info — reuses the same /api/feedback backend as the full
+  // feedback form, just with a much lighter, inline, single-purpose UI.
+  const reportOutdatedBtn = document.getElementById("reportOutdatedBtn");
+  const reportPopover = document.getElementById("reportPopover");
+  const reportCloseBtn = document.getElementById("reportCloseBtn");
+  const reportForm = document.getElementById("reportForm");
+
+  window.onReportTurnstileSuccess = function(){
+    document.getElementById("reportSubmit").disabled = false;
+  };
+  window.reportTurnstileWidgetId = null;
+  function tryRenderReportTurnstile(){
+    if (window.reportTurnstileWidgetId !== null) return;
+    const el = document.getElementById("report-turnstile-widget");
+    if (el && typeof turnstile !== "undefined" && turnstile.render) {
+      window.reportTurnstileWidgetId = turnstile.render(el, {
+        sitekey: "0x4AAAAAAES5Rg7OaO37hy9p",
+        callback: window.onReportTurnstileSuccess,
+      });
+    } else {
+      setTimeout(tryRenderReportTurnstile, 150);
+    }
+  }
+
+  if (reportOutdatedBtn) {
+    reportOutdatedBtn.addEventListener("click", () => {
+      reportPopover.style.display = "flex";
+      tryRenderReportTurnstile();
+    });
+  }
+  if (reportCloseBtn) {
+    reportCloseBtn.addEventListener("click", () => { reportPopover.style.display = "none"; });
+  }
+  if (reportPopover) {
+    reportPopover.addEventListener("click", (e) => {
+      if (e.target === reportPopover) reportPopover.style.display = "none";
+    });
+  }
+  if (reportForm) {
+    reportForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById("reportSubmit");
+      const msgEl = document.getElementById("reportMsg");
+      const reportType = document.getElementById("reportType").value;
+      const details = document.getElementById("reportDetails").value.trim();
+      const turnstileToken = (typeof turnstile !== "undefined" && window.reportTurnstileWidgetId !== null) ? turnstile.getResponse(window.reportTurnstileWidgetId) : "";
+
+      if (!turnstileToken) {
+        msgEl.textContent = "Please complete the verification challenge above.";
+        msgEl.className = "form-msg error";
+        return;
+      }
+
+      submitBtn.disabled = true;
+      msgEl.textContent = "Submitting…";
+      msgEl.className = "form-msg";
+
+      try {
+        const res = await fetch("/api/feedback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            base: baseKey,
+            type: "Correction (hours, phone, address, etc.)",
+            name: "",
+            email: "",
+            message: `${reportType}${details ? " — " + details : ""}`,
+            listingName: place.name,
+            listingId: place.id,
+            turnstileToken,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          msgEl.textContent = data.error || "Something went wrong — try again.";
+          msgEl.className = "form-msg error";
+          if (typeof turnstile !== "undefined" && window.reportTurnstileWidgetId !== null) turnstile.reset(window.reportTurnstileWidgetId);
+          submitBtn.disabled = true;
+        } else {
+          msgEl.textContent = "Thanks — we'll take a look!";
+          msgEl.className = "form-msg ok";
+          setTimeout(() => { reportPopover.style.display = "none"; }, 1800);
+        }
+      } catch {
+        msgEl.textContent = "Couldn't reach the server — check your connection and try again.";
+        msgEl.className = "form-msg error";
+      }
+    });
+  }
 
   // "More in this category" sidebar
   const catMates = places
