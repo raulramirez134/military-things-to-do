@@ -522,6 +522,8 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#182420">
 </head>
 <body>
   <a href="#listView" class="skip-link">Skip to listings</a>
@@ -636,6 +638,7 @@
         <label class="sf-label" for="sortSelect">Sort:</label>
         <select id="sortSelect" class="sf-select">
           <option value="distance">Closest first</option>
+          <option value="nearme">📍 Near me</option>
           <option value="rating">Highest rated</option>
           <option value="name">Name (A–Z)</option>
         </select>
@@ -1106,7 +1109,13 @@ function getOpenStatus(hoursStr, timeZone){
 }
 
 function cardHTML(p){
-  const distText = p.dist === 0 ? "On base" : `${p.dist.toFixed(1)} km / ${milesFrom(p.dist)} mi from base`;
+  let distText;
+  if(nearMeActive && userLocation){
+    const kmFromUser = haversineKm(userLocation.lat, userLocation.lng, p.lat, p.lng);
+    distText = `${kmFromUser.toFixed(1)} km / ${milesFrom(kmFromUser)} mi from you`;
+  } else {
+    distText = p.dist === 0 ? "On base" : `${p.dist.toFixed(1)} km / ${milesFrom(p.dist)} mi from base`;
+  }
   const dirUrl = `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`;
   const callHref = p.phone ? `tel:${p.phone.replace(/\s+/g,'')}` : null;
   const isFav = isFavorited(p.id);
@@ -1155,6 +1164,11 @@ function sortPlaces(items, sortBy){
     });
   } else if(sortBy === "name"){
     sorted.sort((a,b) => a.name.localeCompare(b.name));
+  } else if(sortBy === "nearme" && userLocation){
+    sorted.sort((a,b) =>
+      haversineKm(userLocation.lat, userLocation.lng, a.lat, a.lng) -
+      haversineKm(userLocation.lat, userLocation.lng, b.lat, b.lng)
+    );
   } else {
     sorted.sort((a,b) => a.dist - b.dist);
   }
@@ -1326,7 +1340,53 @@ searchBoxEl.addEventListener("keydown", (e) => {
   if(e.key === "Escape") document.getElementById("baseSuggestDropdown").style.display = "none";
 });
 
-document.getElementById("sortSelect").addEventListener("change", () => {
+// "Near me" — real distance from the visitor's actual location, not the
+// fixed base reference point. Opt-in only (requires a location permission
+// prompt), and falls back gracefully to the normal sort if denied/unavailable.
+let userLocation = null;
+let nearMeActive = false;
+
+function haversineKm(lat1, lng1, lat2, lng2){
+  const R = 6371;
+  const toRad = deg => deg * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+document.getElementById("sortSelect").addEventListener("change", (e) => {
+  if(e.target.value === "nearme"){
+    if(userLocation){
+      nearMeActive = true;
+      render();
+      applyFilter();
+      return;
+    }
+    if(!navigator.geolocation){
+      alert("Your browser doesn't support location access. Sorting by closest to base instead.");
+      e.target.value = "distance";
+      return;
+    }
+    e.target.disabled = true;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        nearMeActive = true;
+        e.target.disabled = false;
+        render();
+        applyFilter();
+      },
+      () => {
+        alert("Couldn't get your location — check your browser's location permission. Sorting by closest to base instead.");
+        e.target.value = "distance";
+        e.target.disabled = false;
+      },
+      { timeout: 10000 }
+    );
+    return;
+  }
+  nearMeActive = false;
   render();
   applyFilter();
 });
