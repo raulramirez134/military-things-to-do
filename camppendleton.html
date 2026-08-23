@@ -1210,6 +1210,14 @@ function getOpenStatus(hoursStr, timeZone){
   return todayRanges.length === 0 ? false : false;
 }
 
+// "Near me" — real distance from the visitor's actual location, not the
+// fixed base reference point. Declared here (before cardHTML/render are ever
+// called) rather than down near the sort dropdown listener, since cardHTML
+// references these on every render — including the very first one at page
+// load — and a `let` referenced before its own declaration line throws.
+let userLocation = null;
+let nearMeActive = false;
+
 function cardHTML(p){
   const areaLabel = p.area === "south" ? "South Area" : "North Area";
   let distText;
@@ -1448,9 +1456,6 @@ searchBoxEl.addEventListener("keydown", (e) => {
 // "Near me" — real distance from the visitor's actual location, not the
 // fixed base reference point. Opt-in only (requires a location permission
 // prompt), and falls back gracefully to the normal sort if denied/unavailable.
-let userLocation = null;
-let nearMeActive = false;
-
 function haversineKm(lat1, lng1, lat2, lng2){
   const R = 6371;
   const toRad = deg => deg * Math.PI / 180;
