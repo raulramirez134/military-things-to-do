@@ -41,6 +41,17 @@ const places = [
 
   // Pet Services
   { id:"ghent-veterinary-hospital", name:"Ghent Veterinary Hospital", cat:"pets", dist:8.09, lat:36.875, lng:-76.295, addr:"939 W 21st St, Norfolk", blurb:"An AAHA-accredited small animal hospital with a genuinely low-stress, fear-free approach — routine care, surgery, dentistry, and in-house diagnostics.", hours:"Mon,Wed,Thu,Fri 8:00–17:00 · Tue 8:00–19:00 · Sat 9:00–14:00 · Closed Sun", phone:"+1 757-351-0167", rating:4.7, reviewCount:41 },
+
+  // Museums & Attractions
+  { id:"nauticus", name:"Nauticus", cat:"museum", dist:11.24, lat:36.8468, lng:-76.2915, addr:"1 Waterside Dr, Norfolk", blurb:"A maritime-themed science center on the downtown waterfront, home to the Battleship Wisconsin — hands-on exhibits covering the region's naval and maritime history, genuinely great for kids.", hours:"Mon–Sat 9:00–17:00 · Sun 10:00–17:00", phone:"+1 757-664-1000", rating:4.5, reviewCount:0 },
+  { id:"hampton-roads-naval-museum", name:"Hampton Roads Naval Museum", cat:"museum", dist:11.24, lat:36.8468, lng:-76.2915, addr:"1 Waterside Dr (inside Nauticus), Norfolk", blurb:"A free, AAM-accredited Navy museum covering over 235 years of naval history in Hampton Roads — ask at the Nauticus entrance to be directed up to the second floor.", hours:"Tue–Sat 10:00–17:00 · Sun 12:00–17:00 · Closed Mon", phone:"+1 757-322-3108", rating:4.6, reviewCount:0 },
+  { id:"chrysler-museum-of-art", name:"Chrysler Museum of Art", cat:"museum", dist:10.11, lat:36.857, lng:-76.292, addr:"1 Memorial Pl, Norfolk", blurb:"One of America's top mid-sized art museums, with free admission every day — over 30,000 objects including one of the country's great glass collections, plus a working glass studio with live demos.", hours:"Tue–Sat 10:00–17:00 · Sun 12:00–17:00 · Closed Mon", phone:"+1 757-664-6200", rating:4.8, reviewCount:0 },
+
+  // Beaches
+  { id:"virginia-beach-boardwalk", name:"Virginia Beach Boardwalk", cat:"beaches", dist:31.30, lat:36.8529, lng:-75.9780, addr:"Atlantic Ave, Virginia Beach", blurb:"A 3-mile oceanfront boardwalk and beach, free and open 24 hours — restaurants, shops, a fishing pier, and a dedicated bike path, about 30-40 minutes from the base depending on traffic.", hours:"Open 24 hours", phone:null, rating:4.6, reviewCount:0 },
+
+  // Historic Triangle Day Trips
+  { id:"colonial-williamsburg", name:"Colonial Williamsburg", cat:"historic", dist:50.41, lat:37.2707, lng:-76.7075, addr:"101 Visitor Center Dr, Williamsburg", blurb:"America's largest living-history museum — an entire 18th-century colonial capital brought to life with costumed interpreters, historic trades, and taverns. Open 365 days a year, about an hour from the base.", hours:"Daily 9:30–17:00", phone:"+1 800-447-8679", rating:4.7, reviewCount:0 },
 ];
 
 const catLabels = { restaurant:"Restaurant", grocery:"Grocery", attraction:"Attraction", auto:"Auto", health:"Health", banking:"Banking", housing:"Housing", pets:"Pet Services", fitness:"Fitness", religious:"Religious", shopping:"Shopping", storage:"Storage", museum:"Museum", outdoors:"Outdoors", kids:"Kids", farmers:"Farmers Market", phone:"Phone/Internet", cars:"Car Dealer", tailor:"Tailoring", furniture:"Furniture", legal:"Legal", education:"Education", schools:"Schools", community:"Community", bars:"Bar", services:"Base Services", rec:"Recreation", tattoo:"Tattoo Shop", notary:"Notary/Shipping", beaches:"Beaches", historic:"Historic Triangle Day Trips" };
