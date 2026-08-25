@@ -207,6 +207,15 @@
   }
   .sf-checkbox{ display:flex; align-items:center; gap:6px; cursor:pointer; user-select:none; }
   .sf-checkbox input{ cursor:pointer; width:15px; height:15px; }
+  #recentlyViewedStrip{ max-width:1100px; margin:16px auto 0; }
+  .recently-viewed-cards{ display:flex; gap:10px; overflow-x:auto; padding-bottom:6px; }
+  .recently-viewed-card{
+    flex-shrink:0; display:flex; align-items:center; gap:8px; background:#fff; border:1px solid var(--line);
+    border-radius:20px; padding:7px 14px 7px 10px; text-decoration:none; color:var(--ink); font-size:13px;
+    white-space:nowrap; transition: border-color .15s ease;
+  }
+  .recently-viewed-card:hover{ border-color:var(--brass); }
+  .recently-viewed-card svg{ width:16px; height:16px; }
   .base-suggest-dropdown{
     position:absolute; top:calc(100% + 4px); left:0; min-width:260px; z-index:50;
     background:#fff; border-radius:4px; box-shadow: 0 12px 28px rgba(0,0,0,0.18);
@@ -680,6 +689,10 @@
           Open now only
         </label>
       </div>
+      <div id="recentlyViewedStrip" style="display:none;">
+        <div class="sf-label" style="margin-bottom:8px; text-transform:uppercase;">Recently viewed</div>
+        <div id="recentlyViewedCards" class="recently-viewed-cards"></div>
+      </div>
     </div>
   </nav>
 
@@ -908,6 +921,27 @@
 
 <script src="data-yokota.js" onerror="document.getElementById('dataLoadError').style.display='block';"></script>
 <script>
+// Reads the shared recently-viewed list (written by listing.html) and shows
+// a small strip of whatever's relevant to THIS base — hidden entirely if
+// there's nothing to show, rather than an empty placeholder section.
+function initRecentlyViewedStrip(){
+  const RECENTLY_VIEWED_KEY = "military_recently_viewed";
+  let list = [];
+  try { list = JSON.parse(localStorage.getItem(RECENTLY_VIEWED_KEY)) || []; } catch { return; }
+  const filtered = list.filter(item => item.base === CURRENT_BASE_KEY);
+  if(filtered.length === 0) return;
+  const strip = document.getElementById("recentlyViewedStrip");
+  const cardsContainer = document.getElementById("recentlyViewedCards");
+  if(!strip || !cardsContainer) return;
+  cardsContainer.innerHTML = filtered.map(item => `
+    <a href="listing.html?base=${item.base}&id=${item.id}" class="recently-viewed-card">
+      ${icons[item.cat] || icons.attraction}
+      <span>${item.name}</span>
+    </a>
+  `).join("");
+  strip.style.display = "block";
+}
+
 // ---- Category emblem icons (inline SVG, stroke-based, matches design system) ----
 const icons = {
   restaurant: `<svg viewBox="0 0 24 24" fill="none" stroke="#8a3a20" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v8a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M17 2c-1.5 0-3 1.5-3 4v4c0 1.5.8 2.3 2 2.6V22"/></svg>`,
@@ -1229,6 +1263,7 @@ try {
 } catch (err) {
   document.getElementById("dataLoadError").style.display = "block";
 }
+initRecentlyViewedStrip();
 
 // Category filtering
 const tabs = document.querySelectorAll(".cat-tab:not(.cat-tab-toggle)");

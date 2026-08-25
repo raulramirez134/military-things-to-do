@@ -228,6 +228,8 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#182420">
 </head>
 <body>
   <header class="brief">
@@ -550,6 +552,24 @@ function injectStructuredData(place, cfg, baseKey){
   document.head.appendChild(script);
 }
 
+// Shared across all 4 bases via one localStorage key, matching the same
+// pattern already used for favorites. Capped at 10, most-recent-first, with
+// de-duplication so re-visiting something just moves it back to the front.
+const RECENTLY_VIEWED_KEY = "military_recently_viewed";
+const RECENTLY_VIEWED_MAX = 10;
+function recordRecentlyViewed(place, baseKey){
+  try {
+    let list = JSON.parse(localStorage.getItem(RECENTLY_VIEWED_KEY)) || [];
+    list = list.filter(item => !(item.base === baseKey && item.id === place.id));
+    list.unshift({ base: baseKey, id: place.id, name: place.name, cat: place.cat });
+    list = list.slice(0, RECENTLY_VIEWED_MAX);
+    localStorage.setItem(RECENTLY_VIEWED_KEY, JSON.stringify(list));
+  } catch {
+    // localStorage can fail (private browsing, storage full, etc.) — this is
+    // a nice-to-have feature, never worth breaking the actual page for.
+  }
+}
+
 function initPage(){
   const place = places.find(p => p.id === id);
   const fullId = baseKey === "ramstein" ? place?.id : `${baseKey}:${place?.id}`;
@@ -570,6 +590,7 @@ function initPage(){
   }
 
   injectStructuredData(place, cfg, baseKey);
+  recordRecentlyViewed(place, baseKey);
   document.title = `${place.name} — Military Things To Do`;
 
   document.getElementById("metaDescTag").content = `${place.name}: ${place.blurb} Distance from ${cfg.label} ${cfg.refWord}, hours, contact info, and reviews.`;
