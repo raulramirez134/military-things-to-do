@@ -34,6 +34,13 @@ const places = [
 
   // Schools & Childcare
   { id:"ghent-school", name:"Ghent School", cat:"schools", dist:8.00, lat:36.876, lng:-76.294, addr:"200 Shirley Ave, Norfolk", blurb:"A well-regarded K-8 public school in Ghent with a Gifted & Talented program — part of Norfolk Public Schools, which serves the base and has multiple schools with the Virginia Purple Star military-friendly designation.", hours:"Mon–Fri 7:30–15:30", phone:"+1 757-628-2565", rating:4.2, reviewCount:0 },
+
+  // Fitness
+  { id:"n24-gym", name:"N-24 Gym (Naval Station Norfolk)", cat:"fitness", dist:0.11, lat:36.947, lng:-76.311, addr:"Gilbert St, Bldg N-24, Naval Station Norfolk", blurb:"The main on-base fitness center — free for active duty, with cardio equipment, weights, and group classes just steps from the gate.", hours:"Contact for hours", phone:"+1 757-444-2276", rating:3.8, reviewCount:0 },
+  { id:"onelife-fitness-norfolk", name:"Onelife Fitness Norfolk", cat:"fitness", dist:7.84, lat:36.877, lng:-76.297, addr:"1900 Monticello Ave, Norfolk", blurb:"A large, full-amenity gym with a pool, group classes, kids club, and a women's-only workout area — a step up from a basic gym if you want the extras.", hours:"Mon–Thu 5:00–23:00 · Fri 5:00–22:00 · Sat/Sun 7:00–20:00", phone:"+1 757-248-4800", rating:4.1, reviewCount:241 },
+
+  // Pet Services
+  { id:"ghent-veterinary-hospital", name:"Ghent Veterinary Hospital", cat:"pets", dist:8.09, lat:36.875, lng:-76.295, addr:"939 W 21st St, Norfolk", blurb:"An AAHA-accredited small animal hospital with a genuinely low-stress, fear-free approach — routine care, surgery, dentistry, and in-house diagnostics.", hours:"Mon,Wed,Thu,Fri 8:00–17:00 · Tue 8:00–19:00 · Sat 9:00–14:00 · Closed Sun", phone:"+1 757-351-0167", rating:4.7, reviewCount:41 },
 ];
 
 const catLabels = { restaurant:"Restaurant", grocery:"Grocery", attraction:"Attraction", auto:"Auto", health:"Health", banking:"Banking", housing:"Housing", pets:"Pet Services", fitness:"Fitness", religious:"Religious", shopping:"Shopping", storage:"Storage", museum:"Museum", outdoors:"Outdoors", kids:"Kids", farmers:"Farmers Market", phone:"Phone/Internet", cars:"Car Dealer", tailor:"Tailoring", furniture:"Furniture", legal:"Legal", education:"Education", schools:"Schools", community:"Community", bars:"Bar", services:"Base Services", rec:"Recreation", tattoo:"Tattoo Shop", notary:"Notary/Shipping", beaches:"Beaches", historic:"Historic Triangle Day Trips" };
