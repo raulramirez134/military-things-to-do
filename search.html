@@ -125,6 +125,8 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#182420">
 </head>
 <body>
 
@@ -146,6 +148,7 @@
         <button class="base-chip" data-base="fortbragg">Fort Bragg</button>
         <button class="base-chip" data-base="camppendleton">Camp Pendleton</button>
         <button class="base-chip" data-base="yokota">Yokota</button>
+        <button class="base-chip" data-base="norfolk">Norfolk</button>
         <button class="base-chip" id="favoritesChip" type="button" style="margin-left:8px;">★ My Favorites</button>
       </div>
     </div>
@@ -215,6 +218,7 @@ const BASES = [
   { key: "fortbragg", label: "Fort Bragg", hub: "fortbragg.html", dataFile: "data-fortbragg.js", timeZone: "America/New_York" },
   { key: "camppendleton", label: "Camp Pendleton", hub: "camppendleton.html", dataFile: "data-camppendleton.js", timeZone: "America/Los_Angeles" },
   { key: "yokota", label: "Yokota", hub: "yokota.html", dataFile: "data-yokota.js", timeZone: "Asia/Tokyo" },
+  { key: "norfolk", label: "Naval Station Norfolk", hub: "norfolk.html", dataFile: "data-norfolk.js", timeZone: "America/New_York" },
 ];
 const BASE_TIME_ZONES = Object.fromEntries(BASES.map(b => [b.key, b.timeZone]));
 
