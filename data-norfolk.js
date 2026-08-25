@@ -52,6 +52,13 @@ const places = [
 
   // Historic Triangle Day Trips
   { id:"colonial-williamsburg", name:"Colonial Williamsburg", cat:"historic", dist:50.41, lat:37.2707, lng:-76.7075, addr:"101 Visitor Center Dr, Williamsburg", blurb:"America's largest living-history museum — an entire 18th-century colonial capital brought to life with costumed interpreters, historic trades, and taverns. Open 365 days a year, about an hour from the base.", hours:"Daily 9:30–17:00", phone:"+1 800-447-8679", rating:4.7, reviewCount:0 },
+
+  // Shopping
+  { id:"wards-corner-shopping-center", name:"Wards Corner Shopping Center", cat:"shopping", dist:6.36, lat:36.912, lng:-76.253, addr:"E Little Creek Rd & Granby St, Norfolk", blurb:"A historic Norfolk shopping hub currently undergoing major revitalization, anchored by a Harris Teeter with a Target under construction — worth checking for the mix of local and national retailers.", hours:"Varies by store", phone:null, rating:3.7, reviewCount:0 },
+
+  // Outdoors & Kids
+  { id:"norfolk-botanical-garden", name:"Norfolk Botanical Garden", cat:"outdoors", dist:10.44, lat:36.90278, lng:-76.20611, addr:"6700 Azalea Garden Rd, Norfolk", blurb:"A 175-acre garden with over 65 themed gardens and a 3-acre children's adventure garden — explore by tram, boat, or on foot, one of the largest azalea and camellia collections on the East Coast.", hours:"Daily 9:00–19:00", phone:"+1 757-441-5830", rating:4.7, reviewCount:0 },
+  { id:"virginia-zoo", name:"Virginia Zoo", cat:"kids", dist:9.19, lat:36.8712, lng:-76.2681, addr:"3500 Granby St, Norfolk", blurb:"A well-loved AZA-accredited zoo dating back to 1901 — giraffes, rhinos, a petting zoo, and a train ride, genuinely great for a half-day with kids.", hours:"Daily 9:30–16:00", phone:"+1 757-441-2374", rating:4.5, reviewCount:274 },
 ];
 
 const catLabels = { restaurant:"Restaurant", grocery:"Grocery", attraction:"Attraction", auto:"Auto", health:"Health", banking:"Banking", housing:"Housing", pets:"Pet Services", fitness:"Fitness", religious:"Religious", shopping:"Shopping", storage:"Storage", museum:"Museum", outdoors:"Outdoors", kids:"Kids", farmers:"Farmers Market", phone:"Phone/Internet", cars:"Car Dealer", tailor:"Tailoring", furniture:"Furniture", legal:"Legal", education:"Education", schools:"Schools", community:"Community", bars:"Bar", services:"Base Services", rec:"Recreation", tattoo:"Tattoo Shop", notary:"Notary/Shipping", beaches:"Beaches", historic:"Historic Triangle Day Trips" };
