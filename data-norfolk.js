@@ -57,6 +57,7 @@ const places = [
 
   // Pet Services
   { id:"ghent-veterinary-hospital", name:"Ghent Veterinary Hospital", cat:"pets", dist:8.09, lat:36.875, lng:-76.295, addr:"939 W 21st St, Norfolk", blurb:"An AAHA-accredited small animal hospital with a genuinely low-stress, fear-free approach — routine care, surgery, dentistry, and in-house diagnostics.", hours:"Mon,Wed,Thu,Fri 8:00–17:00 · Tue 8:00–19:00 · Sat 9:00–14:00 · Closed Sun", phone:"+1 757-351-0167", rating:4.7, reviewCount:41 },
+  { id:"banfield-pet-hospital-norfolk", name:"Banfield Pet Hospital", cat:"pets", dist:9.94, lat:36.885, lng:-76.229, addr:"1275 N Military Hwy, Norfolk", blurb:"A full-service vet hospital inside PetSmart — routine vaccinations, dental, surgery, and Optimum Wellness Plans that bundle a year of preventive care.", hours:"Mon–Sat 8:00–18:00 · Sun 9:00–17:00", phone:"+1 757-459-8094", rating:3.4, reviewCount:0 },
 
   // Museums & Attractions
   { id:"nauticus", name:"Nauticus", cat:"museum", dist:11.24, lat:36.8468, lng:-76.2915, addr:"1 Waterside Dr, Norfolk", blurb:"A maritime-themed science center on the downtown waterfront, home to the Battleship Wisconsin — hands-on exhibits covering the region's naval and maritime history, genuinely great for kids.", hours:"Mon–Sat 9:00–17:00 · Sun 10:00–17:00", phone:"+1 757-664-1000", rating:4.5, reviewCount:0 },
@@ -75,6 +76,7 @@ const places = [
   // Outdoors & Kids
   { id:"norfolk-botanical-garden", name:"Norfolk Botanical Garden", cat:"outdoors", dist:10.44, lat:36.90278, lng:-76.20611, addr:"6700 Azalea Garden Rd, Norfolk", blurb:"A 175-acre garden with over 65 themed gardens and a 3-acre children's adventure garden — explore by tram, boat, or on foot, one of the largest azalea and camellia collections on the East Coast.", hours:"Daily 9:00–19:00", phone:"+1 757-441-5830", rating:4.7, reviewCount:0 },
   { id:"virginia-zoo", name:"Virginia Zoo", cat:"kids", dist:9.19, lat:36.8712, lng:-76.2681, addr:"3500 Granby St, Norfolk", blurb:"A well-loved AZA-accredited zoo dating back to 1901 — giraffes, rhinos, a petting zoo, and a train ride, genuinely great for a half-day with kids.", hours:"Daily 9:30–16:00", phone:"+1 757-441-2374", rating:4.5, reviewCount:274 },
+  { id:"sky-zone-virginia-beach", name:"Sky Zone Virginia Beach", cat:"kids", dist:33.86, lat:36.771, lng:-75.999, addr:"1736 General Booth Blvd, Virginia Beach", blurb:"An indoor trampoline park with wall-to-wall jumping, dodgeball, and a foam pit — genuinely great for burning off energy on a rainy day, with birthday party packages available.", hours:"Mon–Thu 10:00–20:00 · Fri 10:00–22:00 · Sat 9:00–22:00 · Sun 10:00–19:00", phone:"+1 757-930-7155", rating:4.3, reviewCount:0 },
 
   // Attractions Around Hampton Roads — the base sits at the center of a genuinely
   // large metro area (Virginia Beach, Portsmouth, Newport News, Hampton, Chesapeake,
