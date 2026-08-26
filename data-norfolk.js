@@ -11,6 +11,7 @@ const places = [
   // Restaurants & Cafés
   { id:"saltine-norfolk", name:"Saltine", cat:"restaurant", dist:11.22, lat:36.847, lng:-76.291, addr:"100 E Main St, Norfolk", blurb:"An elevated seafood restaurant in the historic Decker building downtown — oysters, a curated raw bar, and a genuinely refined atmosphere for a nicer night out.", hours:"Mon–Thu,Sun 11:30–23:00 · Fri/Sat 11:30–24:00", phone:"+1 757-763-6280", rating:4.5, reviewCount:927 },
   { id:"no-frill-bar-and-grill", name:"No Frill Bar and Grill", cat:"restaurant", dist:7.86, lat:36.877, lng:-76.296, addr:"806 Spotswood Ave, Norfolk", blurb:"A Ghent neighborhood institution for over 20 years — comfort food classics like meatloaf and Sunday brunch, in a colorful, casual setting with a loyal following.", hours:"Mon,Sun 11–20 · Tue–Sat 11–21", phone:"+1 757-627-4262", rating:4.6, reviewCount:1135 },
+  { id:"freemason-abbey", name:"Freemason Abbey Restaurant & Tavern", cat:"restaurant", dist:11.15, lat:36.8477, lng:-76.2907, addr:"209 W Freemason St, Norfolk", blurb:"A local favorite for over 30 years, set inside a genuinely striking 148-year-old renovated church downtown — fresh seafood, steaks, and an award-winning she-crab soup, elegant but not stuffy.", hours:"Mon–Sat 11:00–21:00 · Sun 10:00–20:00", phone:"+1 757-622-3966", rating:4.6, reviewCount:1011 },
   { id:"fair-grounds-coffee", name:"Fair Grounds Coffee Cafe", cat:"restaurant", dist:7.87, lat:36.877, lng:-76.295, addr:"806 Baldwin Ave #2, Norfolk", blurb:"Norfolk's oldest independent coffee shop, tucked into a quirky two-story house in Ghent — great espresso, in-house sandwiches, and a genuinely cozy place to sit a while.", hours:"Mon–Thu,Sun 7–20 · Fri/Sat 7–21", phone:"+1 757-640-2899", rating:4.6, reviewCount:369 },
   { id:"redwood-smoke-shack-norfolk", name:"Redwood Smoke Shack", cat:"restaurant", dist:8.01, lat:36.876, lng:-76.293, addr:"2001 Manteo St, Norfolk", blurb:"Texas-style BBQ smoked low and slow over oak, hickory, and pecan — genuinely great brisket, and one of the only spots in Hampton Roads pouring Texas' own Big Red soda.", hours:"Tue–Sat 11–20 · Closed Sun/Mon", phone:"+1 757-624-1000", rating:4.7, reviewCount:433 },
 
@@ -31,6 +32,7 @@ const places = [
 
   // Housing & Off-Base Living
   { id:"gates-of-west-bay", name:"Gates of West Bay Apartments", cat:"housing", dist:2.90, lat:36.9502, lng:-76.2775, addr:"272 W Bay Ave, Norfolk", blurb:"A pet-friendly apartment community in West Ocean View, just a couple blocks from the base gates — 1-3 bedroom units with a pool, sundeck, and recently renovated units.", hours:"Mon–Fri 9:00–17:00 · Closed Sat/Sun", phone:"+1 757-378-0771", rating:3.9, reviewCount:0 },
+  { id:"larchmont-apartments", name:"Larchmont Apartments", cat:"housing", dist:7.41, lat:36.898, lng:-76.253, addr:"5504 Monroe Pl, Norfolk", blurb:"A well-regarded community on 9 acres in one of Norfolk's most established neighborhoods — spacious floor plans, minutes from Old Dominion University, Ghent, and the base.", hours:"Mon–Fri 9:00–17:00 · Closed Sat/Sun", phone:"+1 757-489-8929", rating:4.0, reviewCount:0 },
 
   // Schools & Childcare
   { id:"ghent-school", name:"Ghent School", cat:"schools", dist:8.00, lat:36.876, lng:-76.294, addr:"200 Shirley Ave, Norfolk", blurb:"A well-regarded K-8 public school in Ghent with a Gifted & Talented program — part of Norfolk Public Schools, which serves the base and has multiple schools with the Virginia Purple Star military-friendly designation.", hours:"Mon–Fri 7:30–15:30", phone:"+1 757-628-2565", rating:4.2, reviewCount:0 },
@@ -101,6 +103,15 @@ const places = [
 
   // Bars
   { id:"the-ghent-rooftop-bar", name:"The Ghent Rooftop Bar", cat:"bars", dist:8.00, lat:36.876, lng:-76.294, addr:"319 W 21st St Suite A, Norfolk", blurb:"A genuinely fun, self-pour taphouse and rooftop lounge — activate a pour card and serve yourself beer, wine, and cocktails at your own pace, with fire pits and heaters for cooler nights.", hours:"Wed–Fri 17:00–22:00 · Sat 12:00–22:00 · Sun 12:00–21:00 · Closed Mon/Tue", phone:"+1 757-647-4820", rating:4.4, reviewCount:72 },
+
+  // Phone & Internet
+  { id:"att-store-ghent", name:"AT&T Store (Ghent)", cat:"phone", dist:8.00, lat:36.876, lng:-76.294, addr:"1304 Colley Ave, Norfolk", blurb:"Phones, tablets, accessories, and AT&T Home Internet — a straightforward stop for a new line, a device upgrade, or setting up service after a move.", hours:"Mon–Sat 10:00–20:00 · Sun 11:00–18:00", phone:"+1 757-625-1122", rating:4.2, reviewCount:187 },
+
+  // Tattoo Shops
+  { id:"colley-ave-tattoo", name:"Colley Ave Tattoo", cat:"tattoo", dist:7.41, lat:36.898, lng:-76.253, addr:"4701 Colley Ave, Norfolk", blurb:"A classic-style street shop specializing in traditional, blackwork, and Japanese tattooing — walk-ins welcome when an artist has an opening, no piercings.", hours:"Mon–Sat 11:00–20:00 · Closed Sun", phone:"+1 757-340-0008", rating:4.7, reviewCount:0 },
+
+  // Furniture
+  { id:"grand-furniture-norfolk", name:"Grand Furniture", cat:"furniture", dist:7.19, lat:36.917, lng:-76.238, addr:"836 E Little Creek Rd, Norfolk", blurb:"A Hampton Roads furniture chain dating back to 1947 — living room, bedroom, and dining furniture plus mattresses, with financing options for those buying on a budget.", hours:"Mon,Tue,Thu 11:00–19:30 · Wed 10:45–19:30 · Fri/Sat 10:00–20:00 · Sun 11:00–19:00", phone:null, rating:3.8, reviewCount:24 },
 ];
 
 const catLabels = { restaurant:"Restaurant", grocery:"Grocery", attraction:"Attraction", auto:"Auto", health:"Health", banking:"Banking", housing:"Housing", pets:"Pet Services", fitness:"Fitness", religious:"Religious", shopping:"Shopping", storage:"Storage", museum:"Museum", outdoors:"Outdoors", kids:"Kids", farmers:"Farmers Market", phone:"Phone/Internet", cars:"Car Dealer", tailor:"Tailoring", furniture:"Furniture", legal:"Legal", education:"Education", schools:"Schools", community:"Community", bars:"Bar", services:"Base Services", rec:"Recreation", tattoo:"Tattoo Shop", notary:"Notary/Shipping", beaches:"Beaches", historic:"Historic Triangle Day Trips" };
