@@ -77,6 +77,30 @@ const places = [
 
   // Legal
   { id:"naval-legal-service-office", name:"Naval Legal Service Office Mid-Atlantic", cat:"legal", dist:0.46, lat:36.947, lng:-76.315, addr:"Bldg A-50, 9620 Maryland Ave, Naval Station Norfolk", blurb:"On-base legal assistance for service members and families — wills, powers of attorney, notary services, and general legal questions, on a walk-in basis.", hours:"Mon–Thu 07:45–11:45 & 12:45–15:45 · Fri 09:00–12:45", phone:"+1 757-341-4489", rating:3.9, reviewCount:0 },
+
+  // Tailoring & Dry Cleaning
+  { id:"aj-alterations-cleaners", name:"A & J Alterations & Cleaners", cat:"tailor", dist:10.01, lat:36.858, lng:-76.291, addr:"4117 Granby St, Norfolk", blurb:"A genuinely well-regarded alterations and dry cleaning shop with real military experience — uniform patches, hems, and formalwear alterations done right.", hours:"Mon–Fri 9:00–18:00 · Sat 9:00–16:30 · Closed Sun", phone:"+1 757-625-3031", rating:4.5, reviewCount:12 },
+
+  // Storage
+  { id:"public-storage-w35th", name:"Public Storage (W 35th St)", cat:"storage", dist:7.19, lat:36.885, lng:-76.286, addr:"1090 W 35th St, Norfolk", blurb:"Conveniently located near Hampton Blvd and I-64 — a range of unit sizes, popular with military families needing flexible short-term storage around a move or deployment.", hours:"Office: Mon–Fri 9:30–18:00 · Sat 9:30–17:00 · Sun 11:00–17:00", phone:null, rating:3.6, reviewCount:0 },
+
+  // Farmers Market
+  { id:"riverview-village-farmers-market", name:"Riverview Village Day's Farmers' Market", cat:"farmers", dist:7.99, lat:36.87852, lng:-76.281973, addr:"3500 Granby St, Norfolk", blurb:"Described as the area's largest open-air farmers' market — 65+ vendors selling produce, honey, eggs, plants, and crafts, held twice monthly.", hours:"2nd & 4th Sundays, April–December, 11:00–16:00", phone:"+1 757-752-4316", rating:4.5, reviewCount:0 },
+
+  // More Museums & Attractions
+  { id:"casemate-museum-fort-monroe", name:"Casemate Museum at Fort Monroe", cat:"museum", dist:6.24, lat:37.0028, lng:-76.3057, addr:"20 Bernard Rd, Fort Monroe, Hampton", blurb:"Free museum inside America's largest stone fort — walk through the actual casemates, including the cell where Confederate president Jefferson Davis was imprisoned. Requires a free timed-entry ticket from the Visitor & Education Center.", hours:"Wed–Sun 10:00–16:00 · Closed Mon/Tue", phone:"+1 757-690-8181", rating:4.6, reviewCount:38 },
+
+  // Car Dealers
+  { id:"priority-ford-norfolk", name:"Priority Ford", cat:"cars", dist:11.01, lat:36.885, lng:-76.213, addr:"3420 N Military Hwy, Norfolk", blurb:"A full-service Ford dealership with new and used inventory, plus a service and parts department for routine maintenance and repairs.", hours:"Mon–Fri 9:00–20:00 · Sat 9:00–18:00 · Sun 12:00–17:00", phone:"+1 757-255-8935", rating:4.2, reviewCount:180 },
+
+  // Education
+  { id:"tcc-norfolk-campus", name:"Tidewater Community College – Norfolk Campus", cat:"education", dist:10.80, lat:36.851, lng:-76.290, addr:"300 Granby St, Norfolk", blurb:"An affordable, accessible option for continuing education or a degree while stationed here — commonly used with Tuition Assistance, and one of four TCC campuses across Hampton Roads.", hours:"Mon–Tue 8:30–18:30 · Wed–Fri 8:30–17:00", phone:"+1 757-822-1110", rating:3.9, reviewCount:0 },
+
+  // Notary & Shipping
+  { id:"ups-store-ghent", name:"The UPS Store (Ghent)", cat:"notary", dist:8.00, lat:36.876, lng:-76.294, addr:"520 W 21st St, Norfolk", blurb:"Locally owned and operated — shipping, printing, mailbox rental, and notary services, right in the heart of Ghent next to Starbucks.", hours:"Open 7 days — check store for daily hours", phone:"+1 757-626-1766", rating:4.3, reviewCount:0 },
+
+  // Bars
+  { id:"the-ghent-rooftop-bar", name:"The Ghent Rooftop Bar", cat:"bars", dist:8.00, lat:36.876, lng:-76.294, addr:"319 W 21st St Suite A, Norfolk", blurb:"A genuinely fun, self-pour taphouse and rooftop lounge — activate a pour card and serve yourself beer, wine, and cocktails at your own pace, with fire pits and heaters for cooler nights.", hours:"Wed–Fri 17:00–22:00 · Sat 12:00–22:00 · Sun 12:00–21:00 · Closed Mon/Tue", phone:"+1 757-647-4820", rating:4.4, reviewCount:72 },
 ];
 
 const catLabels = { restaurant:"Restaurant", grocery:"Grocery", attraction:"Attraction", auto:"Auto", health:"Health", banking:"Banking", housing:"Housing", pets:"Pet Services", fitness:"Fitness", religious:"Religious", shopping:"Shopping", storage:"Storage", museum:"Museum", outdoors:"Outdoors", kids:"Kids", farmers:"Farmers Market", phone:"Phone/Internet", cars:"Car Dealer", tailor:"Tailoring", furniture:"Furniture", legal:"Legal", education:"Education", schools:"Schools", community:"Community", bars:"Bar", services:"Base Services", rec:"Recreation", tattoo:"Tattoo Shop", notary:"Notary/Shipping", beaches:"Beaches", historic:"Historic Triangle Day Trips" };
