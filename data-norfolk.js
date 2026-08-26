@@ -37,6 +37,8 @@ const places = [
 
   // Banking & Financial Services
   { id:"navy-federal-hampton-blvd", name:"Navy Federal Credit Union (Hampton Blvd)", cat:"banking", dist:6.66, lat:36.887, lng:-76.305, addr:"7979 Hampton Blvd, Norfolk", blurb:"The credit union built specifically for military families — this branch sits right along Hampton Blvd near the base, though expect a wait on paydays and Saturdays.", hours:"Mon–Fri 9:00–19:30 · Sat 9:00–13:00 · Closed Sun", phone:"+1 888-842-6328", rating:3.2, reviewCount:17 },
+  { id:"townebank-ghent", name:"TowneBank (Ghent)", cat:"banking", dist:8.00, lat:36.876, lng:-76.294, addr:"1006 Colley Ave, Norfolk", blurb:"A well-regarded regional bank with a genuinely personal touch — full-service branch with a drive-up ATM, in the heart of Ghent.", hours:"Mon–Thu 9:00–17:00 · Fri 9:00–18:00 · Closed Sat/Sun", phone:"+1 757-673-1900", rating:4.5, reviewCount:0 },
+  { id:"wells-fargo-ghent", name:"Wells Fargo (Ghent)", cat:"banking", dist:8.00, lat:36.876, lng:-76.294, addr:"2000 Colonial Ave, Norfolk", blurb:"A full-service Wells Fargo branch that's served the Ghent area for decades — standard banking services plus a full ATM.", hours:"Mon–Fri 9:00–17:00 · Closed Sat/Sun", phone:"+1 757-314-1701", rating:3.0, reviewCount:0 },
 
   // Housing & Off-Base Living
   { id:"gates-of-west-bay", name:"Gates of West Bay Apartments", cat:"housing", dist:2.90, lat:36.9502, lng:-76.2775, addr:"272 W Bay Ave, Norfolk", blurb:"A pet-friendly apartment community in West Ocean View, just a couple blocks from the base gates — 1-3 bedroom units with a pool, sundeck, and recently renovated units.", hours:"Mon–Fri 9:00–17:00 · Closed Sat/Sun", phone:"+1 757-378-0771", rating:3.9, reviewCount:0 },
@@ -44,10 +46,12 @@ const places = [
 
   // Schools & Childcare
   { id:"ghent-school", name:"Ghent School", cat:"schools", dist:8.00, lat:36.876, lng:-76.294, addr:"200 Shirley Ave, Norfolk", blurb:"A well-regarded K-8 public school in Ghent with a Gifted & Talented program — part of Norfolk Public Schools, which serves the base and has multiple schools with the Virginia Purple Star military-friendly designation.", hours:"Mon–Fri 7:30–15:30", phone:"+1 757-628-2565", rating:4.2, reviewCount:0 },
+  { id:"maury-high-school", name:"Matthew Fontaine Maury High School", cat:"schools", dist:8.00, lat:36.876, lng:-76.294, addr:"322 Shirley Ave, Norfolk", blurb:"A large, long-established Norfolk Public Schools high school right in Ghent — one of the district's 5 comprehensive high schools serving the base community.", hours:"Mon–Fri 7:30–14:30", phone:null, rating:3.6, reviewCount:0 },
 
   // Fitness
   { id:"n24-gym", name:"N-24 Gym (Naval Station Norfolk)", cat:"fitness", dist:0.11, lat:36.947, lng:-76.311, addr:"Gilbert St, Bldg N-24, Naval Station Norfolk", blurb:"The main on-base fitness center — free for active duty, with cardio equipment, weights, and group classes just steps from the gate.", hours:"Contact for hours", phone:"+1 757-444-2276", rating:3.8, reviewCount:0 },
   { id:"onelife-fitness-norfolk", name:"Onelife Fitness Norfolk", cat:"fitness", dist:7.84, lat:36.877, lng:-76.297, addr:"1900 Monticello Ave, Norfolk", blurb:"A large, full-amenity gym with a pool, group classes, kids club, and a women's-only workout area — a step up from a basic gym if you want the extras.", hours:"Mon–Thu 5:00–23:00 · Fri 5:00–22:00 · Sat/Sun 7:00–20:00", phone:"+1 757-248-4800", rating:4.1, reviewCount:241 },
+  { id:"planet-fitness-military-hwy", name:"Planet Fitness (N Military Hwy)", cat:"fitness", dist:9.94, lat:36.885, lng:-76.229, addr:"415 N Military Hwy, Norfolk", blurb:"A genuinely low-cost, no-pressure \"Judgement Free Zone\" gym open around the clock — good if you want a straightforward place to work out without a big membership commitment.", hours:"Open 24 hours", phone:"+1 757-330-5339", rating:4.2, reviewCount:0 },
 
   // Pet Services
   { id:"ghent-veterinary-hospital", name:"Ghent Veterinary Hospital", cat:"pets", dist:8.09, lat:36.875, lng:-76.295, addr:"939 W 21st St, Norfolk", blurb:"An AAHA-accredited small animal hospital with a genuinely low-stress, fear-free approach — routine care, surgery, dentistry, and in-house diagnostics.", hours:"Mon,Wed,Thu,Fri 8:00–17:00 · Tue 8:00–19:00 · Sat 9:00–14:00 · Closed Sun", phone:"+1 757-351-0167", rating:4.7, reviewCount:41 },
