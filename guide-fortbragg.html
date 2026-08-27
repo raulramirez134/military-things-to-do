@@ -49,14 +49,35 @@
   .stage-num{ font-family:'JetBrains Mono', monospace; font-size:13px; color:var(--brass); border:1px solid var(--brass);
     border-radius:20px; padding:3px 11px; }
   .checklist{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
-  .checklist li{
+  .checklist li{ border-radius:4px; }
+  .check-row{
     background:#fff; border:1px solid var(--line); border-radius:4px; padding:14px 16px;
     display:flex; gap:12px; align-items:flex-start; font-size:14.5px; line-height:1.55;
+    cursor:pointer; transition:background 0.15s, border-color 0.15s;
   }
-  .checklist li::before{ content:"☐"; font-size:16px; color:var(--brass); flex-shrink:0; margin-top:1px; }
+  .check-row:hover{ border-color: var(--brass); }
+  .check-input{
+    appearance:none; -webkit-appearance:none; flex-shrink:0; margin:1px 0 0;
+    width:18px; height:18px; border:1.5px solid var(--brass); border-radius:3px;
+    background:#fff; cursor:pointer; position:relative;
+  }
+  .check-input:checked{ background:var(--brass); }
+  .check-input:checked::after{
+    content:"✓"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:12px; font-weight:700; line-height:1;
+  }
+  .check-input:focus-visible{ outline:2px solid var(--steel); outline-offset:2px; }
+  .checklist li.done .check-row{ background: rgba(91,107,79,0.06); }
+  .checklist li.done .check-row > div{ opacity:0.6; text-decoration: line-through; text-decoration-color: rgba(24,36,32,0.35); }
   .checklist li b{ font-family:'Source Sans 3', sans-serif; }
-  .checklist li .note{ display:block; color:#69665B; font-size:13px; margin-top:3px; }
+  .checklist li .note{ display:block; color:#69665B; font-size:13px; margin-top:3px; text-decoration:none; }
   .cta-row{ margin-top:10px; font-size:13px; }
+  .progress-wrap{ max-width:900px; margin:0 auto 34px; display:flex; align-items:center; gap:14px; }
+  .progress-label{ font-family:'JetBrains Mono', monospace; font-size:12.5px; color:var(--ink); white-space:nowrap; }
+  .progress-track{ flex:1; height:8px; background: var(--parchment-dim); border-radius:20px; overflow:hidden; border:1px solid var(--line); }
+  .progress-fill{ height:100%; background:var(--brass); border-radius:20px; width:0%; transition:width 0.25s ease; }
+  .progress-reset{ font-family:'JetBrains Mono', monospace; font-size:11.5px; color:var(--olive); background:none; border:none;
+    cursor:pointer; text-decoration:underline; padding:0; white-space:nowrap; }
   footer{ background:var(--ink); color: rgba(237,231,214,0.55); padding: 26px 24px; font-size:12px; line-height:1.7; }
   footer .footer-inner{ max-width:900px; margin:0 auto; }
 </style>
@@ -65,6 +86,8 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#182420">
 </head>
 <body>
   <header class="brief">
@@ -79,41 +102,47 @@
     </div>
   </header>
 
+  <div class="progress-wrap">
+    <span class="progress-label" id="progressLabel">0 of 13 done</span>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <button class="progress-reset" id="progressReset" type="button">Reset</button>
+  </div>
+
   <main>
     <div class="stage">
       <div class="stage-head"><span class="stage-num">Before you arrive</span></div>
       <ul class="checklist">
-        <li><div><b>Request a sponsor</b> as soon as you get orders — complete DA Form 5434 through Army Career Tracker so your gaining unit can assign one.<span class="note">Your sponsor is genuinely one of the most useful resources for what's changed recently and current wait times.</span></div></li>
-        <li><div><b>Start your household goods paperwork early</b> through the Defense Personal Property System (DPS) — schedule your move as soon as your dates are firm.</div></li>
-        <li><div><b>Check your state driver's license is REAL ID compliant</b> — Fort Bragg enforces the REAL ID Act, and a non-compliant license may require extra ID at the gate.</div></li>
+        <li data-id="sponsor"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Request a sponsor</b> as soon as you get orders — complete DA Form 5434 through Army Career Tracker so your gaining unit can assign one.<span class="note">Your sponsor is genuinely one of the most useful resources for what's changed recently and current wait times.</span></div></label></li>
+        <li data-id="dps-paperwork"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Start your household goods paperwork early</b> through the Defense Personal Property System (DPS) — schedule your move as soon as your dates are firm.</div></label></li>
+        <li data-id="real-id"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Check your state driver's license is REAL ID compliant</b> — Fort Bragg enforces the REAL ID Act, and a non-compliant license may require extra ID at the gate.</div></label></li>
       </ul>
     </div>
 
     <div class="stage">
       <div class="stage-head"><span class="stage-num">First week</span></div>
       <ul class="checklist">
-        <li><div><b>Report to the XVIII Airborne Corps Reception Company</b> if you're a first-time arrival to Fort Bragg — it's a 24-hour operation for permanent party soldiers, then check in with your unit's S-1 (personnel office).</div></li>
-        <li><div><b>Enroll in DEERS and update ID cards</b> for every family member at the ID card section in the Soldier Support Center.</div></li>
-        <li><div><b>Visit the Corvias Housing Office</b> if you're planning on-post housing — call ahead at (910) 396-1022, and apply as early as possible since waitlists move slowly.</div></li>
-        <li><div><b>Start your off-post housing search early if renting</b> — Fayetteville, Hope Mills, and Spring Lake are the most affordable areas; Southern Pines/Pinehurst costs more but is popular for schools.</div></li>
+        <li data-id="reception-company"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Report to the XVIII Airborne Corps Reception Company</b> if you're a first-time arrival to Fort Bragg — it's a 24-hour operation for permanent party soldiers, then check in with your unit's S-1 (personnel office).</div></label></li>
+        <li data-id="deers"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Enroll in DEERS and update ID cards</b> for every family member at the ID card section in the Soldier Support Center.</div></label></li>
+        <li data-id="corvias-housing"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Visit the Corvias Housing Office</b> if you're planning on-post housing — call ahead at (910) 396-1022, and apply as early as possible since waitlists move slowly.</div></label></li>
+        <li data-id="off-post-search"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Start your off-post housing search early if renting</b> — Fayetteville, Hope Mills, and Spring Lake are the most affordable areas; Southern Pines/Pinehurst costs more but is popular for schools.</div></label></li>
       </ul>
     </div>
 
     <div class="stage">
       <div class="stage-head"><span class="stage-num">First month</span></div>
       <ul class="checklist">
-        <li><div><b>Register your vehicle and get a North Carolina driver's license</b> if you're relocating from out of state — the NC DMV has its own timeline requirements for new residents.</div></li>
-        <li><div><b>Enroll kids in school or the CDC/childcare waitlist</b> as early as possible — check whether you're zoned for Cumberland County Schools or Harnett/Moore County depending on where you land.<span class="note">See the Schools & Childcare section on the main listings page.</span></div></li>
-        <li><div><b>Register with TRICARE and get assigned a Primary Care Manager</b> through Womack Army Medical Center so routine and urgent care are set up before you need them.</div></li>
-        <li><div><b>Set up on-base or local banking</b> and confirm your BAH is calculating correctly for the Fort Bragg/Pope Military Housing Area (MHA code NC182).</div></li>
+        <li data-id="nc-license"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Register your vehicle and get a North Carolina driver's license</b> if you're relocating from out of state — the NC DMV has its own timeline requirements for new residents.</div></label></li>
+        <li data-id="school-cdc"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Enroll kids in school or the CDC/childcare waitlist</b> as early as possible — check whether you're zoned for Cumberland County Schools or Harnett/Moore County depending on where you land.<span class="note">See the Schools & Childcare section on the main listings page.</span></div></label></li>
+        <li data-id="tricare"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Register with TRICARE and get assigned a Primary Care Manager</b> through Womack Army Medical Center so routine and urgent care are set up before you need them.</div></label></li>
+        <li data-id="banking-bah"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Set up on-base or local banking</b> and confirm your BAH is calculating correctly for the Fort Bragg/Pope Military Housing Area (MHA code NC182).</div></label></li>
       </ul>
     </div>
 
     <div class="stage">
       <div class="stage-head"><span class="stage-num">Settling in</span></div>
       <ul class="checklist">
-        <li><div><b>Find a spouses' club or Family Readiness Group</b> — one of the fastest ways to build a local support network, especially given how often units deploy or rotate.</div></li>
-        <li><div><b>Explore beyond the post</b> — the Fayetteville area and nearby day trips (Asheville, the Outer Banks) have a lot to offer once the paperwork phase is behind you.</div></li>
+        <li data-id="frg"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Find a spouses' club or Family Readiness Group</b> — one of the fastest ways to build a local support network, especially given how often units deploy or rotate.</div></label></li>
+        <li data-id="explore-fayetteville"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Explore beyond the post</b> — the Fayetteville area and nearby day trips (Asheville, the Outer Banks) have a lot to offer once the paperwork phase is behind you.</div></label></li>
       </ul>
     </div>
 
@@ -125,6 +154,58 @@
       <p><b>Military Things To Do</b> is an independent community resource, not an official U.S. Department of Defense publication. Requirements and processes change — always confirm current steps with your sponsor, unit, or the relevant garrison office before relying on this checklist.</p>
     </div>
   </footer>
+<script>
+(function(){
+  var STORAGE_KEY = 'arrival_checklist_fortbragg';
+  var items = Array.prototype.slice.call(document.querySelectorAll('.checklist li[data-id]'));
+  var total = items.length;
+  var fillEl = document.getElementById('progressFill');
+  var labelEl = document.getElementById('progressLabel');
+  var resetBtn = document.getElementById('progressReset');
+
+  function loadState(){
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch(e) { return {}; }
+  }
+  function saveState(state){
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) { /* private mode etc — fail silently */ }
+  }
+  function updateProgress(){
+    var done = items.filter(function(li){ return li.classList.contains('done'); }).length;
+    labelEl.textContent = done + ' of ' + total + ' done';
+    fillEl.style.width = (total ? (done/total*100) : 0) + '%';
+  }
+
+  var state = loadState();
+  items.forEach(function(li){
+    var id = li.getAttribute('data-id');
+    var checkbox = li.querySelector('.check-input');
+    if (state[id]) {
+      checkbox.checked = true;
+      li.classList.add('done');
+    }
+    checkbox.addEventListener('change', function(){
+      if (checkbox.checked) { li.classList.add('done'); state[id] = true; }
+      else { li.classList.remove('done'); delete state[id]; }
+      saveState(state);
+      updateProgress();
+    });
+  });
+  updateProgress();
+
+  resetBtn.addEventListener('click', function(){
+    state = {};
+    saveState(state);
+    items.forEach(function(li){
+      li.classList.remove('done');
+      li.querySelector('.check-input').checked = false;
+    });
+    updateProgress();
+  });
+})();
+</script>
 <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "accc7ee5b3ea402cabc45138d3ff02bf"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>

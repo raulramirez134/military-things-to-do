@@ -50,14 +50,35 @@
     border-radius:20px; padding:3px 11px; }
   .stage-title{ font-family:'Big Shoulders Display', sans-serif; font-weight:700; font-size:26px; }
   .checklist{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
-  .checklist li{
+  .checklist li{ border-radius:4px; }
+  .check-row{
     background:#fff; border:1px solid var(--line); border-radius:4px; padding:14px 16px;
     display:flex; gap:12px; align-items:flex-start; font-size:14.5px; line-height:1.55;
+    cursor:pointer; transition:background 0.15s, border-color 0.15s;
   }
-  .checklist li::before{ content:"☐"; font-size:16px; color:var(--brass); flex-shrink:0; margin-top:1px; }
+  .check-row:hover{ border-color: var(--brass); }
+  .check-input{
+    appearance:none; -webkit-appearance:none; flex-shrink:0; margin:1px 0 0;
+    width:18px; height:18px; border:1.5px solid var(--brass); border-radius:3px;
+    background:#fff; cursor:pointer; position:relative;
+  }
+  .check-input:checked{ background:var(--brass); }
+  .check-input:checked::after{
+    content:"✓"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:12px; font-weight:700; line-height:1;
+  }
+  .check-input:focus-visible{ outline:2px solid var(--steel); outline-offset:2px; }
+  .checklist li.done .check-row{ background: rgba(91,107,79,0.06); }
+  .checklist li.done .check-row > div{ opacity:0.6; text-decoration: line-through; text-decoration-color: rgba(24,36,32,0.35); }
   .checklist li b{ font-family:'Source Sans 3', sans-serif; }
-  .checklist li .note{ display:block; color:#6b7268; font-size:13px; margin-top:3px; }
+  .checklist li .note{ display:block; color:#6b7268; font-size:13px; margin-top:3px; text-decoration:none; }
   .cta-row{ margin-top:10px; font-size:13px; }
+  .progress-wrap{ max-width:900px; margin:0 auto 34px; display:flex; align-items:center; gap:14px; }
+  .progress-label{ font-family:'JetBrains Mono', monospace; font-size:12.5px; color:var(--ink); white-space:nowrap; }
+  .progress-track{ flex:1; height:8px; background: var(--parchment-dim); border-radius:20px; overflow:hidden; border:1px solid var(--line); }
+  .progress-fill{ height:100%; background:var(--brass); border-radius:20px; width:0%; transition:width 0.25s ease; }
+  .progress-reset{ font-family:'JetBrains Mono', monospace; font-size:11.5px; color:var(--olive); background:none; border:none;
+    cursor:pointer; text-decoration:underline; padding:0; white-space:nowrap; }
   footer{ background:var(--ink); color: rgba(237,231,214,0.55); padding: 26px 24px; font-size:12px; line-height:1.7; }
   footer .footer-inner{ max-width:900px; margin:0 auto; }
 </style>
@@ -66,6 +87,8 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#182420">
 </head>
 <body>
   <header class="brief">
@@ -83,44 +106,50 @@
     </div>
   </header>
 
+  <div class="progress-wrap">
+    <span class="progress-label" id="progressLabel">0 of 16 done</span>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <button class="progress-reset" id="progressReset" type="button">Reset</button>
+  </div>
+
   <main>
     <div class="stage">
       <div class="stage-head"><span class="stage-num">Before you arrive</span></div>
       <ul class="checklist">
-        <li><div><b>Confirm your sponsor</b> is assigned and in contact — they're your best source for what's changed recently.<span class="note">Ask about your report-no-later-than date and any current in-processing quirks.</span></div></li>
-        <li><div><b>Start your household goods paperwork early</b> — separate shipments (household goods, unaccompanied baggage) often arrive on very different timelines overseas.</div></li>
-        <li><div><b>Check passport and visa status</b> for every family member, including pets if you're bringing one — pet import rules for Germany have real lead time requirements.</div></li>
+        <li data-id="confirm-sponsor"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Confirm your sponsor</b> is assigned and in contact — they're your best source for what's changed recently.<span class="note">Ask about your report-no-later-than date and any current in-processing quirks.</span></div></label></li>
+        <li data-id="hhg-paperwork"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Start your household goods paperwork early</b> — separate shipments (household goods, unaccompanied baggage) often arrive on very different timelines overseas.</div></label></li>
+        <li data-id="passport-visa"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Check passport and visa status</b> for every family member, including pets if you're bringing one — pet import rules for Germany have real lead time requirements.</div></label></li>
       </ul>
     </div>
 
     <div class="stage">
       <div class="stage-head"><span class="stage-num">First week</span></div>
       <ul class="checklist">
-        <li><div><b>In-process with your unit</b> and get your Geneva Conventions ID/dependent ID cards sorted at the ID card section.</div></li>
-        <li><div><b>Visit the Housing Office</b> if you're planning to live off base, before signing anything — they can flag known problem landlords or areas.</div></li>
-        <li><div><b>Register with the Visitor Control Center</b> process if any family members will need access without an active sponsor present.</div></li>
-        <li><div><b>Stop by the Commissary and Exchange</b> to get oriented — small thing, but it helps to know where the basics are early.</div></li>
+        <li data-id="unit-inprocess"><label class="check-row"><input type="checkbox" class="check-input"><div><b>In-process with your unit</b> and get your Geneva Conventions ID/dependent ID cards sorted at the ID card section.</div></label></li>
+        <li data-id="housing-office"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Visit the Housing Office</b> if you're planning to live off base, before signing anything — they can flag known problem landlords or areas.</div></label></li>
+        <li data-id="visitor-control"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Register with the Visitor Control Center</b> process if any family members will need access without an active sponsor present.</div></label></li>
+        <li data-id="commissary-exchange"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Stop by the Commissary and Exchange</b> to get oriented — small thing, but it helps to know where the basics are early.</div></label></li>
       </ul>
     </div>
 
     <div class="stage">
       <div class="stage-head"><span class="stage-num">First month</span></div>
       <ul class="checklist">
-        <li><div><b>Get your USAREUR/local driving license</b> through the Automobile Registration process — required before driving off base, and it takes a written test.</div></li>
-        <li><div><b>Register your vehicle</b> and sort out German liability insurance if you're bringing or buying a car locally.</div></li>
-        <li><div><b>Get your ration card and tax-relief (VAT) paperwork</b> sorted — this affects fuel purchases and off-base big purchases.</div></li>
-        <li><div><b>Set up on-base banking</b> or confirm your stateside bank handles overseas transactions and ATM fees reasonably.</div></li>
-        <li><div><b>Register kids for school or the CDC/childcare waitlist</b> as early as possible — waitlists move slowly.<span class="note">See the Schools & Childcare section on the main listings page.</span></div></li>
-        <li><div><b>Register with the on-base clinic or TRICARE Overseas</b> so routine and urgent care are already set up before you need them.</div></li>
+        <li data-id="driving-license"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Get your USAREUR/local driving license</b> through the Automobile Registration process — required before driving off base, and it takes a written test.</div></label></li>
+        <li data-id="vehicle-registration"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Register your vehicle</b> and sort out German liability insurance if you're bringing or buying a car locally.</div></label></li>
+        <li data-id="ration-card"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Get your ration card and tax-relief (VAT) paperwork</b> sorted — this affects fuel purchases and off-base big purchases.</div></label></li>
+        <li data-id="banking"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Set up on-base banking</b> or confirm your stateside bank handles overseas transactions and ATM fees reasonably.</div></label></li>
+        <li data-id="school-cdc"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Register kids for school or the CDC/childcare waitlist</b> as early as possible — waitlists move slowly.<span class="note">See the Schools & Childcare section on the main listings page.</span></div></label></li>
+        <li data-id="tricare-clinic"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Register with the on-base clinic or TRICARE Overseas</b> so routine and urgent care are already set up before you need them.</div></label></li>
       </ul>
     </div>
 
     <div class="stage">
       <div class="stage-head"><span class="stage-num">Settling in</span></div>
       <ul class="checklist">
-        <li><div><b>Look into a German language class</b> — even basic phrases make daily errands easier.<span class="note">See the Language Schools section on the main listings page.</span></div></li>
-        <li><div><b>Find a spouses' club or community group</b> — one of the fastest ways to build a local support network.</div></li>
-        <li><div><b>Explore beyond the base</b> — the KMC has a lot to offer once the paperwork phase is behind you.</div></li>
+        <li data-id="language-class"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Look into a German language class</b> — even basic phrases make daily errands easier.<span class="note">See the Language Schools section on the main listings page.</span></div></label></li>
+        <li data-id="spouses-club"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Find a spouses' club or community group</b> — one of the fastest ways to build a local support network.</div></label></li>
+        <li data-id="explore-kmc"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Explore beyond the base</b> — the KMC has a lot to offer once the paperwork phase is behind you.</div></label></li>
       </ul>
       <p class="cta-row"><a href="ramstein.html">→ Browse the full Ramstein listings</a></p>
     </div>
@@ -131,6 +160,58 @@
       <p><b>Military Things To Do</b> is an independent community resource, not an official U.S. Department of Defense or U.S. Air Force publication. Requirements and processes change — always confirm current steps with your sponsor, unit, or the relevant base office before relying on this checklist.</p>
     </div>
   </footer>
+<script>
+(function(){
+  var STORAGE_KEY = 'arrival_checklist_ramstein';
+  var items = Array.prototype.slice.call(document.querySelectorAll('.checklist li[data-id]'));
+  var total = items.length;
+  var fillEl = document.getElementById('progressFill');
+  var labelEl = document.getElementById('progressLabel');
+  var resetBtn = document.getElementById('progressReset');
+
+  function loadState(){
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch(e) { return {}; }
+  }
+  function saveState(state){
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) { /* private mode etc — fail silently */ }
+  }
+  function updateProgress(){
+    var done = items.filter(function(li){ return li.classList.contains('done'); }).length;
+    labelEl.textContent = done + ' of ' + total + ' done';
+    fillEl.style.width = (total ? (done/total*100) : 0) + '%';
+  }
+
+  var state = loadState();
+  items.forEach(function(li){
+    var id = li.getAttribute('data-id');
+    var checkbox = li.querySelector('.check-input');
+    if (state[id]) {
+      checkbox.checked = true;
+      li.classList.add('done');
+    }
+    checkbox.addEventListener('change', function(){
+      if (checkbox.checked) { li.classList.add('done'); state[id] = true; }
+      else { li.classList.remove('done'); delete state[id]; }
+      saveState(state);
+      updateProgress();
+    });
+  });
+  updateProgress();
+
+  resetBtn.addEventListener('click', function(){
+    state = {};
+    saveState(state);
+    items.forEach(function(li){
+      li.classList.remove('done');
+      li.querySelector('.check-input').checked = false;
+    });
+    updateProgress();
+  });
+})();
+</script>
 <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "accc7ee5b3ea402cabc45138d3ff02bf"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
