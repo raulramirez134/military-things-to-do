@@ -239,16 +239,6 @@
   .section-label:first-child{ margin-top:0; }
   .section-label::after{ content:""; flex:1; height:1px; background:var(--line); }
   .grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 16px; }
-  .favorites-label{
-    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:0.1em; text-transform:uppercase;
-    color:var(--brass); margin: 0 0 14px; display:flex; align-items:center; gap:10px;
-  }
-  .favorites-label::after{ content:""; flex:1; height:1px; background:var(--line); }
-  .favorites-section{
-    background: rgba(192,138,52,0.05); border:1px solid rgba(192,138,52,0.3); border-radius:6px;
-    padding:22px 22px 6px; margin-bottom:34px;
-  }
-  .favorites-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 16px; }
   .card{
     background:#fff; border:1px solid var(--line); border-radius:4px; padding: 18px 18px 16px;
     display:flex; flex-direction:column; gap:10px; position:relative;
@@ -748,12 +738,6 @@
         <p style="margin:0 0 12px; font-size:15px;">Something went wrong loading the listings — likely a connection hiccup rather than a problem with the data itself.</p>
         <button type="button" class="action-btn" onclick="window.location.reload()">↻ Try again</button>
       </div>
-
-      <div class="favorites-section" id="favoritesSection">
-        <h2 class="favorites-label">★ Local Favorites</h2>
-        <div class="favorites-grid" id="grid-favorites"></div>
-      </div>
-
       <h2 class="section-label">Restaurants &amp; Cafés</h2>
       <div class="grid" data-group="restaurant" id="grid-restaurant"></div>
 
@@ -1348,15 +1332,8 @@ function sortPlaces(items, sortBy){
   return sorted;
 }
 
-const LOCAL_FAVORITES = ["saltine-norfolk", "doumars-cones-bbq", "nauticus", "macarthur-memorial", "norfolk-botanical-garden", "attucks-theatre"];
-
 function render(){
   const sortBy = document.getElementById("sortSelect") ? document.getElementById("sortSelect").value : "distance";
-  const favEl = document.getElementById("grid-favorites");
-  if(favEl){
-    const favItems = LOCAL_FAVORITES.map(id => places.find(p => p.id === id)).filter(Boolean);
-    favEl.innerHTML = favItems.map(cardHTML).join("");
-  }
   ["restaurant","grocery","attraction","auto","health","banking","housing","pets","fitness","religious","shopping","storage","museum","rec","outdoors","kids","farmers","phone","cars","tailor","furniture","legal","education","schools","community","bars","services","tattoo","notary","beaches","historic"].forEach(cat=>{
     const el = document.getElementById("grid-"+cat);
     const items = sortPlaces(places.filter(p=>p.cat===cat), sortBy);
@@ -1378,10 +1355,6 @@ const emptyState = document.getElementById("emptyState");
 function applyFilter(){
   const active = document.querySelector(".cat-tab.active").dataset.cat;
   const query = document.getElementById("searchBox").value.trim().toLowerCase();
-  const favoritesSectionEl = document.getElementById("favoritesSection");
-  if(favoritesSectionEl){
-    favoritesSectionEl.style.display = (active === "all" && !query) ? "" : "none";
-  }
   const openNowOnlyEl = document.getElementById("openNowOnly");
   const openNowOnly = openNowOnlyEl ? openNowOnlyEl.checked : false;
   const favs = getAllFavorites();
