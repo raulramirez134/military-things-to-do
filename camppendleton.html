@@ -628,19 +628,32 @@
           </p>
         </div>
         <div class="brief-graphic" aria-hidden="true">
-          <svg viewBox="0 0 200 270" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="100" cy="34" r="15" fill="none" stroke="#D9A24C" stroke-width="6"/>
-            <line x1="100" y1="49" x2="100" y2="164" stroke="#D9A24C" stroke-width="7" stroke-linecap="round"/>
-            <line x1="62" y1="70" x2="138" y2="70" stroke="#D9A24C" stroke-width="6" stroke-linecap="round"/>
-            <path d="M100 164 Q48 173 38 118" fill="none" stroke="#D9A24C" stroke-width="7" stroke-linecap="round"/>
-            <path d="M100 164 Q152 173 162 118" fill="none" stroke="#D9A24C" stroke-width="7" stroke-linecap="round"/>
-            <path d="M26 110 L38 118 L50 106" fill="none" stroke="#D9A24C" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M174 110 L162 118 L150 106" fill="none" stroke="#D9A24C" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M20 185 Q45 175 70 185 T120 185 T170 185" fill="none" stroke="rgba(217,162,76,0.45)" stroke-width="2.5"/>
-            <path d="M20 195 Q45 185 70 195 T120 195 T170 195" fill="none" stroke="rgba(217,162,76,0.25)" stroke-width="2"/>
-            <line x1="30" y1="212" x2="170" y2="212" stroke="rgba(217,162,76,0.4)" stroke-width="1"/>
-            <text x="100" y="232" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="15" font-weight="700" letter-spacing="1" fill="#D9A24C">CAMP</text>
-            <text x="100" y="248" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" letter-spacing="3" fill="rgba(237,231,214,0.65)">PENDLETON</text>
+          <svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="pendletonBrass" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#F2CD8A"/><stop offset="55%" stop-color="#D9A24C"/><stop offset="100%" stop-color="#8F6420"/>
+              </linearGradient>
+              <radialGradient id="pendletonRustSun" cx="50%" cy="35%" r="60%">
+                <stop offset="0%" stop-color="#D9754C"/><stop offset="100%" stop-color="#A8472C"/>
+              </radialGradient>
+              <radialGradient id="pendletonBadgeBg" cx="50%" cy="35%" r="65%">
+                <stop offset="0%" stop-color="#223129"/><stop offset="100%" stop-color="#141f19"/>
+              </radialGradient>
+            </defs>
+            <rect x="18" y="14" width="164" height="164" rx="26" fill="url(#pendletonBadgeBg)"/>
+            <circle cx="99" cy="72" r="32" fill="url(#pendletonRustSun)"/>
+            <line x1="65" y1="68" x2="133" y2="68" stroke="#A8472C" stroke-width="3" opacity="0.6"/>
+            <line x1="70" y1="80" x2="128" y2="80" stroke="#A8472C" stroke-width="3" opacity="0.6"/>
+            <path d="M100,178 C94,140 106,105 99,72" stroke="url(#pendletonBrass)" stroke-width="7" fill="none" stroke-linecap="round"/>
+            <path d="M99,72 Q70,42 48,56" stroke="url(#pendletonBrass)" stroke-width="6" fill="none" stroke-linecap="round"/>
+            <path d="M99,72 Q62,58 34,78" stroke="url(#pendletonBrass)" stroke-width="6" fill="none" stroke-linecap="round"/>
+            <path d="M99,72 Q58,78 32,100" stroke="url(#pendletonBrass)" stroke-width="6" fill="none" stroke-linecap="round"/>
+            <path d="M99,72 Q128,42 150,56" stroke="url(#pendletonBrass)" stroke-width="6" fill="none" stroke-linecap="round"/>
+            <path d="M99,72 Q136,58 164,78" stroke="url(#pendletonBrass)" stroke-width="6" fill="none" stroke-linecap="round"/>
+            <path d="M99,72 Q140,78 166,100" stroke="url(#pendletonBrass)" stroke-width="6" fill="none" stroke-linecap="round"/>
+            <line x1="30" y1="192" x2="170" y2="192" stroke="rgba(217,162,76,0.4)" stroke-width="1"/>
+            <text x="100" y="210" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="15" font-weight="700" letter-spacing="1" fill="#D9A24C">CAMP</text>
+            <text x="100" y="226" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" letter-spacing="3" fill="rgba(237,231,214,0.65)">PENDLETON</text>
           </svg>
         </div>
       </div>
