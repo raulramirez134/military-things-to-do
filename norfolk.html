@@ -143,7 +143,7 @@
   .brief-inner{ max-width:1100px; margin:0 auto; }
   .brief-flex{ display:flex; align-items:center; justify-content:space-between; gap:30px; }
   .brief-copy{ flex:1; min-width:0; }
-  .brief-graphic{ flex-shrink:0; width:150px; height:202px; opacity:0.95; }
+  .brief-graphic{ flex-shrink:0; width:150px; height:210px; opacity:0.95; }
   .brief-graphic svg{ width:100%; height:100%; }
   @media (max-width:760px){ .brief-graphic{ display:none; } }
   .eyebrow{
@@ -615,18 +615,34 @@
           </p>
         </div>
         <div class="brief-graphic" aria-hidden="true">
-          <svg viewBox="0 0 200 270" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="100" cy="42" r="17" fill="none" stroke="#D9A24C" stroke-width="6"/>
-            <path d="M100 59 L100 190" stroke="#D9A24C" stroke-width="8" stroke-linecap="round" fill="none"/>
-            <path d="M60 82 L140 82" stroke="#D9A24C" stroke-width="7" stroke-linecap="round" fill="none"/>
-            <circle cx="100" cy="190" r="8" fill="#D9A24C"/>
-            <path d="M100 190 C 58 190, 22 174, 17 138 C 15 122, 22 109, 36 102" stroke="#D9A24C" stroke-width="8" stroke-linecap="round" fill="none"/>
-            <path d="M100 190 C 142 190, 178 174, 183 138 C 185 122, 178 109, 164 102" stroke="#D9A24C" stroke-width="8" stroke-linecap="round" fill="none"/>
-            <path d="M36 102 L26 88 L48 93 Z" fill="#D9A24C"/>
-            <path d="M164 102 L174 88 L152 93 Z" fill="#D9A24C"/>
-            <line x1="30" y1="216" x2="170" y2="216" stroke="rgba(217,162,76,0.4)" stroke-width="1"/>
-            <text x="100" y="236" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="15" font-weight="700" letter-spacing="2" fill="#D9A24C">NAVAL STATION</text>
-            <text x="100" y="252" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" letter-spacing="4" fill="rgba(237,231,214,0.65)">NORFOLK</text>
+          <svg viewBox="0 0 200 280" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="norfolkBrass" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#F2CD8A"/><stop offset="55%" stop-color="#D9A24C"/><stop offset="100%" stop-color="#8F6420"/>
+              </linearGradient>
+              <linearGradient id="norfolkSteel" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#6684A4"/><stop offset="100%" stop-color="#3F5C6B"/>
+              </linearGradient>
+              <radialGradient id="norfolkBadgeBg" cx="50%" cy="30%" r="65%">
+                <stop offset="0%" stop-color="#223129"/><stop offset="100%" stop-color="#141f19"/>
+              </radialGradient>
+            </defs>
+            <rect x="18" y="6" width="164" height="220" rx="26" fill="url(#norfolkBadgeBg)"/>
+            <path d="M 25,150 Q 50,140 75,150 T 125,150 T 175,150" fill="none" stroke="url(#norfolkSteel)" stroke-width="3.5" opacity="0.7"/>
+            <path d="M 25,160 Q 50,150 75,160 T 125,160 T 175,160" fill="none" stroke="url(#norfolkSteel)" stroke-width="2.5" opacity="0.4"/>
+            <path d="M20,165 A86,86 0 0,0 180,165 A100,100 0 0,1 20,165 Z" fill="url(#norfolkBrass)"/>
+            <path d="M92,38 Q100,19 108,38 L108,205 L92,205 Z" fill="url(#norfolkBrass)"/>
+            <rect x="52" y="64" width="96" height="13" rx="4" fill="url(#norfolkBrass)"/>
+            <circle cx="100" cy="30" r="19" fill="url(#norfolkBrass)"/>
+            <circle cx="100" cy="30" r="10" fill="#1c2921"/>
+            <line x1="93" y1="90" x2="107" y2="100" stroke="#EDE7D6" stroke-width="4" opacity="0.5" stroke-linecap="round"/>
+            <line x1="93" y1="104" x2="107" y2="114" stroke="#EDE7D6" stroke-width="4" opacity="0.5" stroke-linecap="round"/>
+            <line x1="93" y1="118" x2="107" y2="128" stroke="#EDE7D6" stroke-width="4" opacity="0.5" stroke-linecap="round"/>
+            <line x1="93" y1="132" x2="107" y2="142" stroke="#EDE7D6" stroke-width="4" opacity="0.5" stroke-linecap="round"/>
+            <line x1="93" y1="146" x2="107" y2="156" stroke="#EDE7D6" stroke-width="4" opacity="0.5" stroke-linecap="round"/>
+            <line x1="30" y1="234" x2="170" y2="234" stroke="rgba(217,162,76,0.4)" stroke-width="1"/>
+            <text x="100" y="252" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="15" font-weight="700" letter-spacing="2" fill="#D9A24C">NAVAL STATION</text>
+            <text x="100" y="268" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" letter-spacing="4" fill="rgba(237,231,214,0.65)">NORFOLK</text>
           </svg>
         </div>
       </div>
