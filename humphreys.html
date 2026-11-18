@@ -612,8 +612,8 @@
       </div>
       <div class="coords-row">
         <span><b>36.967° N, 127.033° E</b> — Camp Humphreys (ref. point)</span>
-        <span><b>34</b> categories mapped</span>
-        <span><b>204</b> locations logged</span>
+        <span><b>7</b> categories mapped</span>
+        <span><b>10</b> locations logged</span>
       </div>
     </div>
   </header>
@@ -713,7 +713,7 @@
           <div class="legend-items" id="legendItems"></div>
         </div>
       </div>
-      <p style="font-size:12px; color:#69665B; margin-top:8px;">All 204 logged locations at once — zoom, click a pin for details, or toggle categories in the legend.</p>
+      <p style="font-size:12px; color:#69665B; margin-top:8px;">All 10 logged locations at once — zoom, click a pin for details, or toggle categories in the legend.</p>
     </div>
 
     <div id="listView" tabindex="-1">
@@ -866,7 +866,7 @@
           <div class="h-desc">Free, confidential, 24/7 — for any service member, veteran, or family member in crisis, including thoughts of self-harm.</div>
           <div class="h-numbers">
             <span><span class="h-tag">In the U.S.</span>Dial 988, then press 1</span>
-            <a href="tel:0080012738255"><span class="h-tag">From Europe</span>00800-1273-8255</a>
+            <a href="sms:838255"><span class="h-tag">Text</span>838255</a>
             <span><span class="h-tag">On base</span>DSN 118</span>
             <a href="https://www.veteranscrisisline.net/get-help-now/military-crisis-line/" target="_blank" rel="noopener">Chat online →</a>
           </div>
@@ -966,7 +966,7 @@
     </div>
   </footer>
 
-<script src="data.js" onerror="document.getElementById('dataLoadError').style.display='block';"></script>
+<script src="data-humphreys.js" onerror="document.getElementById('dataLoadError').style.display='block';"></script>
 <script>
 // Reads the shared recently-viewed list (written by listing.html) and shows
 // a small strip of whatever's relevant to THIS base — hidden entirely if
@@ -1077,7 +1077,7 @@ function claimListing(name, id){
   messageBox.focus();
 }
 
-// places & catLabels now come from data.js (shared with listing.html)
+// places & catLabels now come from data-humphreys.js (shared with listing.html)
 
 function milesFrom(km){ return (km * 0.621371).toFixed(1); }
 
@@ -1720,7 +1720,7 @@ places.forEach(p=>{
 });
 
 // Base marker (always visible, not part of the legend toggles)
-L.marker([49.4512593, 7.5844778], {
+L.marker([36.967, 127.033], {
   icon: L.divIcon({ className: '', html: '<div style="background:#182420;width:14px;height:14px;border-radius:50%;border:2px solid #D9A24C;"></div>', iconSize:[14,14] })
 }).addTo(map).bindPopup("<b>Camp Humphreys</b><br>Reference point");
 
