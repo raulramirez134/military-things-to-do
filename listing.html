@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Listing — Military Things To Do</title>
 <meta name="description" content="Details, hours, distance from the gate, and reviews for local businesses and resources near Ramstein Air Base." id="metaDescTag">
-<link rel="canonical" href="https://militarythingstodo.com/listing.html" id="canonicalTag">
+<link rel="canonical" href="https://militarythingstodo.com/listing" id="canonicalTag">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -596,7 +596,7 @@ function initPage(){
   document.title = `${place.name} — Military Things To Do`;
 
   document.getElementById("metaDescTag").content = `${place.name}: ${place.blurb} Distance from ${cfg.label} ${cfg.refWord}, hours, contact info, and reviews.`;
-  document.getElementById("canonicalTag").href = `https://militarythingstodo.com/listing.html?base=${baseKey}&id=${place.id}`;
+  document.getElementById("canonicalTag").href = `https://militarythingstodo.com/listing?base=${baseKey}&id=${place.id}`;
 
   document.getElementById("headerInner").innerHTML = `
     <div class="hero-icon" aria-hidden="true">${icons[place.cat] || icons.attraction}</div>
