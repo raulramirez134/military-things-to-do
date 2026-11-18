@@ -183,6 +183,14 @@
   .cat-tabs-extra{ display:none; gap:8px; flex-wrap:wrap; }
   .cat-tabs-extra.open{ display:flex; }
   .cat-tab-toggle{ background:var(--parchment-dim); border-style:dashed; }
+  .group-tab .grp-count{ opacity:.6; font-size:11px; }
+  .group-tab.parent-active{ border-color:var(--ink); box-shadow: inset 0 -3px 0 var(--ink); }
+  .sub-rows{ flex-basis:100%; }
+  @media (max-width:600px){ .cat-tabs .group-tab{ font-size:11px; padding:8px 9px; } }
+  .sub-row{ display:none; flex-wrap:wrap; gap:6px; padding:10px 0 2px; }
+  .sub-row.open{ display:flex; }
+  .cat-tab.sub-tab{ font-size:11px; padding:6px 10px; background:var(--parchment-dim); }
+  .cat-tab.sub-tab.active{ background:var(--ink); color:var(--parchment); border-color:var(--ink); }
   .cat-tab{
     font-family:'JetBrains Mono', monospace;
     font-size:12px; letter-spacing:0.04em; text-transform:uppercase;
@@ -616,44 +624,64 @@
     <div class="cat-inner">
       <div class="cat-tabs" id="catTabs">
         <button class="cat-tab active" data-cat="all">All</button>
-        <button class="cat-tab" data-cat="restaurant">Restaurants &amp; Cafés</button>
-        <button class="cat-tab" data-cat="grocery">Grocery &amp; Food</button>
-        <button class="cat-tab" data-cat="attraction">Parks &amp; Attractions</button>
-        <button class="cat-tab" data-cat="auto">Auto &amp; Transportation</button>
-        <button class="cat-tab" data-cat="health">Health &amp; Personal Care</button>
-        <button class="cat-tab" data-cat="housing">Housing &amp; Off-Base Living</button>
-        <button class="cat-tab" data-cat="rec">Recreation &amp; Entertainment</button>
-        <button class="cat-tab" data-cat="services">Base Services</button>
-        <span id="catTabsExtra" class="cat-tabs-extra">
-          <button class="cat-tab" data-cat="language">Language Schools</button>
-          <button class="cat-tab" data-cat="banking">Banking &amp; Money</button>
-          <button class="cat-tab" data-cat="schools">Schools &amp; Childcare</button>
-          <button class="cat-tab" data-cat="pets">Pet Services</button>
-          <button class="cat-tab" data-cat="fitness">Fitness &amp; Recreation</button>
-          <button class="cat-tab" data-cat="community">Community &amp; Spouse Groups</button>
-          <button class="cat-tab" data-cat="religious">Religious Services</button>
-          <button class="cat-tab" data-cat="pcs">PCS &amp; Household Goods</button>
-          <button class="cat-tab" data-cat="legal">Legal &amp; Financial Services</button>
-          <button class="cat-tab" data-cat="education">Education &amp; Career</button>
-          <button class="cat-tab" data-cat="shopping">Shopping &amp; Retail</button>
-          <button class="cat-tab" data-cat="kids">Kids &amp; Playgrounds</button>
-          <button class="cat-tab" data-cat="outdoors">Dog Parks &amp; Swimming Spots</button>
-          <button class="cat-tab" data-cat="events">Seasonal Events</button>
-          <button class="cat-tab" data-cat="tailor">Tailoring &amp; Alterations</button>
-          <button class="cat-tab" data-cat="museum">Museums &amp; Local History</button>
-          <button class="cat-tab" data-cat="storage">Storage &amp; Moving</button>
-          <button class="cat-tab" data-cat="farmers">Farmers Markets</button>
-          <button class="cat-tab" data-cat="bars">Bars &amp; Nightlife</button>
-          <button class="cat-tab" data-cat="phone">Phone &amp; Internet</button>
-          <button class="cat-tab" data-cat="cars">Car Dealerships</button>
-          <button class="cat-tab" data-cat="furniture">Furniture &amp; Home Goods</button>
-          <button class="cat-tab" data-cat="wine">Wine Country Day Trips</button>
-          <button class="cat-tab" data-cat="tattoo">Tattoo Shops</button>
-          <button class="cat-tab" data-cat="notary">Notary &amp; Shipping</button>
-          <button class="cat-tab" data-cat="ski">Ski &amp; Winter Sports</button>
-          <button class="cat-tab" data-cat="castles">Castles &amp; Historic Day Trips</button>
-        </span>
-        <button class="cat-tab cat-tab-toggle" id="catTabsToggle" type="button">More categories ▾</button>
+        <button class="cat-tab group-tab" data-cat="group:food" data-group="food">Food &amp; Drink <span class="grp-count"></span></button>
+        <button class="cat-tab group-tab" data-cat="group:shop" data-group="shop">Shopping &amp; Auto <span class="grp-count"></span></button>
+        <button class="cat-tab group-tab" data-cat="group:settle" data-group="settle">Getting Settled <span class="grp-count"></span></button>
+        <button class="cat-tab group-tab" data-cat="group:care" data-group="care">Health &amp; Personal <span class="grp-count"></span></button>
+        <button class="cat-tab group-tab" data-cat="group:family" data-group="family">Family &amp; Community <span class="grp-count"></span></button>
+        <button class="cat-tab group-tab" data-cat="group:fun" data-group="fun">Things to Do <span class="grp-count"></span></button>
+        <button class="cat-tab group-tab" data-cat="group:trips" data-group="trips">Day Trips <span class="grp-count"></span></button>
+        <div class="sub-rows" id="subRows">
+          <div class="sub-row" data-group="food" role="group" aria-label="Food &amp; Drink categories">
+            <button class="cat-tab sub-tab" data-cat="restaurant">Restaurants &amp; Cafés</button>
+            <button class="cat-tab sub-tab" data-cat="bars">Bars &amp; Nightlife</button>
+            <button class="cat-tab sub-tab" data-cat="grocery">Grocery &amp; Food</button>
+            <button class="cat-tab sub-tab" data-cat="farmers">Farmers Markets</button>
+          </div>
+          <div class="sub-row" data-group="shop" role="group" aria-label="Shopping &amp; Auto categories">
+            <button class="cat-tab sub-tab" data-cat="shopping">Shopping &amp; Retail</button>
+            <button class="cat-tab sub-tab" data-cat="furniture">Furniture &amp; Home Goods</button>
+            <button class="cat-tab sub-tab" data-cat="auto">Auto &amp; Transportation</button>
+            <button class="cat-tab sub-tab" data-cat="cars">Car Dealerships</button>
+          </div>
+          <div class="sub-row" data-group="settle" role="group" aria-label="Getting Settled categories">
+            <button class="cat-tab sub-tab" data-cat="housing">Housing &amp; Off-Base Living</button>
+            <button class="cat-tab sub-tab" data-cat="pcs">PCS &amp; Household Goods</button>
+            <button class="cat-tab sub-tab" data-cat="storage">Storage &amp; Moving</button>
+            <button class="cat-tab sub-tab" data-cat="phone">Phone &amp; Internet</button>
+            <button class="cat-tab sub-tab" data-cat="banking">Banking &amp; Money</button>
+            <button class="cat-tab sub-tab" data-cat="services">Base Services</button>
+          </div>
+          <div class="sub-row" data-group="care" role="group" aria-label="Health &amp; Personal categories">
+            <button class="cat-tab sub-tab" data-cat="health">Health &amp; Personal Care</button>
+            <button class="cat-tab sub-tab" data-cat="legal">Legal &amp; Financial Services</button>
+            <button class="cat-tab sub-tab" data-cat="notary">Notary &amp; Shipping</button>
+            <button class="cat-tab sub-tab" data-cat="tailor">Tailoring &amp; Alterations</button>
+            <button class="cat-tab sub-tab" data-cat="tattoo">Tattoo Shops</button>
+            <button class="cat-tab sub-tab" data-cat="pets">Pet Services</button>
+          </div>
+          <div class="sub-row" data-group="family" role="group" aria-label="Family &amp; Community categories">
+            <button class="cat-tab sub-tab" data-cat="schools">Schools &amp; Childcare</button>
+            <button class="cat-tab sub-tab" data-cat="kids">Kids &amp; Playgrounds</button>
+            <button class="cat-tab sub-tab" data-cat="language">Language Schools</button>
+            <button class="cat-tab sub-tab" data-cat="education">Education &amp; Career</button>
+            <button class="cat-tab sub-tab" data-cat="community">Community &amp; Spouse Groups</button>
+            <button class="cat-tab sub-tab" data-cat="religious">Religious Services</button>
+          </div>
+          <div class="sub-row" data-group="fun" role="group" aria-label="Things to Do categories">
+            <button class="cat-tab sub-tab" data-cat="attraction">Parks &amp; Attractions</button>
+            <button class="cat-tab sub-tab" data-cat="rec">Recreation &amp; Entertainment</button>
+            <button class="cat-tab sub-tab" data-cat="fitness">Fitness &amp; Recreation</button>
+            <button class="cat-tab sub-tab" data-cat="outdoors">Dog Parks &amp; Swimming Spots</button>
+            <button class="cat-tab sub-tab" data-cat="museum">Museums &amp; Local History</button>
+            <button class="cat-tab sub-tab" data-cat="events">Seasonal Events</button>
+          </div>
+          <div class="sub-row" data-group="trips" role="group" aria-label="Day Trips categories">
+            <button class="cat-tab sub-tab" data-cat="wine">Wine Country Day Trips</button>
+            <button class="cat-tab sub-tab" data-cat="ski">Ski &amp; Winter Sports</button>
+            <button class="cat-tab sub-tab" data-cat="castles">Castles &amp; Historic Day Trips</button>
+          </div>
+        </div>
       </div>
       <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
         <a href="guide.html" class="cat-tab" style="text-decoration:none; display:inline-block; background:var(--brass); color:#fff; border-color:var(--brass);">New Here? Start Guide →</a>
@@ -1340,6 +1368,32 @@ try {
 }
 initRecentlyViewedStrip();
 
+// Category groups (progressive disclosure): top row = groups, second row = that group's categories
+const CAT_GROUPS = {
+  food: ["restaurant", "bars", "grocery", "farmers"],
+  shop: ["shopping", "furniture", "auto", "cars"],
+  settle: ["housing", "pcs", "storage", "phone", "banking", "services"],
+  care: ["health", "legal", "notary", "tailor", "tattoo", "pets"],
+  family: ["schools", "kids", "language", "education", "community", "religious"],
+  fun: ["attraction", "rec", "fitness", "outdoors", "museum", "events"],
+  trips: ["wine", "ski", "castles"]
+};
+function syncGroupRow(){
+  const active = document.querySelector(".cat-tab.active").dataset.cat;
+  const grp = active.startsWith("group:") ? active.slice(6)
+    : Object.keys(CAT_GROUPS).find(g => CAT_GROUPS[g].includes(active)) || null;
+  document.querySelectorAll(".sub-row").forEach(r => r.classList.toggle("open", r.dataset.group === grp));
+  document.querySelectorAll(".group-tab").forEach(t => t.classList.toggle("parent-active", t.dataset.group === grp && t.dataset.cat !== active));
+}
+function initGroupCounts(){
+  document.querySelectorAll(".group-tab").forEach(t=>{
+    const cats = CAT_GROUPS[t.dataset.group];
+    const n = places.filter(p => cats.includes(p.cat)).length;
+    const el = t.querySelector(".grp-count"); if(el) el.textContent = "(" + n + ")";
+  });
+}
+initGroupCounts();
+
 // Category filtering
 const tabs = document.querySelectorAll(".cat-tab:not(.cat-tab-toggle)");
 const listView = document.getElementById("listView");
@@ -1347,6 +1401,8 @@ const emptyState = document.getElementById("emptyState");
 
 function applyFilter(){
   const active = document.querySelector(".cat-tab.active").dataset.cat;
+  syncGroupRow();
+  const activeGroupCats = active.startsWith("group:") ? (CAT_GROUPS[active.slice(6)] || []) : null;
   const query = document.getElementById("searchBox").value.trim().toLowerCase();
   const openNowOnlyEl = document.getElementById("openNowOnly");
   const openNowOnly = openNowOnlyEl ? openNowOnlyEl.checked : false;
@@ -1369,7 +1425,7 @@ function applyFilter(){
 
   document.querySelectorAll(".grid").forEach(grid=>{
     const cat = grid.dataset.group;
-    const show = active === "all" || active === cat || active === "favorites";
+    const show = active === "all" || active === cat || active === "favorites" || (activeGroupCats && activeGroupCats.includes(cat));
     grid.previousElementSibling.style.display = show ? "" : "none";
     grid.style.display = show ? "" : "none";
     if(show){
@@ -1391,7 +1447,7 @@ function applyFilter(){
   const eventsBlock = document.getElementById("eventsGrid");
   const eventsLabel = document.getElementById("eventsLabel");
   const eventsNote = document.getElementById("eventsNote");
-  const showEvents = active === "all" || active === "events";
+  const showEvents = active === "all" || active === "events" || (activeGroupCats && activeGroupCats.includes("events"));
   eventsBlock.style.display = showEvents ? "" : "none";
   eventsLabel.style.display = showEvents ? "" : "none";
   eventsNote.style.display = showEvents ? "" : "none";
@@ -1541,14 +1597,6 @@ document.getElementById("sortSelect").addEventListener("change", (e) => {
   applyFilter();
 });
 document.getElementById("openNowOnly").addEventListener("change", applyFilter);
-
-// Show/hide the less-common category buttons
-const catTabsToggle = document.getElementById("catTabsToggle");
-const catTabsExtra = document.getElementById("catTabsExtra");
-catTabsToggle.addEventListener("click", ()=>{
-  const isOpen = catTabsExtra.classList.toggle("open");
-  catTabsToggle.textContent = isOpen ? "Fewer categories ▴" : "More categories ▾";
-});
 
 // Base picker dropdown
 const basePicker = document.getElementById("basePicker");
