@@ -510,6 +510,28 @@ function escapeHtmlAttr(str){
 // shared listing link showed the same generic preview. This intercepts the request
 // server-side and injects the correct per-listing tags before the HTML is sent,
 // so previews (and non-JS search engines) see the real listing every time.
+// Cloudflare Workers forbid eval / new Function ("Code generation from strings disallowed"),
+// so the data files can't simply be executed. Each listing is a single line of the form
+// { id:"x", name:"...", ..., blurb:"...", ... }, so pull the fields out with a string-aware regex.
+function extractPlace(dataText, id) {
+  const marker = `id:${JSON.stringify(id)}`;
+  const at = dataText.indexOf(marker);
+  if (at === -1) return null;
+  const start = dataText.lastIndexOf("\n", at) + 1;
+  let end = dataText.indexOf("\n", at);
+  if (end === -1) end = dataText.length;
+  const line = dataText.slice(start, end);
+  const str = (key) => {
+    const m = line.match(new RegExp(`\\b${key}:\\s*("(?:[^"\\\\]|\\\\.)*")`));
+    if (!m) return null;
+    try { return JSON.parse(m[1]); } catch { return null; }
+  };
+  const name = str("name");
+  const blurb = str("blurb");
+  if (!name) return null;
+  return { id, name, blurb: blurb || "" };
+}
+
 async function handleListingPage(request, env) {
   const url = new URL(request.url);
   const assetResponse = await env.ASSETS.fetch(request);
@@ -522,18 +544,19 @@ async function handleListingPage(request, env) {
 
   const cfg = LISTING_BASE_CONFIG[baseKey];
   let html = await assetResponse.text();
+  // The body can only be read once, so any fallback must rebuild the response from `html`.
+  const passthrough = new Response(html, { status: assetResponse.status, headers: assetResponse.headers });
 
   try {
     const dataUrl = new URL("/" + cfg.dataFile, url);
     const dataResponse = await env.ASSETS.fetch(new Request(dataUrl, request));
     const dataText = await dataResponse.text();
-    const places = new Function(dataText + "\nreturn places;")();
-    const place = places.find(p => p.id === id);
-    if (!place) return new Response(html, assetResponse);
+    const place = extractPlace(dataText, id);
+    if (!place) return passthrough;
 
     const title = `${place.name} — Military Things To Do`;
     const description = `${place.name}: ${place.blurb} Distance from ${cfg.label} ${cfg.refWord}, hours, contact info, and reviews.`;
-    const canonicalUrl = `https://militarythingstodo.com/listing.html?base=${baseKey}&id=${id}`;
+    const canonicalUrl = `https://militarythingstodo.com/listing?base=${baseKey}&id=${id}`;
 
     html = html.replace(
       "<title>Listing — Military Things To Do</title>",
@@ -557,10 +580,11 @@ async function handleListingPage(request, env) {
 <meta name="twitter:description" content="${escapeHtmlAttr(description)}">
 </head>`;
     html = html.replace("</head>", ogTags);
-  } catch {
+  } catch (err) {
+    console.log("listing inject failed:", String(err && err.stack || err));
     // If anything goes wrong (malformed data file, unexpected place shape, etc.),
     // just serve the original page unchanged rather than risk a broken response.
-    return assetResponse;
+    return passthrough;
   }
 
   return new Response(html, {
@@ -686,7 +710,9 @@ export default {
       return handleExportData(request, env);
     }
 
-    if (url.pathname === "/listing.html" && request.method === "GET") {
+    // Cloudflare serves pages at clean URLs (/listing) and 307-redirects /listing.html there,
+    // so the per-listing tag injection must match the clean path (the .html path only redirects).
+    if ((url.pathname === "/listing" || url.pathname === "/listing.html") && request.method === "GET") {
       return handleListingPage(request, env);
     }
 
