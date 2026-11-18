@@ -191,6 +191,9 @@ const places = [
   // PCS & Household Goods
   { id:"humphreys-household-goods-transportation-office", name:"Household Goods / Transportation Office (Outbound)", cat:"pcs", dist:2.7, lat:36.9677, lng:127.00298, addr:"Maude Hall, Bldg 6400, USAG Humphreys (on-post)", blurb:"Where you go to understand your household-goods entitlements and arrange shipment of personal property. Commercial storage near Humphreys is limited, and you pay all costs for goods stored off post. For vehicle shipping, see the PCSmyPOV site.", hours:"Mon–Fri 08:00–16:30 · Closed weekends, US and Korean holidays", phone:"+82 50-3357-2448", rating:null, reviewCount:0 },
 
+  // Storage
+  { id:"dalock-mini-storage-camp-humphreys", name:"DaLock (다락) Mini Storage – Camp Humphreys Branch", cat:"storage", dist:0.76, lat:36.9669, lng:127.0415, addr:"165 Paengseong Daegyo-gil, 2F, Paengseong-eup, Pyeongtaek (경기 평택시 팽성읍 팽성대교길 165 2층)", blurb:"Self-storage units just off post for the overflow that won't fit in quarters (excess household goods are your own responsibility to store). Open 24/7 and unstaffed — book online or request a free visit; units come in slim, medium and large sizes, with a first hour of free parking. The chain publishes a guide for foreign customers. Prices aren't listed online, so ask when you book. Map pin is approximate (street level).", hours:"Open 24 hours, 7 days (unstaffed — book online)", phone:null, rating:null, reviewCount:0 },
+
   // Seoul Day Trips
   { id:"myeongdong-shopping", name:"Myeongdong Shopping District", cat:"seoul", dist:66.5, lat:37.5636, lng:126.9834, addr:"Myeongdong, Jung District, Seoul", blurb:"One of Seoul's most famous shopping and street-food districts — a genuinely great full-day trip, easily combined with Gyeongbokgung Palace and Namsan Seoul Tower nearby. Reachable by direct train from Pyeongtaek Station.", hours:"Street market typically 17:00–22:00; shops vary", phone:null, rating:null, reviewCount:0 },
 
