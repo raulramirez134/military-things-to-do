@@ -607,7 +607,7 @@ function initPage(){
         <div class="rating-row">
           <span class="stars">${starGlyphs(place.rating)}</span>
           <span class="num">${place.rating.toFixed(1)}</span>
-          <span class="count">(${place.reviewCount} Google ratings)</span>
+          ${place.reviewCount ? `<span class="count">(${place.reviewCount} Google ratings)</span>` : ""}
           ${place.priceTier ? `<span class="price-tier">${place.priceTier}<span class="dim">${'$'.repeat(4-place.priceTier.length)}</span></span>` : ""}
         </div>
         <div class="rating-note">Google rating shown for reference — write your own review below.</div>
