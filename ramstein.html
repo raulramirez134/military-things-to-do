@@ -1280,7 +1280,7 @@ function cardHTML(p){
       <div class="card-top">
         <div class="name-row">
           <div class="emblem ${p.cat}">${icons[p.cat]}</div>
-          <a class="card-name" href="listing.html?id=${p.id}">${p.name}</a>
+          <a class="card-name" href="listing.html?base=ramstein&id=${p.id}">${p.name}</a>
         </div>
         <button class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${p.id}', '${p.name.replace(/'/g,"\\'")}', this)" aria-label="Save to favorites">★</button>
       </div>
@@ -1293,7 +1293,7 @@ function cardHTML(p){
         <span>${p.hours}</span>
       </div>
       <div class="card-actions">
-        <a class="action-btn" href="listing.html?id=${p.id}">${detailIcon} Details &amp; reviews</a>
+        <a class="action-btn" href="listing.html?base=ramstein&id=${p.id}">${detailIcon} Details &amp; reviews</a>
         <a class="action-btn" href="${dirUrl}" target="_blank" rel="noopener">${dirIcon} Directions</a>
         ${callHref
           ? `<a class="action-btn" href="${callHref}">${callIcon} ${p.phone}</a>`
