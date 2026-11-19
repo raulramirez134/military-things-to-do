@@ -712,6 +712,8 @@ const CB_PAGES = {
 };
 
 function parseCommunityBank(html, page) {
+  // Currency signs may arrive as entities (&#8361; for won) — drop entities so their digits aren't read as the rate.
+  html = String(html || "").replace(/&#x?[0-9a-f]+;|&[a-z]+;/gi, " ");
   const num = (id) => {
     const m = new RegExp('id="' + id + '"[^>]*>[\\s\\S]{0,200}?<span>\\s*[^0-9<]*([0-9][0-9,.]*)\\s*</span>', "i").exec(html);
     return m ? parseFloat(m[1].replace(/,/g, "")) : NaN;
@@ -763,7 +765,7 @@ async function handleGetRates(request, env) {
     });
   } else if (CB_PAGES[which]) {
     const page = CB_PAGES[which];
-    cached = await cachedRates(env, `fx:cb:${which}`, async () => {
+    cached = await cachedRates(env, `fx:cb2:${which}`, async () => {
       const res = await fetch(page.url, { headers: { "User-Agent": RATES_UA, "Accept": "text/html" } });
       if (!res.ok) return { parsed: null, failReason: `Community Bank answered ${res.status}` };
       const parsed = parseCommunityBank(await res.text(), page);
