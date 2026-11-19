@@ -731,7 +731,7 @@ function parseCommunityBank(html, page) {
 }
 
 // Reads a rates source at most every few hours, keeps the last good copy in KV and serves that.
-async function cachedRates(env, kvKey, load) {
+async function cachedRates(env, kvKey, load, force = false) {
   const kv = env.REVIEWS_KV;
   let cached = null;
   if (kv) {
@@ -740,7 +740,7 @@ async function cachedRates(env, kvKey, load) {
   const now = Date.now();
   const fresh = cached && cached.fetchedAt && now - cached.fetchedAt < RATES_REFRESH_MS;
   const recentlyFailed = cached && cached.failedAt && now - cached.failedAt < RATES_RETRY_MS;
-  if (!fresh && !recentlyFailed) {
+  if (force || (!fresh && !recentlyFailed)) {
     let parsed = null, failReason = "";
     try { ({ parsed, failReason } = await load()); } catch { failReason = "could not reach the rates source"; }
     if (parsed) cached = { ...parsed, fetchedAt: now };
@@ -752,28 +752,42 @@ async function cachedRates(env, kvKey, load) {
 
 const RATES_UA = "Mozilla/5.0 (compatible; MilitaryThingsToDo/1.0; +https://militarythingstodo.com)";
 
-async function handleGetRates(request, env) {
-  const which = new URL(request.url).searchParams.get("source") || "scu";
-  let cached;
+// One place that knows how to (re)read each rates source. `force` skips the freshness check —
+// used by the hourly scheduled refresh so new official rates show up within the hour.
+async function getRates(env, which, force = false) {
   if (which === "scu") {
-    cached = await cachedRates(env, RATES_KV_KEY, async () => {
+    return cachedRates(env, RATES_KV_KEY, async () => {
       const res = await fetch(SCU_RATES_API, { headers: { "User-Agent": RATES_UA, "Accept": "application/json" } });
       if (!res.ok) return { parsed: null, failReason: `Service CU answered ${res.status}` };
       let parsed = null;
       try { parsed = parseScuFeed(await res.json()); } catch { parsed = null; }
       return { parsed, failReason: parsed ? "" : "Service CU feed had no usable rates" };
-    });
-  } else if (CB_PAGES[which]) {
+    }, force);
+  }
+  if (CB_PAGES[which]) {
     const page = CB_PAGES[which];
-    cached = await cachedRates(env, `fx:cb2:${which}`, async () => {
+    return cachedRates(env, `fx:cb2:${which}`, async () => {
       const res = await fetch(page.url, { headers: { "User-Agent": RATES_UA, "Accept": "text/html" } });
       if (!res.ok) return { parsed: null, failReason: `Community Bank answered ${res.status}` };
       const parsed = parseCommunityBank(await res.text(), page);
       return { parsed, failReason: parsed ? "" : "Community Bank page had no rate" };
-    });
-  } else {
-    return jsonResponse({ error: "Unknown rates source" }, 400, request);
+    }, force);
   }
+  return undefined;
+}
+
+// Hourly cron (wrangler.jsonc "triggers"): re-read every source. A failed read keeps the
+// last good rates in place, so the site never shows an empty box because of a hiccup.
+async function refreshAllRates(env) {
+  for (const which of ["scu", ...Object.keys(CB_PAGES)]) {
+    try { await getRates(env, which, true); } catch {}
+  }
+}
+
+async function handleGetRates(request, env) {
+  const which = new URL(request.url).searchParams.get("source") || "scu";
+  if (which !== "scu" && !CB_PAGES[which]) return jsonResponse({ error: "Unknown rates source" }, 400, request);
+  const cached = await getRates(env, which);
   if (!cached || !cached.rates || cached.rates.length === 0) {
     return jsonResponse({ error: "Exchange rates are temporarily unavailable.", reason: (cached && cached.failReason) || "" }, 503, request);
   }
@@ -919,5 +933,9 @@ export default {
     }
 
     return env.ASSETS.fetch(request);
+  },
+
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(refreshAllRates(env));
   },
 };
