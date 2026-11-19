@@ -652,8 +652,8 @@
       </div>
       <div class="coords-row">
         <span><b>35.7428° N, 139.3384° E</b> — Yokota AB (ref. point)</span>
-        <span><b>20</b> categories mapped</span>
-        <span><b>89</b> locations logged</span>
+        <span><b>21</b> categories mapped</span>
+        <span><b>92</b> locations logged</span>
       </div>
     </div>
   </header>
@@ -683,6 +683,7 @@
             <button class="cat-tab sub-tab" data-cat="housing">Housing &amp; Off-Base Living</button>
             <button class="cat-tab sub-tab" data-cat="banking">Banking &amp; Money</button>
             <button class="cat-tab sub-tab" data-cat="phone">Phone &amp; Internet</button>
+            <button class="cat-tab sub-tab" data-cat="legal">Legal Help</button>
           </div>
           <div class="sub-row" data-group="care" role="group" aria-label="Health &amp; Personal categories">
             <button class="cat-tab sub-tab" data-cat="health">Health &amp; Personal Care</button>
@@ -759,7 +760,7 @@
           <div class="legend-items" id="legendItems"></div>
         </div>
       </div>
-      <p style="font-size:12px; color:#69665B; margin-top:8px;">All 89 logged locations at once — zoom, click a pin for details, or toggle categories in the legend.</p>
+      <p style="font-size:12px; color:#69665B; margin-top:8px;">All 92 logged locations at once — zoom, click a pin for details, or toggle categories in the legend.</p>
     </div>
 
     <div id="listView" tabindex="-1">
@@ -784,6 +785,9 @@
 
       <h2 class="section-label">Banking &amp; Money</h2>
       <div class="grid" data-group="banking" id="grid-banking"></div>
+
+      <h2 class="section-label">Legal Help</h2>
+      <div class="grid" data-group="legal" id="grid-legal"></div>
 
       <h2 class="section-label">Housing &amp; Off-Base Living</h2>
       <div class="grid" data-group="housing" id="grid-housing"></div>
@@ -832,7 +836,7 @@
         <div class="help-card">
           <div class="h-name">Yokota Air Base Friendship Festival</div>
           <div class="h-desc">The base's signature open-house event — a two-day festival with aircraft static displays, capability demonstrations, live performances and food stalls. 2026 was the 50th edition and drew about 226,500 visitors. Free; visitors 16 and older need photo ID, and entry rules for non-Japanese, non-U.S. guests can include online pre-registration, so check the official page first.</div>
-          <div class="h-numbers"><span><span class="h-tag">Typical dates</span>Mid-May (2026: May 16–17 · 2027 dates not yet announced)</span></div>
+          <div class="h-numbers"><span><span class="h-tag">Typical dates</span>Mid-May (2026: May 16–17 · 2027: expected mid-May, dates not yet confirmed)</span></div>
         </div>
         <div class="help-card">
           <div class="h-name">Fussa Sakura Matsuri (Cherry Blossom Festival)</div>
@@ -1328,7 +1332,7 @@ function sortPlaces(items, sortBy){
 
 function render(){
   const sortBy = document.getElementById("sortSelect") ? document.getElementById("sortSelect").value : "distance";
-  ["restaurant","grocery","attraction","auto","health","banking","housing","pets","fitness","religious","museum","kids","phone","tailor","bars","rec","shopping","onsen","tokyo","outdoors"].forEach(cat=>{
+  ["restaurant","grocery","attraction","auto","health","banking","housing","pets","fitness","religious","museum","kids","phone","tailor","bars","rec","shopping","onsen","tokyo","outdoors","legal"].forEach(cat=>{
     const el = document.getElementById("grid-"+cat);
     const items = sortPlaces(places.filter(p=>p.cat===cat), sortBy);
     el.innerHTML = items.map(cardHTML).join("");
@@ -1345,7 +1349,7 @@ initRecentlyViewedStrip();
 const CAT_GROUPS = {
   food: ["restaurant", "bars", "grocery"],
   shop: ["shopping", "auto"],
-  settle: ["housing", "banking", "phone"],
+  settle: ["housing", "banking", "phone", "legal"],
   care: ["health", "tailor", "pets"],
   family: ["kids", "religious"],
   fun: ["attraction", "rec", "fitness", "outdoors", "museum", "events"],
