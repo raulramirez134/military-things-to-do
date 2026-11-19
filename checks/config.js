@@ -4,7 +4,8 @@
 module.exports = {
   siteUrl: "https://militarythingstodo.com",
   // Phone numbers that are legitimately shared between base pages (national / DoD-wide lines), digits only.
-  sharedNumbers: ["988", "8003429647", "8779955247", "8002221222", "911", "18003429647", "18002221222", "18779955247", "18772727337", "110", "112", "119"],
+  sharedNumbers: ["988", "8003429647", "8779955247", "8002221222", "911", "18003429647", "18002221222", "18779955247", "18772727337", "110", "112", "119", "825033573102", "19316485732", "19316457476"],
+  // ^ last three: Humphreys Religious Support Office (all chapels), Montgomery County Parks & Rec, Clarksville Parks & Rec — shared office lines
   // Businesses that must never be listed (confirmed closed or off-limits). Matched against listing names.
   neverList: [
     { re: /508 locals/i, why: "closed (Norfolk)" },
