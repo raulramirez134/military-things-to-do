@@ -31,8 +31,13 @@ const M = [
   ["listing duplicated under a new id", "static", () => edit("data-yokota.js", (s) => { const m = s.match(/^  \{ id:"([^"]+)".*$/m); return s.replace(m[0], m[0] + "\n" + m[0].replace(`id:"${m[1]}"`, `id:"${m[1]}-copy"`)); }), /duplicate listing|identical blurb/],
   ["same blurb pasted on two listings", "static", () => edit("data-norfolk.js", (s) => { const bl = [...s.matchAll(/blurb:("(?:[^"\\]|\\.)*")/g)]; return s.replace(bl[4][0], "blurb:" + bl[3][1]); }), /identical blurb/],
   ["5 listings deleted by accident", "static", () => edit("data-yokota.js", (s) => { let n = 0; return s.split("\n").filter((l) => !(l.startsWith("  { id:") && n++ < 5)).join("\n"); }), /disappeared since the last ship/],
-  ["timezone off by an hour", "browser:ramstein", () => edit("ramstein.html", (s) => s.replace("minutes: hour * 60 + minute }", "minutes: hour * 60 + minute + 60 }")), /clock check|should be/],
-  ["Open/Closed logic inverted", "browser:fortbragg", () => edit("fortbragg.html", (s) => s.replace("if (now.minutes >= start && now.minutes < end) return true;", "if (now.minutes >= start && now.minutes < end) return false;")), /should be/],
+  ["timezone off by an hour", "browser:ramstein", () => edit("hours.js", (s) => s.replace("minutes: hour * 60 + minute, month", "minutes: hour * 60 + minute + 60, month")), /clock check|should be/],
+  ["Open/Closed logic inverted", "browser:fortbragg", () => edit("hours.js", (s) => s.replace("if (t >= hs && t < he) return true;", "if (t >= hs && t < he) return false;")), /should be (Open|Closed)/],
+  ["hours parser unit regression", "static", () => edit("hours.js", (s) => s.replace('if (part === "weekends" || part === "weekend")', 'if (false)')), /unit tests fail/],
+  ["hours parser drops a format for many listings", "static", () => edit("hours.js", (s) => s.replace("spec.split(/\\s*(?:,|&|\\band\\b)\\s*/)", "spec.split(/\\s*,\\s*/)")), /stopped being readable|unit tests fail/],
+  ["old inline hours parser pasted back", "static", () => edit("norfolk.html", (s) => s.replace("// Open/Closed parsing (parseHoursString", "function parseHoursString(x){ return null; }\n// Open/Closed parsing (parseHoursString")), /defines its own parseHoursString/],
+  ["page forgets to load hours.js", "static", () => edit("search.html", (s) => s.replace('<script src="/hours.js"></script>', "")), /must load/],
+  ["12-hour time in hours field", "static", () => edit("data.js", (s) => s.replace('hours:"Mon–Fri 9–18 · Sat 9–17"', 'hours:"Mon–Fri 9–6 · Sat 9–5"')), /12-hour time/],
 ];
 let missed = 0;
 for (const [name, kind, mut, re] of M) {

@@ -163,6 +163,41 @@ for (const k of keys) {
   R.check(gl === b.guide, S, `"Start Guide" link points to ${gl}, expected ${b.guide}`);
 }
 
+// ---------- Open/Closed hours parser (/hours.js) ----------
+{
+  const S = "hours.js";
+  const HT = require("./hours-tests");
+  let H = null;
+  if (!exists("hours.js")) R.fail(S, "hours.js is missing — every page's Open/Closed badge needs it");
+  else { try { H = HT.loadHours(ROOT); R.ok(); } catch (e) { R.fail(S, `hours.js does not load: ${e.message}`); } }
+  if (H) {
+    const t = HT.runCases(H);
+    R.check(!t.failures.length, S, `${t.failures.length}/${t.total} Open/Closed unit tests fail: ${t.failures.slice(0, 4).join(" | ")}`);
+    // the shared file is the ONLY copy, and every page that shows badges loads it before its own script
+    for (const f of [...keys.map((k) => cfg.bases[k].page), "listing.html", "search.html"]) {
+      if (!exists(f)) continue;
+      const h = read(f), tag = h.indexOf('<script src="/hours.js"></script>'), use = h.indexOf("getOpenStatus(");
+      R.check(!/function parseHoursString\s*\(/.test(h), f, "defines its own parseHoursString — delete it, the shared /hours.js is the only copy");
+      R.check(tag >= 0 && (use < 0 || tag < use), f, 'must load <script src="/hours.js"></script> before its inline script (Open/Closed badges)');
+    }
+    // every listing: parsed schedules are sane, and no 12-hour times hiding in a 24-hour field
+    for (const k of keys) {
+      if (!datas[k]) continue; let readable = 0, placeholder = 0;
+      for (const p of datas[k].places) {
+        if (/check current hours/i.test(p.hours || "")) { placeholder++; continue; }
+        let parsed; try { parsed = H.parseHoursString(p.hours, 6); } catch (e) { R.fail(k, `hours of ${p.id} crash the parser: ${e.message}`); continue; }
+        if (!parsed) continue; readable++;
+        const bad = HT.sanity(parsed); if (bad) R.fail(k, `hours of ${p.id} parse to nonsense (${bad}): "${p.hours}"`);
+        if (p.cat !== "bars") for (const m of String(p.hours).matchAll(/(?:^|[^\d:])(\d{1,2})\s*[–-]\s*(\d{1,2})(?![\d:])/g)) {
+          const a = +m[1], z = +m[2];
+          R.check(!(a >= 7 && a <= 14 && z >= 1 && z <= 7), k, `hours of ${p.id} look like 12-hour time ("${m[0].trim()}" would mean open past midnight) — write 24-hour times: "${p.hours}"`);
+        }
+      }
+      R.info(k, `Open/Closed badge can read ${readable}/${datas[k].places.length} listings' hours (${placeholder} are "Check current hours" placeholders)`);
+    }
+  }
+}
+
 // ---------- inline scripts compile (all pages) ----------
 const allPages = fs.readdirSync(ROOT).filter((f) => f.endsWith(".html"));
 const titles = new Map();
@@ -288,6 +323,8 @@ for (const [ph, ids] of allPhones) { const bs = new Set(ids.map((x) => x.split("
     if (d.added.length || d.removed.length) R.info(d.base, `${d.dTotal >= 0 ? "+" : ""}${d.dTotal} listings (${d.added.length} added${d.removed.length ? `, ${d.removed.length} removed: ${d.removed.slice(0, 6).join(", ")}` : ""}); by category ${Object.entries(d.catChanges).map(([c, n]) => `${c} ${n > 0 ? "+" : ""}${n}`).join(", ") || "—"}`);
     R.check(d.removed.length <= 3, d.base, `${d.removed.length} listings disappeared since the last ship (${d.removed.slice(0, 5).join(", ")}…) — if intentional, run: node checks/baseline.js --update`);
     R.check(!d.catsGone.length, d.base, `category fully emptied since the last ship: ${d.catsGone}`);
+    if (d.hoursLost.length) R.check(d.hoursLost.length <= 5, d.base, `${d.hoursLost.length} listings' hours stopped being readable by the Open/Closed badge since the last ship (${d.hoursLost.slice(0, 5).join(", ")}) — a hours.js change probably broke a format`);
+    if (d.hoursLost.length && d.hoursLost.length <= 5) R.warn(d.base, `hours no longer readable for: ${d.hoursLost.join(", ")}`);
   }
 }
 

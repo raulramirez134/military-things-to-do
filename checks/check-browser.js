@@ -102,7 +102,7 @@ async function newPage(b, vp, errs, bad) {
     const found = await p.evaluate((n) => [...document.querySelectorAll(".card")].filter((c) => c.offsetParent !== null && c.dataset.placename === n).length, probe);
     R.check(found >= 1, S, `searching "${probe}" didn't show that listing`); await p.fill("#searchBox", ""); await p.waitForTimeout(100);
     // Open/Closed badge: which hours strings can't the page read? (report, not failure)
-    const hrs = await p.evaluate(() => places.map((x) => ({ id: x.id, h: x.hours, ok: parseHoursString(x.hours) !== null })));
+    const hrs = await p.evaluate(() => places.map((x) => ({ id: x.id, h: x.hours, ok: parseHoursString(x.hours, new Date().getMonth()) !== null })));
     const unread = hrs.filter((x) => !x.ok && !/check current hours/i.test(x.h));
     if (unread.length && ENGINE === "chromium") {
       const dir = path.join(os.tmpdir(), "mtd-reports"); fs.mkdirSync(dir, { recursive: true });
