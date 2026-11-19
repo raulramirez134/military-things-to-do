@@ -108,6 +108,16 @@ async function newPage(b, vp, errs, bad) {
     await p.fill("#searchBox", probe); await p.waitForTimeout(300);
     const found = await p.evaluate((n) => [...document.querySelectorAll(".card")].filter((c) => c.offsetParent !== null && c.dataset.placename === n).length, probe);
     R.check(found >= 1, S, `searching "${probe}" didn't show that listing`); await p.fill("#searchBox", ""); await p.waitForTimeout(100);
+    // motion layer: smooth scrolling is on, and no card is left invisible (waiting to rise in) once it has scrolled into view
+    const mo = await p.evaluate(() => ({ lenis: document.documentElement.classList.contains("lenis"), api: !!window.mtdMotion }));
+    R.check(mo.lenis && mo.api, S, `motion layer not running (smooth scroll ${mo.lenis}, motion.js ${mo.api})`);
+    let stuck = 0;
+    for (let i = 1; i <= 8; i++) {
+      await p.evaluate((f) => window.scrollTo(0, (document.documentElement.scrollHeight - innerHeight) * f), i / 8); await p.waitForTimeout(350);
+      stuck += await p.evaluate(() => [...document.querySelectorAll(".mtd-pending")].filter((c) => { const r = c.getBoundingClientRect(); return c.offsetParent !== null && r.top < innerHeight - 80 && r.bottom > 80; }).length);
+    }
+    R.check(stuck === 0, S, `${stuck} cards/headings stayed invisible after scrolling into view (motion.js reveal)`);
+    await p.evaluate(() => window.scrollTo(0, 0)); await p.waitForTimeout(100);
     // Open/Closed badge: which hours strings can't the page read? (report, not failure)
     const hrs = await p.evaluate(() => places.map((x) => ({ id: x.id, h: x.hours, ok: parseHoursString(x.hours, new Date().getMonth()) !== null })));
     const unread = hrs.filter((x) => !x.ok && !/check current hours/i.test(x.h));
