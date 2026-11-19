@@ -717,7 +717,7 @@
         <button class="cat-tab" data-cat="favorites" id="favTab">★ My Favorites</button>
         <a href="search.html" class="cat-tab" style="text-decoration:none; display:inline-block;">🔍 Search All Bases</a>
         <a href="suggest.html" class="cat-tab" style="text-decoration:none; display:inline-block;">💡 Suggest a Listing</a>
-        <a href="#moneySection" id="moneyNavLink" class="cat-tab" style="text-decoration:none; display:inline-block;" hidden>⛽ Gas Prices</a>
+        <a href="#moneySection" id="moneyNavLink" class="cat-tab" style="text-decoration:none; display:inline-block;" hidden>💱 Rates &amp; Gas</a>
         <a href="#help-section" class="cat-tab" style="text-decoration:none; display:inline-block;">Emergency &amp; Health</a>
         <a href="#feedback-section" class="cat-tab" style="text-decoration:none; display:inline-block;">Feedback</a>
         <div class="search-wrap" style="position:relative;">
@@ -875,7 +875,7 @@
     </div>
     <div class="empty-state" id="emptyState" style="display:none;">No matches — try a different search or category.</div>
 
-    <section id="moneySection" data-base="yokota" hidden>
+    <section id="moneySection" data-base="yokota" data-rates="yen" hidden>
     <style>
   .money-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:18px; max-width:860px; }
   .money-card{ background:#fff; border:1px solid var(--line); border-top:4px solid var(--olive); border-radius:4px; padding:18px 20px; min-width:0; }
@@ -884,6 +884,8 @@
   .m-head{ font-family:'Big Shoulders Display', sans-serif; font-weight:800; font-size:21px; text-transform:uppercase; letter-spacing:0.02em; }
   .m-sub{ font-family:'JetBrains Mono', monospace; font-size:10.5px; color:#69665B; text-transform:uppercase; letter-spacing:0.04em; margin-top:2px; }
   .m-date{ font-size:13.5px; font-weight:600; margin:12px 0 6px; }
+  .m-big{ font-size:19px; margin:4px 0 10px; }
+  .m-big b{ font-family:'JetBrains Mono', monospace; font-size:22px; }
   .m-buys{ font-size:13px; color:#3b4640; margin-bottom:4px; }
   .m-table{ width:100%; border-collapse:collapse; font-size:14.5px; }
   .m-table th{ font-family:'JetBrains Mono', monospace; font-size:10px; font-weight:600; text-transform:uppercase; color:#69665B; text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); }
@@ -898,8 +900,9 @@
   .m-note a{ color:var(--olive); }
   @media (max-width:420px){ .money-card{ padding:16px 14px; } .m-table{ font-size:13.5px; } .m-table td, .m-table th{ padding:6px 5px; } }
 </style>
-    <h2 class="section-label" style="margin-top:54px;">Gas Prices on Post</h2>
+    <h2 class="section-label" style="margin-top:54px;">Exchange Rate &amp; Gas Prices</h2>
     <div class="money-grid">
+      <div class="money-card" id="ratesCard" hidden></div>
       <div class="money-card" id="gasCard" hidden></div>
     </div>
   </section>
