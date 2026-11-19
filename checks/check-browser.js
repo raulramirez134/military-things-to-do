@@ -3,7 +3,8 @@
 const fs = require("fs"), path = require("path"), http = require("http"), os = require("os"), cp = require("child_process");
 const { ROOT, loadData, Report } = require("./lib");
 const cfg = require("./config");
-const R = new Report("browser");
+const ENGINE = process.env.ENGINE || "chromium";
+const R = new Report("browser" + (ENGINE === "chromium" ? "" : " / " + ENGINE));
 const only = process.argv.slice(2);
 const keys = Object.keys(cfg.bases).filter((k) => !only.length || only.includes(k));
 
@@ -17,7 +18,7 @@ function leafletDist() {
   return path.join(dir, "node_modules/leaflet/dist");
 }
 const LF = leafletDist();
-const { chromium } = require("playwright");
+const pw = require("playwright");
 const MIME = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".css": "text/css", ".xml": "text/xml", ".png": "image/png", ".svg": "image/svg+xml", ".txt": "text/plain" };
 const srv = http.createServer((q, r) => {
   const u = new URL(q.url, "http://x"); let p = decodeURIComponent(u.pathname);
@@ -40,7 +41,14 @@ async function newPage(b, vp, errs, bad) {
 (async () => {
   await new Promise((r) => srv.listen(0, "127.0.0.1", r));
   const URL0 = "http://127.0.0.1:" + srv.address().port;
-  const b = await chromium.launch();
+  let b;
+  try { b = await pw[ENGINE].launch(); } catch (e) {
+    if (process.env.MTD_PW_RETRY) { console.log(`!! ${ENGINE} is unavailable here (${e.message.split("\n")[0]}) — skipped`); srv.close(); process.exit(ENGINE === "chromium" ? 1 : 0); }
+    const dir = path.join(os.tmpdir(), "mtd-pw"); console.log(`installing ${ENGINE} for the cross-browser run…`);
+    try { cp.execFileSync(process.execPath, [path.join(path.dirname(require.resolve("playwright/package.json")), "cli.js"), "install", ENGINE], { env: { ...process.env, PLAYWRIGHT_BROWSERS_PATH: dir }, stdio: "inherit" }); } catch (e2) { console.log(`!! could not install ${ENGINE} (${String(e2.message).split("\n")[0]}) — skipped`); srv.close(); process.exit(ENGINE === "chromium" ? 1 : 0); }
+    const r = cp.spawnSync(process.execPath, [__filename, ...process.argv.slice(2)], { stdio: "inherit", env: { ...process.env, PLAYWRIGHT_BROWSERS_PATH: dir, MTD_PW_RETRY: "1" } });
+    srv.close(); process.exit(r.status === null ? 1 : r.status);
+  }
   for (const k of keys) {
     const base = cfg.bases[k], S = k, data = loadData(base.data), places = data.places;
     const used = [...new Set(places.map((p) => p.cat))];
@@ -66,7 +74,7 @@ async function newPage(b, vp, errs, bad) {
     R.check(!info.emptyTabs.length, S, `tabs with no cards: ${info.emptyTabs}`);
     R.check(info.wrongLinks === 0, S, `${info.wrongLinks} card links lack base=${k} (worker would default to ramstein)`);
     const cov = info.withStatus / Math.max(1, info.nCards);
-    if (cov < 0.5) R.warn(S, `only ${(cov * 100).toFixed(0)}% of cards have a parseable Open/Closed status`);
+    if (cov < 0.5 && ENGINE === "chromium") R.warn(S, `only ${(cov * 100).toFixed(0)}% of cards have a parseable Open/Closed status`);
     // groups
     const vis = () => p.evaluate(() => ({ cards: [...document.querySelectorAll(".card")].filter((c) => c.offsetParent !== null).length,
       cats: [...new Set([...document.querySelectorAll(".card")].filter((c) => c.offsetParent !== null).map((c) => c.dataset.cat))],
@@ -93,6 +101,33 @@ async function newPage(b, vp, errs, bad) {
     await p.fill("#searchBox", probe); await p.waitForTimeout(300);
     const found = await p.evaluate((n) => [...document.querySelectorAll(".card")].filter((c) => c.offsetParent !== null && c.dataset.placename === n).length, probe);
     R.check(found >= 1, S, `searching "${probe}" didn't show that listing`); await p.fill("#searchBox", ""); await p.waitForTimeout(100);
+    // Open/Closed badge: which hours strings can't the page read? (report, not failure)
+    const hrs = await p.evaluate(() => places.map((x) => ({ id: x.id, h: x.hours, ok: parseHoursString(x.hours) !== null })));
+    const unread = hrs.filter((x) => !x.ok && !/check current hours/i.test(x.h));
+    if (unread.length && ENGINE === "chromium") {
+      const dir = path.join(os.tmpdir(), "mtd-reports"); fs.mkdirSync(dir, { recursive: true });
+      const f = path.join(dir, `hours-unreadable-${k}.txt`); fs.writeFileSync(f, unread.map((x) => `${x.id}\t${x.h}`).join("\n"));
+      R.warn(S + " hours", `${unread.length} listings have hours the Open/Closed badge can't read (e.g. "${unread[0].h.slice(0, 50)}") — full list: ${f}`);
+    }
+    // Deterministic Open/Closed + timezone tests (winter and summer, so daylight-saving is covered)
+    {
+      const wall = (tz, y, m, d, h, mi) => { let t = Date.UTC(y, m - 1, d, h, mi);
+        for (let i = 0; i < 3; i++) { const g = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: tz, hourCycle: "h23", year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "numeric" }).formatToParts(new Date(t)).map((x) => [x.type, +x.value])); t += Date.UTC(y, m - 1, d, h, mi) - Date.UTC(g.year, g.month - 1, g.day, g.hour, g.minute); } return t; };
+      const tp = await newPage(b, { width: 800, height: 600 }, [], []);
+      await tp.goto(`${URL0}/${base.page}`); await tp.waitForTimeout(400);
+      await tp.clock.install({ time: new Date("2026-01-01T00:00:00Z") });
+      // [y, m, d, hh, mm, weekday(0=Sun), hoursString, expected]
+      const cases = [[2026, 7, 14, 12, 0, 2, "Mon-Fri 9:00-17:00", true], [2027, 1, 12, 12, 0, 2, "Mon-Fri 9:00-17:00", true], [2026, 7, 14, 20, 0, 2, "Mon-Fri 9:00-17:00", false], [2027, 1, 12, 8, 30, 2, "Mon-Fri 9:00-17:00", false],
+        [2026, 7, 18, 19, 59, 6, "Daily 10:00-20:00", true], [2026, 7, 18, 20, 1, 6, "Daily 10:00-20:00", false], [2026, 10, 26, 12, 0, 1, "Mon-Fri 9:00-17:00", true], [2027, 3, 29, 12, 0, 1, "Mon-Fri 9:00-17:00", true], [2026, 7, 14, 3, 0, 2, "Open 24 hours", true],
+        [2026, 7, 14, 0, 30, 2, "Daily 10:00-20:00", false], [2027, 1, 12, 0, 5, 2, "Mon-Fri 9:00-17:00", false], [2026, 7, 18, 0, 30, 6, "Daily 18:00-02:00", true]];
+      for (const [y, m, d, hh, mm, wd, hs, want] of cases) {
+        const ms = wall(base.tz, y, m, d, hh, mm); await tp.clock.setFixedTime(new Date(ms));
+        const got = await tp.evaluate(([h]) => ({ st: getOpenStatus(h, HUB_TIME_ZONE), now: getNowInTimeZone(HUB_TIME_ZONE) }), [hs]);
+        R.check(got.now.day === wd && got.now.minutes === hh * 60 + mm, S, `clock check: at ${y}-${m}-${d} ${hh}:${String(mm).padStart(2, "0")} ${base.tz} the page thinks it is day ${got.now.day}, minute ${got.now.minutes} (want day ${wd}, minute ${hh * 60 + mm}) — timezone/DST bug`);
+        R.check(got.st === want, S, `"${hs}" at ${y}-${m}-${d} ${hh}:${String(mm).padStart(2, "0")} local should be ${want ? "Open" : "Closed"}, page says ${got.st}`);
+      }
+      await tp.close();
+    }
     // map tab + legend toggle hides pins
     await p.click('.cat-tab[data-cat="map"]'); await p.waitForTimeout(300);
     const mp = await p.evaluate(() => ({ shown: document.getElementById("map-section").offsetParent !== null, n: document.querySelectorAll("#legendItems input").length }));

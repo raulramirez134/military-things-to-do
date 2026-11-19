@@ -21,16 +21,18 @@ function stripDiv(html, marker) {
   return html;
 }
 class Report {
-  constructor(title) { this.title = title; this.fails = []; this.warns = []; this.passes = 0; }
+  constructor(title) { this.title = title; this.fails = []; this.warns = []; this.infos = []; this.passes = 0; }
   ok(n = 1) { this.passes += n; }
   fail(scope, msg) { this.fails.push([scope, msg]); }
   warn(scope, msg) { this.warns.push([scope, msg]); }
+  info(scope, msg) { this.infos.push([scope, msg]); }
   check(cond, scope, msg) { cond ? this.ok() : this.fail(scope, msg); return !!cond; }
   print() {
     const g = (arr) => arr.reduce((m, [s, x]) => ((m[s] = m[s] || []).push(x), m), {});
     console.log(`\n== ${this.title}: ${this.passes} checks passed, ${this.fails.length} FAILED, ${this.warns.length} warnings`);
     for (const [s, xs] of Object.entries(g(this.fails))) { console.log(`  FAIL [${s}]`); xs.slice(0, 12).forEach((x) => console.log("    - " + x)); if (xs.length > 12) console.log(`    … and ${xs.length - 12} more`); }
     for (const [s, xs] of Object.entries(g(this.warns))) { console.log(`  warn [${s}]`); xs.slice(0, 6).forEach((x) => console.log("    - " + x)); if (xs.length > 6) console.log(`    … and ${xs.length - 6} more`); }
+    if (this.infos.length) { console.log("  info"); this.infos.forEach(([s, x]) => console.log(`    ${s}: ${x}`)); }
     return this.fails.length === 0;
   }
 }

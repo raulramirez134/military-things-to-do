@@ -26,6 +26,13 @@ const M = [
   ["canonical with .html", "static", () => edit("about.html", (s) => s.replace(/(rel="canonical" href="[^"]+?)"/, '$1.html"')), /clean URL/],
   ["JS runtime error on page", "browser:ramstein", () => edit("ramstein.html", (s) => s.replace("const CURRENT_BASE_KEY", "undefinedFunctionCall();\nconst CURRENT_BASE_KEY")), /page errors/],
   ["card links lose base=", "browser:fortbragg", () => edit("fortbragg.html", (s) => s.replace(/class="card-name" href="listing\.html\?base=fortbragg&id=/, 'class="card-name" href="listing.html?id=')), /lack base=|page errors|card links/],
+  ["secret committed (Discord webhook)", "static", () => edit("about.html", (s) => s.replace("</body>", "<!-- " + "https://discord.com/api/" + "webhooks/123456789012345678/" + "abcdefghijklmnopqrstuvwxyz0123456789 -->\n</body>")), /Discord webhook/],
+  ["private key committed", "static", () => edit("privacy.html", (s) => s.replace("</body>", "<!-- -----BEGIN RSA PRIV" + "ATE KEY----- -->\n</body>")), /private key/],
+  ["listing duplicated under a new id", "static", () => edit("data-yokota.js", (s) => { const m = s.match(/^  \{ id:"([^"]+)".*$/m); return s.replace(m[0], m[0] + "\n" + m[0].replace(`id:"${m[1]}"`, `id:"${m[1]}-copy"`)); }), /duplicate listing|identical blurb/],
+  ["same blurb pasted on two listings", "static", () => edit("data-norfolk.js", (s) => { const bl = [...s.matchAll(/blurb:("(?:[^"\\]|\\.)*")/g)]; return s.replace(bl[4][0], "blurb:" + bl[3][1]); }), /identical blurb/],
+  ["5 listings deleted by accident", "static", () => edit("data-yokota.js", (s) => { let n = 0; return s.split("\n").filter((l) => !(l.startsWith("  { id:") && n++ < 5)).join("\n"); }), /disappeared since the last ship/],
+  ["timezone off by an hour", "browser:ramstein", () => edit("ramstein.html", (s) => s.replace("minutes: hour * 60 + minute }", "minutes: hour * 60 + minute + 60 }")), /clock check|should be/],
+  ["Open/Closed logic inverted", "browser:fortbragg", () => edit("fortbragg.html", (s) => s.replace("if (now.minutes >= start && now.minutes < end) return true;", "if (now.minutes >= start && now.minutes < end) return false;")), /should be/],
 ];
 let missed = 0;
 for (const [name, kind, mut, re] of M) {
