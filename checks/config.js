@@ -7,6 +7,8 @@ module.exports = {
   sharedNumbers: ["988", "8003429647", "8779955247", "8002221222", "911", "18003429647", "18002221222", "18779955247", "18772727337", "110", "112", "119"],
   // Businesses that must never be listed (confirmed closed or off-limits). Matched against listing names.
   neverList: [
+    { re: /508 locals/i, why: "closed (Norfolk)" },
+    { re: /pagoda ice cream/i, why: "closed 2026 (Norfolk)" },
     { re: /bahama breeze/i, why: "closed Sept 2026 (Fayetteville)" },
     { re: /walk-?on'?s/i, why: "closed (Fayetteville)" },
     { re: /mash house/i, why: "closed (Fayetteville)" },

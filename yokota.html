@@ -652,8 +652,8 @@
       </div>
       <div class="coords-row">
         <span><b>35.7428° N, 139.3384° E</b> — Yokota AB (ref. point)</span>
-        <span><b>21</b> categories mapped</span>
-        <span><b>92</b> locations logged</span>
+        <span><b>23</b> categories mapped</span>
+        <span><b>98</b> locations logged</span>
       </div>
     </div>
   </header>
@@ -691,7 +691,9 @@
             <button class="cat-tab sub-tab" data-cat="pets">Pet Services</button>
           </div>
           <div class="sub-row" data-group="family" role="group" aria-label="Family &amp; Community categories">
+            <button class="cat-tab sub-tab" data-cat="schools">Schools &amp; Childcare</button>
             <button class="cat-tab sub-tab" data-cat="kids">Kids &amp; Playgrounds</button>
+            <button class="cat-tab sub-tab" data-cat="community">Community &amp; Family Support</button>
             <button class="cat-tab sub-tab" data-cat="religious">Religious Services</button>
           </div>
           <div class="sub-row" data-group="fun" role="group" aria-label="Things to Do categories">
@@ -760,7 +762,7 @@
           <div class="legend-items" id="legendItems"></div>
         </div>
       </div>
-      <p style="font-size:12px; color:#69665B; margin-top:8px;">All 92 logged locations at once — zoom, click a pin for details, or toggle categories in the legend.</p>
+      <p style="font-size:12px; color:#69665B; margin-top:8px;">All 98 logged locations at once — zoom, click a pin for details, or toggle categories in the legend.</p>
     </div>
 
     <div id="listView" tabindex="-1">
@@ -806,6 +808,12 @@
 
       <h2 class="section-label">Kids &amp; Playgrounds</h2>
       <div class="grid" data-group="kids" id="grid-kids"></div>
+
+      <h2 class="section-label">Schools &amp; Childcare</h2>
+      <div class="grid" data-group="schools" id="grid-schools"></div>
+
+      <h2 class="section-label">Community &amp; Family Support</h2>
+      <div class="grid" data-group="community" id="grid-community"></div>
 
       <h2 class="section-label">Phone &amp; Internet Providers</h2>
       <div class="grid" data-group="phone" id="grid-phone"></div>
@@ -1208,7 +1216,7 @@ function sortPlaces(items, sortBy){
 
 function render(){
   const sortBy = document.getElementById("sortSelect") ? document.getElementById("sortSelect").value : "distance";
-  ["restaurant","grocery","attraction","auto","health","banking","housing","pets","fitness","religious","museum","kids","phone","tailor","bars","rec","shopping","onsen","tokyo","outdoors","legal"].forEach(cat=>{
+  ["restaurant","grocery","attraction","auto","health","banking","housing","pets","fitness","religious","museum","kids","phone","tailor","bars","rec","shopping","onsen","tokyo","outdoors","legal","schools","community"].forEach(cat=>{
     const el = document.getElementById("grid-"+cat);
     const items = sortPlaces(places.filter(p=>p.cat===cat), sortBy);
     el.innerHTML = items.map(cardHTML).join("");
@@ -1227,7 +1235,7 @@ const CAT_GROUPS = {
   shop: ["shopping", "auto"],
   settle: ["housing", "banking", "phone", "legal"],
   care: ["health", "tailor", "pets"],
-  family: ["kids", "religious"],
+  family: ["schools", "kids", "community", "religious"],
   fun: ["attraction", "rec", "fitness", "outdoors", "museum", "events"],
   trips: ["onsen", "tokyo"]
 };
