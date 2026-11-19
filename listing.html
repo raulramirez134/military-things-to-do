@@ -75,11 +75,11 @@
   .si-thumb svg{ width:22px; height:22px; }
   .si-body{ min-width:0; flex:1 1 0%; }
   .sidebar-item .si-name{ font-weight:600; font-size:14px; margin-bottom:3px; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block; }
-  .sidebar-item .si-meta{ display:flex; align-items:center; gap:8px; font-size:12px; color:#6b6656; flex-wrap:wrap; }
+  .sidebar-item .si-meta{ display:flex; align-items:center; gap:8px; font-size:12px; color:#5a5648; flex-wrap:wrap; }
   .sidebar-item .si-meta .stars{ color:var(--brass); letter-spacing:1px; }
   .sidebar-item .si-dist{ font-family:'JetBrains Mono', monospace; }
   .sidebar-item.current{ border-color:var(--olive); background: rgba(91,107,79,0.06); }
-  .si-viewing{ font-weight:400; font-style:italic; color:var(--olive); font-size:11px; white-space:nowrap; flex-shrink:0; margin-left:auto; padding-left:8px; }
+  .si-viewing{ font-weight:400; font-style:italic; color:#4c5a41; font-size:12px; white-space:nowrap; flex-shrink:0; margin-left:auto; padding-left:8px; }
 
   @media (max-width:860px){
     main{ flex-direction:column; }
@@ -155,7 +155,7 @@
   }
   .admin-remove-btn:hover{ color:var(--rust); }
   .removed-card{ background:var(--parchment-dim); border-style:dashed; }
-  .removed-text{ color:#69665B; font-style:italic; margin:0; }
+  .removed-text{ color:#57544a; font-style:italic; margin:0; }
   .admin-remove-row{
     display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:8px;
     padding-top:8px; border-top:1px dashed var(--line);
@@ -220,6 +220,7 @@
     a{ color:var(--ink); text-decoration:underline; }
     .open-badge{ border:1px solid currentColor; background:none !important; }
   }
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } *{ transition:none !important; } }
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2511246091167745" crossorigin="anonymous"></script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
@@ -532,7 +533,7 @@ function initPage(){
       ${callHref ? `<a class="action-btn" href="${callHref}">Call ${place.phone}</a>` : ""}
       <button class="action-btn" id="shareBtn" type="button">Share / QR code</button>
       <button class="action-btn" id="reportOutdatedBtn" type="button">🚩 Report outdated info</button>
-      <a class="action-btn" href="${cfg.hub}#feedback-section">Claim / report this listing</a>
+      <a class="action-btn" href="${cfg.hub}?claim=${encodeURIComponent(place.id)}#feedback-section">Claim / report this listing</a>
     </div>
 
     <div id="reportPopover" class="share-popover" style="display:none;">

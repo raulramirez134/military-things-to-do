@@ -183,13 +183,13 @@
   .cat-tabs-extra{ display:none; gap:8px; flex-wrap:wrap; }
   .cat-tabs-extra.open{ display:flex; }
   .cat-tab-toggle{ background:var(--parchment-dim); border-style:dashed; }
-  .group-tab .grp-count{ opacity:.6; font-size:11px; }
+  .group-tab .grp-count{ opacity:.8; font-size:12px; }
   .group-tab.parent-active{ border-color:var(--ink); box-shadow: inset 0 -3px 0 var(--ink); }
   .sub-rows{ flex-basis:100%; }
-  @media (max-width:600px){ .cat-tabs .group-tab{ font-size:11px; padding:8px 9px; } }
+  @media (max-width:600px){ .cat-tabs .group-tab{ font-size:12px; padding:8px 10px; } }
   .sub-row{ display:none; flex-wrap:wrap; gap:6px; padding:10px 0 2px; }
   .sub-row.open{ display:flex; }
-  .cat-tab.sub-tab{ font-size:11px; padding:6px 10px; background:var(--parchment-dim); }
+  .cat-tab.sub-tab{ font-size:12px; padding:7px 11px; background:var(--parchment-dim); }
   .cat-tab.sub-tab.active{ background:var(--ink); color:var(--parchment); border-color:var(--ink); }
   .cat-tab{
     font-family:'JetBrains Mono', monospace;
@@ -206,9 +206,9 @@
   }
   .sort-filter-row{
     max-width:1100px; margin:10px auto 0; display:flex; align-items:center; gap:14px; flex-wrap:wrap;
-    font-family:'JetBrains Mono', monospace; font-size:12.5px; color:#6b7268;
+    font-family:'JetBrains Mono', monospace; font-size:12.5px; color:#575d55;
   }
-  .sf-label{ text-transform:uppercase; letter-spacing:0.04em; font-size:11px; }
+  .sf-label{ text-transform:uppercase; letter-spacing:0.04em; font-size:12px; }
   .sf-select{
     font-family:'Source Sans 3', sans-serif; font-size:13px; padding:6px 10px;
     border:1px solid var(--line); border-radius:3px; background:#fff; color:var(--ink); cursor:pointer;
@@ -298,7 +298,7 @@
   .card-name:hover{ color:var(--brass); }
   .card-rating{ display:flex; align-items:baseline; gap:6px; font-size:13px; flex-wrap:wrap; }
   .open-badge{
-    display:inline-block; font-family:'JetBrains Mono', monospace; font-size:10.5px; font-weight:600;
+    display:inline-block; font-family:'JetBrains Mono', monospace; font-size:11.5px; font-weight:600;
     letter-spacing:0.03em; text-transform:uppercase; padding:2px 8px; border-radius:10px;
   }
   .open-badge.open{ background: rgba(91,107,79,0.16); color:#41502f; }
@@ -306,9 +306,9 @@
   .card-rating .stars{ color:var(--brass); letter-spacing:1px; font-size:14px; }
   .card-rating .stars-num{ font-family:'JetBrains Mono', monospace; font-weight:600; color:var(--ink); }
   .card-rating .stars-count{ color:#69665B; font-size:12px; }
-  .card-rating .stars-na{ color:#a39d89; font-size:12px; font-style:italic; }
+  .card-rating .stars-na{ color:#6e6957; font-size:12px; font-style:italic; }
   .tag{
-    font-family:'JetBrains Mono', monospace; font-size:10px; letter-spacing:0.06em; text-transform:uppercase;
+    font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.06em; text-transform:uppercase;
     padding:4px 8px; border-radius:2px; white-space:nowrap; flex-shrink:0;
     display:inline-block; align-self:flex-start;
   }
@@ -348,24 +348,24 @@
   .tag.castles{ background: rgba(192,138,52,0.16); color:#8c621f; }
 
   .card-blurb{ font-size:14px; line-height:1.5; color:#3b4640; }
-  .card-addr{ font-size:12.5px; color:#7a8078; }
+  .card-addr{ font-size:13.5px; color:#5f655d; }
   .card-meta{
-    display:flex; flex-wrap:wrap; gap:14px; font-family:'JetBrains Mono', monospace; font-size:11.5px;
+    display:flex; flex-wrap:wrap; gap:14px; font-family:'JetBrains Mono', monospace; font-size:12.5px;
     color:#6b7268; padding-top:8px; border-top:1px dashed var(--line); margin-top:2px;
   }
-  .card-meta .dist{ color: var(--brass); font-weight:600; }
+  .card-meta .dist{ color:#8c621f; font-weight:600; }
 
   .card-actions{ display:flex; gap:8px; flex-wrap:wrap; padding-top:4px; }
   .action-btn{
     display:inline-flex; align-items:center; gap:6px;
-    font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.03em; text-transform:uppercase;
-    padding:8px 11px; border-radius:3px; border:1px solid var(--line);
+    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:0.03em; text-transform:uppercase;
+    padding:9px 12px; border-radius:3px; border:1px solid var(--line);
     text-decoration:none; color:var(--ink); background:var(--parchment);
     transition: background .15s ease, border-color .15s ease;
   }
   .action-btn:hover{ background:#fff; border-color:var(--olive); }
   .action-btn svg{ width:13px; height:13px; }
-  .action-btn.disabled{ opacity:0.35; pointer-events:none; }
+  .action-btn.disabled{ color:#6b7268; background:transparent; border-style:dashed; pointer-events:none; }
 
   .empty-state{ padding: 60px 20px; text-align:center; color:#7a8078; font-family:'JetBrains Mono', monospace; font-size:13px; }
 
@@ -402,9 +402,9 @@
   .emergency-strip-inner{
     max-width:1100px; margin:0 auto; padding:9px 24px;
     display:flex; flex-wrap:wrap; align-items:center; gap:16px;
-    font-family:'JetBrains Mono', monospace; font-size:11.5px;
+    font-family:'JetBrains Mono', monospace; font-size:12.5px;
   }
-  .es-label{ text-transform:uppercase; letter-spacing:0.08em; font-weight:600; opacity:0.85; }
+  .es-label{ text-transform:uppercase; letter-spacing:0.08em; font-weight:600; }
   .es-item b{ font-weight:700; }
   .es-link{ margin-left:auto; text-decoration:underline; text-underline-offset:2px; color:#fff; white-space:nowrap; }
   @media (max-width:700px){ .es-link{ margin-left:0; } }
@@ -460,19 +460,6 @@
   footer .footer-inner{ max-width:1100px; margin:0 auto; }
   footer b{ color: rgba(237,231,214,0.85); }
 
-  /* ===== Interstitial ad ===== */
-  .ad-overlay{ position:fixed; inset:0; background: rgba(24,36,32,0.72); display:flex; align-items:center; justify-content:center; z-index:100; padding:20px; }
-  .ad-overlay.hidden{ display:none; }
-  .ad-card{ background:#fff; border-radius:6px; width:100%; max-width:420px; overflow:hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.4); }
-  .ad-card-head{
-    display:flex; justify-content:space-between; align-items:center; padding: 10px 14px;
-    background: var(--parchment-dim); font-family:'JetBrains Mono', monospace; font-size:10.5px;
-    letter-spacing:0.06em; text-transform:uppercase; color:#7a8078;
-  }
-  .ad-close{ border:none; background:none; cursor:pointer; font-size:18px; line-height:1; color:#7a8078; padding:2px 6px; }
-  .ad-close:hover{ color:var(--ink); }
-  .ad-body{ padding: 24px; text-align:center; color:#7a8078; font-family:'Source Sans 3', sans-serif; min-height:250px; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-  .ad-body .adsense-note{ font-size:11px; margin-top:14px; color:#a39d89; }
 
   @media (max-width:600px){
     header.brief{ padding:18px 16px 30px; }
@@ -484,11 +471,54 @@
     .base-suggest-dropdown{ left:0; right:0; min-width:0; }
   }
 
+  /* ===== Modal shell (used by the first-visit welcome) ===== */
+  .ad-overlay{ position:fixed; inset:0; background: rgba(24,36,32,0.72); display:flex; align-items:center; justify-content:center; z-index:100; padding:20px; }
+  .ad-overlay.hidden{ display:none; }
+  .ad-card{ background:#fff; border-radius:6px; width:100%; max-width:420px; overflow:hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.4); }
+
+  /* ===== In-list ad (replaces the old pop-up) — collapsed until Google actually fills it ===== */
+  .list-ad{ margin:30px 0 4px; }
+  .list-ad:not(:has(ins[data-ad-status="filled"])){ height:0; margin:0; overflow:hidden; }
+  .list-ad-head{ font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:#575d55; margin-bottom:8px; }
+  .list-ad-body{ display:flex; justify-content:center; background:#fff; border:1px solid var(--line); border-radius:4px; padding:14px; }
+
+  /* ===== "Show all" under long sections in the All view ===== */
+  .show-all-btn{
+    display:block; width:100%; margin-top:14px; padding:13px 14px; cursor:pointer;
+    font-family:'JetBrains Mono', monospace; font-size:12.5px; letter-spacing:0.05em; text-transform:uppercase;
+    color:var(--ink); background:transparent; border:1px dashed rgba(24,36,32,0.35); border-radius:4px;
+    transition: background .15s ease, border-color .15s ease;
+  }
+  .show-all-btn:hover{ background:#fff; border-color:var(--olive); border-style:solid; }
+  .show-all-btn b{ color:#7a5418; }
+
+  /* ===== Utility links: one swipeable row on phones so listings start sooner ===== */
+  .util-links{ display:contents; }
+  @media (max-width:600px){
+    .util-row{ flex-direction:column; flex-wrap:nowrap !important; align-items:stretch !important; width:100%; min-width:0; }
+    .util-row .search-wrap{ order:-1; }
+    .util-links{
+      display:flex; gap:8px; overflow-x:auto; overscroll-behavior-x:contain; scrollbar-width:none;
+      margin:0 -16px; padding:2px 16px 4px;
+      -webkit-mask-image: linear-gradient(to right, #000 82%, transparent);
+              mask-image: linear-gradient(to right, #000 82%, transparent);
+    }
+    .util-links::-webkit-scrollbar{ display:none; }
+    .util-links > *{ flex-shrink:0; white-space:nowrap; }
+    .coords-row > span:first-child{ display:none; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    .card, .cat-tab, .action-btn, .show-all-btn{ transition:none; }
+    .card:hover{ transform:none; }
+  }
+
   @media print{
     /* Print a clean category listing, not the site chrome. */
     header.brief{ background:none; color:var(--ink); border-bottom:2px solid var(--ink); }
     .topbar, .cat-tabs, #catTabsExtra, .search-wrap, .sort-filter-row,
-    #map-section, .ad-overlay, footer, #moneySection, #help-section, #feedback-section,
+    #map-section, .list-ad, .show-all-btn, footer, #moneySection, #help-section, #feedback-section,
     .fav-btn, .skip-link{
       display:none !important;
     }
@@ -542,26 +572,6 @@
     </div>
   </div>
 
-  <!-- Interstitial ad: shows once per browser session -->
-  <div class="ad-overlay hidden" id="adOverlay">
-    <div class="ad-card">
-      <div class="ad-card-head">
-        <span>Sponsored</span>
-        <button class="ad-close" id="adClose" aria-label="Close">×</button>
-      </div>
-      <div class="ad-body">
-        <!-- ================================================================
-             ADSENSE AD UNIT — "Interstitial - Ramstein" (300x250)
-             ================================================================ -->
-        <ins class="adsbygoogle"
-             style="display:inline-block;width:300px;height:250px"
-             data-ad-client="ca-pub-2511246091167745"
-             data-ad-slot="8039818257"></ins>
-        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-        <p class="adsense-note">Runs once per visit, then stays out of the way.</p>
-      </div>
-    </div>
-  </div>
 
   <header class="brief">
     <div class="topbar">
@@ -684,15 +694,17 @@
           </div>
         </div>
       </div>
-      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-        <a href="guide.html" class="cat-tab" style="text-decoration:none; display:inline-block; background:var(--brass); color:#fff; border-color:var(--brass);">New Here? Start Guide →</a>
-        <button class="cat-tab" data-cat="map">Map View</button>
-        <button class="cat-tab" data-cat="favorites" id="favTab">★ My Favorites</button>
-        <a href="search.html" class="cat-tab" style="text-decoration:none; display:inline-block;">🔍 Search All Bases</a>
-        <a href="suggest.html" class="cat-tab" style="text-decoration:none; display:inline-block;">💡 Suggest a Listing</a>
-        <a href="#moneySection" id="moneyNavLink" class="cat-tab" style="text-decoration:none; display:inline-block;" hidden>💱 Rates &amp; Gas</a>
-        <a href="#help-section" class="cat-tab" style="text-decoration:none; display:inline-block;">Emergency &amp; Health</a>
-        <a href="#feedback-section" class="cat-tab" style="text-decoration:none; display:inline-block;">Feedback</a>
+      <div class="util-row" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <div class="util-links">
+          <a href="guide.html" class="cat-tab" style="text-decoration:none; display:inline-block; background:var(--brass); color:var(--ink); border-color:var(--brass);">New Here? Start Guide →</a>
+          <button class="cat-tab" data-cat="map">Map View</button>
+          <button class="cat-tab" data-cat="favorites" id="favTab">★ My Favorites</button>
+          <a href="search.html" class="cat-tab" style="text-decoration:none; display:inline-block;">🔍 Search All Bases</a>
+          <a href="suggest.html" class="cat-tab" style="text-decoration:none; display:inline-block;">💡 Suggest a Listing</a>
+          <a href="#moneySection" id="moneyNavLink" class="cat-tab" style="text-decoration:none; display:inline-block;" hidden>💱 Rates &amp; Gas</a>
+          <a href="#help-section" class="cat-tab" style="text-decoration:none; display:inline-block;">Emergency &amp; Health</a>
+          <a href="#feedback-section" class="cat-tab" style="text-decoration:none; display:inline-block;">Feedback</a>
+        </div>
         <div class="search-wrap" style="position:relative;">
           <input type="text" class="search-box" id="searchBox" placeholder="Search this base…" />
           <div id="baseSuggestDropdown" class="base-suggest-dropdown" style="display:none;"></div>
@@ -748,6 +760,18 @@
       </div>
       <h2 class="section-label">Restaurants &amp; Cafés</h2>
       <div class="grid" data-group="restaurant" id="grid-restaurant"></div>
+
+      <div class="list-ad" id="listAd" role="complementary" aria-label="Advertisement">
+        <div class="list-ad-head">Sponsored</div>
+        <div class="list-ad-body">
+          <!-- ADSENSE AD UNIT — "Interstitial - Ramstein" (300x250), shown in the list instead of a pop-up -->
+          <ins class="adsbygoogle"
+               style="display:inline-block;width:300px;height:250px"
+               data-ad-client="ca-pub-2511246091167745"
+               data-ad-slot="8039818257"></ins>
+          <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+      </div>
 
       <h2 class="section-label">Grocery &amp; Food Stores</h2>
       <div class="grid" data-group="grocery" id="grid-grocery"></div>
@@ -1255,7 +1279,6 @@ function cardHTML(p){
         ${callHref
           ? `<a class="action-btn" href="${callHref}">${callIcon} ${p.phone}</a>`
           : `<span class="action-btn disabled">${callIcon} No phone listed</span>`}
-        <a class="action-btn" href="#feedback-section" onclick="claimListing('${p.name.replace(/'/g,"\\'")}', '${p.id}')">${claimIcon} Claim / report</a>
       </div>
     </div>
   `;
@@ -1328,6 +1351,25 @@ const tabs = document.querySelectorAll(".cat-tab:not(.cat-tab-toggle)");
 const listView = document.getElementById("listView");
 const emptyState = document.getElementById("emptyState");
 
+// "All" view: show the first few listings per section, with a "Show all" button under the rest
+const CAP_PER_SECTION = 6;
+const expandedGrids = new Set();
+function showAllBtnFor(grid){
+  let btn = grid.nextElementSibling;
+  if(btn && btn.classList.contains("show-all-btn")) return btn;
+  btn = document.createElement("button");
+  btn.type = "button"; btn.className = "show-all-btn"; btn.dataset.for = grid.id;
+  btn.addEventListener("click", ()=>{
+    expandedGrids.add(grid.id);
+    applyFilter();
+    const next = grid.querySelectorAll(".card")[CAP_PER_SECTION];
+    const link = next && next.querySelector(".card-name");
+    if(link) link.focus({ preventScroll:true });
+  });
+  grid.after(btn);
+  return btn;
+}
+
 function applyFilter(){
   const active = document.querySelector(".cat-tab.active").dataset.cat;
   syncGroupRow();
@@ -1359,17 +1401,27 @@ function applyFilter(){
     grid.style.display = show ? "" : "none";
     if(show){
       let visibleInGrid = 0;
+      const capped = active === "all" && !query && !openNowOnly && !expandedGrids.has(grid.id);
       grid.querySelectorAll(".card").forEach(card=>{
         const matchesQuery = !query || card.dataset.name.includes(query);
         const matchesFav = active !== "favorites" || favs.some(f => f.base === CURRENT_BASE_KEY && f.id === card.dataset.placeid);
         const matchesOpenNow = !openNowOnly || card.dataset.openstatus === "open";
         const visible = matchesQuery && matchesFav && matchesOpenNow;
-        card.style.display = visible ? "" : "none";
         if(visible) visibleInGrid++;
         else if(matchesQuery && matchesFav && openNowOnly && !matchesOpenNow) anyHiddenByOpenNowOnly = true;
+        card.style.display = visible && !(capped && visibleInGrid > CAP_PER_SECTION) ? "" : "none";
       });
+      const moreBtn = showAllBtnFor(grid);
+      if(capped && visibleInGrid > CAP_PER_SECTION){
+        const label = grid.previousElementSibling.textContent.trim();
+        moreBtn.innerHTML = `Show all <b>${visibleInGrid}</b> — ${label} ↓`;
+        moreBtn.style.display = "";
+      } else moreBtn.style.display = "none";
       if(visibleInGrid > 0) anyVisible = true;
       else { grid.previousElementSibling.style.display = "none"; grid.style.display = "none"; }
+    } else {
+      const moreBtn = grid.nextElementSibling;
+      if(moreBtn && moreBtn.classList.contains("show-all-btn")) moreBtn.style.display = "none";
     }
   });
 
@@ -1399,6 +1451,7 @@ tabs.forEach(tab=>{
     document.querySelector("main").scrollIntoView({ behavior: "smooth", block: "start" });
   });
 });
+try { applyFilter(); } catch (err) {} // first load: apply the "All" view cap + Show-all buttons
 function levenshtein(a, b){
   if (a === b) return 0;
   if (!a.length) return b.length;
@@ -1664,14 +1717,23 @@ feedbackForm.addEventListener("submit", async (e)=>{
   }
 });
 
-// First-visit welcome — shows once ever, before the ad (never both at once)
+// "Claim / report" on a listing page links here with ?claim=<id> — prefill the feedback form
+(function(){
+  const cid = new URLSearchParams(location.search).get("claim");
+  const pl = cid && places.find(x => x.id === cid);
+  if(!pl) return;
+  claimListing(pl.name, pl.id);
+  const fs = document.getElementById("feedback-section");
+  if(fs) fs.scrollIntoView({ block:"start" });
+})();
+
+// First-visit welcome — shows once ever
 const welcomeOverlay = document.getElementById("welcomeOverlay");
 const needsWelcome = !localStorage.getItem("military_onboarding_seen");
 if(needsWelcome){ welcomeOverlay.classList.remove("hidden"); }
 function dismissWelcome(){
   welcomeOverlay.classList.add("hidden");
   localStorage.setItem("military_onboarding_seen", "1");
-  if(!sessionStorage.getItem("kmc_ad_shown")){ adOverlay.classList.remove("hidden"); }
 }
 document.getElementById("welcomeDismissBtn").addEventListener("click", dismissWelcome);
 welcomeOverlay.addEventListener("click", (e) => { if(e.target === welcomeOverlay) dismissWelcome(); });
@@ -1679,14 +1741,6 @@ document.addEventListener("keydown", (e) => {
   if(e.key === "Escape" && !welcomeOverlay.classList.contains("hidden")) dismissWelcome();
 });
 
-// Interstitial ad — once per session
-const adOverlay = document.getElementById("adOverlay");
-const adClose = document.getElementById("adClose");
-if(!needsWelcome && !sessionStorage.getItem("kmc_ad_shown")){ adOverlay.classList.remove("hidden"); }
-adClose.addEventListener("click", ()=>{
-  adOverlay.classList.add("hidden");
-  sessionStorage.setItem("kmc_ad_shown", "1");
-});
 
 // ---- Map view (Leaflet + OpenStreetMap tiles) ----
 const catColors = {

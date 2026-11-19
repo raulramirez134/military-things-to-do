@@ -95,7 +95,14 @@ async function newPage(b, vp, errs, bad) {
     }
     R.check(sum === places.length, S, `groups cover ${sum} listings but data has ${places.length}`);
     await p.click('.cat-tab[data-cat="all"]'); await p.waitForTimeout(120);
-    const all = await vis(); R.check(all.cards === places.length && all.openRows.length === 0, S, `"All" shows ${all.cards}/${places.length} cards`);
+    // "All" starts capped at 6 per section with a "Show all" button; expanding every section must reveal every listing
+    const cap = await p.evaluate(() => ({ over: [...document.querySelectorAll('.grid[id^="grid-"]')].filter((g) => g.offsetParent !== null && [...g.querySelectorAll(".card")].filter((c) => c.offsetParent !== null).length > 6).map((g) => g.id),
+      missingBtn: [...document.querySelectorAll('.grid[id^="grid-"]')].filter((g) => g.children.length > 6 && !(g.nextElementSibling && g.nextElementSibling.classList.contains("show-all-btn") && g.nextElementSibling.offsetParent !== null)).map((g) => g.id) }));
+    R.check(!cap.over.length && !cap.missingBtn.length, S, `"All" view: sections over 6 cards [${cap.over}], long sections without a Show-all button [${cap.missingBtn}]`);
+    await p.evaluate(() => document.querySelectorAll(".show-all-btn").forEach((x) => { if (x.offsetParent !== null) x.click(); })); await p.waitForTimeout(150);
+    const all = await vis(); R.check(all.cards === places.length && all.openRows.length === 0, S, `"All" (after Show all) shows ${all.cards}/${places.length} cards`);
+    const leftBtns = await p.evaluate(() => [...document.querySelectorAll(".show-all-btn")].filter((x) => x.offsetParent !== null).length);
+    R.check(leftBtns === 0, S, `${leftBtns} Show-all buttons still visible after expanding`);
     // search finds a known listing
     const probe = places[Math.floor(places.length / 2)].name;
     await p.fill("#searchBox", probe); await p.waitForTimeout(300);
