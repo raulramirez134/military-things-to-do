@@ -53,6 +53,14 @@
   }
   .sc-handle-btn:hover{ background: rgba(91,107,79,0.14); }
   .empty-msg{ color:#69665B; font-style:italic; }
+  .gas-form{ display:flex; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
+  .gas-form label{ display:flex; flex-direction:column; gap:4px; font-family:'JetBrains Mono', monospace; font-size:11px; text-transform:uppercase; color:#6b7268; }
+  .gas-form input, .gas-form select, .gas-table input{ font-family:'Source Sans 3', sans-serif; font-size:15px; padding:8px 10px; border:1px solid var(--line); border-radius:3px; background:#fff; }
+  .gas-table{ border-collapse:collapse; width:100%; max-width:520px; }
+  .gas-table th{ font-family:'JetBrains Mono', monospace; font-size:11px; text-transform:uppercase; color:#6b7268; text-align:left; padding:4px 6px; }
+  .gas-table td{ padding:4px 6px; }
+  .gas-table input{ width:100%; }
+  .gas-liter{ font-family:'JetBrains Mono', monospace; font-size:14px; color:#3b4640; }
 </style>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
@@ -75,6 +83,30 @@
     <div id="exportSection" style="margin-bottom:32px; padding-bottom:24px; border-bottom:1px solid var(--line);">
       <button id="exportBtn" type="button" class="sc-handle-btn" style="padding:9px 16px;">⬇ Download full data backup (.json)</button>
       <p style="font-size:12px; color:#69665B; margin-top:8px;">Includes every review, suggestion, and feedback message currently stored — worth downloading periodically.</p>
+    </div>
+    <div id="gasSection" style="margin-bottom:32px; padding-bottom:24px; border-bottom:1px solid var(--line);">
+      <h1>Gas Prices on Post</h1>
+      <p style="font-size:13.5px; color:#3b4640; margin:0 0 14px;">Type in the Exchange Express pump prices (per gallon, in dollars). The per-liter price is worked out for you. They show on that base's page with the date you pick, until you update or clear them.</p>
+      <div class="gas-form">
+        <label>Base
+          <select id="gasBase"></select>
+        </label>
+        <label>Area shown
+          <input type="text" id="gasRegion" maxlength="40" placeholder="e.g. Germany">
+        </label>
+        <label>Prices as of
+          <input type="date" id="gasAsOf">
+        </label>
+      </div>
+      <table class="gas-table">
+        <thead><tr><th>Fuel type</th><th>$ per gallon</th><th>$ per liter</th></tr></thead>
+        <tbody id="gasRows"></tbody>
+      </table>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+        <button id="gasSaveBtn" type="button" class="sc-handle-btn" style="padding:9px 16px; background:var(--ink); color:var(--parchment);">Save gas prices</button>
+        <button id="gasClearBtn" type="button" class="sc-handle-btn" style="padding:9px 16px;">Remove prices for this base</button>
+      </div>
+      <div id="gasMsg" style="font-size:13px; margin-top:10px; min-height:18px;"></div>
     </div>
     <h1>Suggested Listings</h1>
     <div class="count-line" id="countLine"></div>
@@ -102,6 +134,7 @@ async function loadSuggestions(){
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("suggestionsList").style.display = "block";
     renderSuggestions(data.suggestions || []);
+    initGas();
 
     const fbRes = await fetch(`/api/feedback?adminKey=${encodeURIComponent(adminKey)}`);
     const fbData = await fbRes.json();
@@ -221,6 +254,80 @@ window.markFeedbackHandled = async function(id){
     }
   } catch {}
 };
+
+
+// ---- Gas prices on post ----
+const GAS_DEFAULTS = {
+  europe: { region: "Germany", types: ["Super E10", "Super", "Super Plus", "Diesel"] },
+  asia: { region: "", types: ["Regular", "Midgrade", "Premium", "Diesel"] },
+  us: { region: "", types: ["Regular", "Midgrade", "Premium", "Diesel"] },
+};
+const GAS_REGION_OF = { ramstein: "europe", yokota: "asia", humphreys: "asia" };
+const L_PER_GAL = 3.785411784;
+function gasRowsHtml(types, prices){
+  const rows = [];
+  for (let i = 0; i < 4; i++) {
+    const p = (prices && prices[i]) || {};
+    rows.push(`<tr><td><input type="text" class="gas-type" maxlength="30" value="${escapeHtml(p.type || types[i] || "")}"></td>
+      <td><input type="number" class="gas-gal" step="0.001" min="0" inputmode="decimal" value="${p.gallon != null ? p.gallon : ""}" placeholder="0.000"></td>
+      <td class="gas-liter"></td></tr>`);
+  }
+  document.getElementById("gasRows").innerHTML = rows.join("");
+  updateLiters();
+}
+function updateLiters(){
+  document.querySelectorAll("#gasRows tr").forEach(tr => {
+    const g = parseFloat(tr.querySelector(".gas-gal").value);
+    tr.querySelector(".gas-liter").textContent = g > 0 ? "$" + (g / L_PER_GAL).toFixed(3) : "";
+  });
+}
+async function loadGas(){
+  const base = document.getElementById("gasBase").value;
+  const def = GAS_DEFAULTS[GAS_REGION_OF[base] || "us"];
+  document.getElementById("gasMsg").textContent = "";
+  let data = null;
+  try { const r = await fetch(`/api/gas?base=${encodeURIComponent(base)}`, { cache: "no-store" }); data = r.ok ? await r.json() : null; } catch {}
+  const has = data && data.prices && data.prices.length;
+  document.getElementById("gasRegion").value = has ? (data.region || "") : def.region;
+  document.getElementById("gasAsOf").value = has ? data.asOf : new Date().toISOString().slice(0, 10);
+  gasRowsHtml(def.types, has ? data.prices : null);
+  document.getElementById("gasMsg").textContent = has ? `Currently showing prices as of ${data.asOf}.` : "No prices showing for this base yet.";
+}
+function initGas(){
+  const sel = document.getElementById("gasBase");
+  sel.innerHTML = Object.entries(BASE_LABELS).map(([k, v]) => `<option value="${k}">${v}</option>`).join("");
+  sel.value = "ramstein";
+  sel.addEventListener("change", loadGas);
+  document.getElementById("gasRows").addEventListener("input", updateLiters);
+  document.getElementById("gasSaveBtn").addEventListener("click", () => saveGas(false));
+  document.getElementById("gasClearBtn").addEventListener("click", () => saveGas(true));
+  loadGas();
+}
+async function saveGas(clear){
+  const msg = document.getElementById("gasMsg");
+  const base = document.getElementById("gasBase").value;
+  const prices = [...document.querySelectorAll("#gasRows tr")].map(tr => ({
+    type: tr.querySelector(".gas-type").value.trim(),
+    gallon: parseFloat(tr.querySelector(".gas-gal").value),
+  })).filter(p => p.type && p.gallon > 0);
+  if (!clear && prices.length === 0) { msg.style.color = "var(--rust)"; msg.textContent = "Enter at least one price per gallon."; return; }
+  try {
+    const res = await fetch("/api/gas", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(clear ? { adminKey, base, clear: true } : {
+        adminKey, base, prices,
+        region: document.getElementById("gasRegion").value.trim(),
+        asOf: document.getElementById("gasAsOf").value,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) { msg.style.color = "var(--rust)"; msg.textContent = data.error || "Couldn't save."; return; }
+    msg.style.color = "var(--olive)";
+    msg.textContent = clear ? `Removed — the gas box is hidden on ${BASE_LABELS[base]} now.` : `Saved — showing on the ${BASE_LABELS[base]} page within a few minutes.`;
+    if (clear) loadGas();
+  } catch { msg.style.color = "var(--rust)"; msg.textContent = "Couldn't reach the server — check your connection."; }
+}
 
 document.getElementById("loginBtn").addEventListener("click", () => {
   adminKey = document.getElementById("adminPw").value;
