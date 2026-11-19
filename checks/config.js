@@ -63,7 +63,7 @@ module.exports = {
     campbell: {
       label: "Fort Campbell", status: "live", page: "campbell.html", data: "data-campbell.js", guide: "guide-campbell.html",
       tz: "America/Chicago", unit: "mi", refWord: "gate", refs: [[36.6436477, -87.4409467]],
-      bbox: [35.8, -88.6, 37.3, -86.3], tokens: ["Fort Campbell", "Clarksville", "Blanchfield", "Oak Grove"],
+      bbox: [35.8, -88.6, 37.3, -85.9], tokens: ["Fort Campbell", "Clarksville", "Blanchfield", "Oak Grove"],
       phone: /^(\+1|\(?\d{3}\)?)/, topbar: "FORT CAMPBELL",
     },
   },
