@@ -520,7 +520,7 @@
     /* Print a clean category listing, not the site chrome. */
     header.brief{ background:none; color:var(--ink); border-bottom:2px solid var(--ink); }
     .topbar, .cat-tabs, #catTabsExtra, .search-wrap, .sort-filter-row,
-    #map-section, .ad-overlay, footer, #help-section, #feedback-section,
+    #map-section, .ad-overlay, footer, #moneySection, #help-section, #feedback-section,
     .fav-btn, .skip-link{
       display:none !important;
     }
@@ -725,6 +725,7 @@
         <button class="cat-tab" data-cat="favorites" id="favTab">★ My Favorites</button>
         <a href="search.html" class="cat-tab" style="text-decoration:none; display:inline-block;">🔍 Search All Bases</a>
         <a href="suggest.html" class="cat-tab" style="text-decoration:none; display:inline-block;">💡 Suggest a Listing</a>
+        <a href="#moneySection" id="moneyNavLink" class="cat-tab" style="text-decoration:none; display:inline-block;" hidden>⛽ Gas Prices</a>
         <a href="#help-section" class="cat-tab" style="text-decoration:none; display:inline-block;">Emergency &amp; Health</a>
         <a href="#feedback-section" class="cat-tab" style="text-decoration:none; display:inline-block;">Feedback</a>
         <div class="search-wrap" style="position:relative;">
@@ -931,6 +932,35 @@
     </div>
     <div class="empty-state" id="emptyState" style="display:none;">No matches — try a different search or category.</div>
 
+    <section id="moneySection" data-base="fortbragg" hidden>
+    <style>
+  .money-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:18px; max-width:860px; }
+  .money-card{ background:#fff; border:1px solid var(--line); border-top:4px solid var(--olive); border-radius:4px; padding:18px 20px; min-width:0; }
+  #gasCard{ border-top-color: var(--brass); }
+  #moneySection[hidden], .money-card[hidden], #moneyNavLink[hidden]{ display:none !important; }
+  .m-head{ font-family:'Big Shoulders Display', sans-serif; font-weight:800; font-size:21px; text-transform:uppercase; letter-spacing:0.02em; }
+  .m-sub{ font-family:'JetBrains Mono', monospace; font-size:10.5px; color:#69665B; text-transform:uppercase; letter-spacing:0.04em; margin-top:2px; }
+  .m-date{ font-size:13.5px; font-weight:600; margin:12px 0 6px; }
+  .m-buys{ font-size:13px; color:#3b4640; margin-bottom:4px; }
+  .m-table{ width:100%; border-collapse:collapse; font-size:14.5px; }
+  .m-table th{ font-family:'JetBrains Mono', monospace; font-size:10px; font-weight:600; text-transform:uppercase; color:#69665B; text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); }
+  .m-table td{ padding:7px 8px; }
+  .m-table tbody tr:nth-child(odd){ background: rgba(24,36,32,0.045); }
+  .m-num{ text-align:right !important; font-family:'JetBrains Mono', monospace; white-space:nowrap; }
+  .m-code{ font-family:'JetBrains Mono', monospace; font-size:11px; color:#69665B; }
+  .m-up{ color:#5B6B4F; font-size:9px; vertical-align:1px; }
+  .m-down{ color:#A8472C; font-size:9px; vertical-align:1px; }
+  .m-dim{ color:#69665B; }
+  .m-note{ font-size:12px; color:#69665B; margin:10px 0 0; line-height:1.45; }
+  .m-note a{ color:var(--olive); }
+  @media (max-width:420px){ .money-card{ padding:16px 14px; } .m-table{ font-size:13.5px; } .m-table td, .m-table th{ padding:6px 5px; } }
+</style>
+    <h2 class="section-label" style="margin-top:54px;">Gas Prices on Post</h2>
+    <div class="money-grid">
+      <div class="money-card" id="gasCard" hidden></div>
+    </div>
+  </section>
+
     <div id="help-section">
       <h2 class="section-label" style="margin-top:54px;">Emergency &amp; Medical</h2>
       <div class="help-grid">
@@ -1072,6 +1102,7 @@
 
 <script src="data-fortbragg.js" onerror="document.getElementById('dataLoadError').style.display='block';"></script>
 <script src="/hours.js"></script>
+<script src="/money.js" defer></script>
 <script>
 // Reads the shared recently-viewed list (written by listing.html) and shows
 // a small strip of whatever's relevant to THIS base — hidden entirely if

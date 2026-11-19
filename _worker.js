@@ -649,9 +649,149 @@ async function handleExportData(request, env) {
   });
 }
 
+// ---- Currency exchange rates (Service Credit Union) ----
+// Service CU publishes the official military accommodation rate once per business day
+// (by 4 p.m. CET). We read their public rates page at most every few hours, keep the
+// last good copy in KV, and serve that — so a slow or failed fetch never breaks a page.
+const SCU_RATES_URL = "https://servicecu.org/international-services/exchange-rates/";
+const RATES_KV_KEY = "fx:scu";
+const RATES_REFRESH_MS = 3 * 60 * 60 * 1000;     // re-read Service CU at most every 3 hours
+const RATES_RETRY_MS = 30 * 60 * 1000;           // after a failed read, wait 30 min before retrying
+
+function stripTags(s) {
+  return String(s || "").replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
+}
+
+// Pulls the rates table out of the Service CU page. Returns null if the layout isn't recognised.
+function parseScuRates(html) {
+  const table = (html.match(/<table[^>]*exchange-rates__table[\s\S]*?<\/table>/i) || [])[0];
+  if (!table) return null;
+  const rates = [];
+  for (const row of table.match(/<tr[^>]*>[\s\S]*?<\/tr>/gi) || []) {
+    const cells = [...row.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)].map(m => m[1]);
+    if (cells.length < 2) continue;
+    const name = stripTags(cells[0]);
+    const code = (name.match(/\(([A-Z]{3})\)/) || [])[1];
+    const rate = parseFloat(stripTags(cells[1]));
+    if (!code || !(rate > 0)) continue;
+    const cls = (row.match(/<tr[^>]*class="([^"]*)"/i) || [])[1] || "";
+    const change = /is-up/.test(cls) ? "up" : /is-down/.test(cls) ? "down" : "";
+    const reconv = parseFloat(stripTags(cells[3] || ""));
+    const validFrom = stripTags(cells[4] || "");
+    rates.push({ code, name: name.replace(/\s*\([A-Z]{3}\)\s*/, ""), rate, change, reconversion: reconv > 0 ? reconv : null, validFrom });
+  }
+  if (!rates.some(r => r.code === "EUR")) return null;
+  const updated = (html.match(/Last updated:\s*([0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4})/i) || [])[1] || "";
+  return { source: "Service Credit Union", sourceUrl: SCU_RATES_URL, updated, rates };
+}
+
+async function handleGetRates(request, env) {
+  const kv = env.REVIEWS_KV;
+  let cached = null;
+  if (kv) {
+    try { cached = JSON.parse((await kv.get(RATES_KV_KEY)) || "null"); } catch { cached = null; }
+  }
+  const now = Date.now();
+  const fresh = cached && cached.fetchedAt && now - cached.fetchedAt < RATES_REFRESH_MS;
+  const recentlyFailed = cached && cached.failedAt && now - cached.failedAt < RATES_RETRY_MS;
+
+  if (!fresh && !recentlyFailed) {
+    try {
+      const res = await fetch(SCU_RATES_URL, {
+        headers: { "User-Agent": "Mozilla/5.0 (compatible; MilitaryThingsToDo/1.0; +https://militarythingstodo.com)", "Accept": "text/html" },
+        cf: { cacheTtl: 1800, cacheEverything: true },
+      });
+      const parsed = res.ok ? parseScuRates(await res.text()) : null;
+      if (parsed) {
+        cached = { ...parsed, fetchedAt: now };
+      } else {
+        cached = cached ? { ...cached, failedAt: now } : { failedAt: now, rates: [] };
+      }
+    } catch {
+      cached = cached ? { ...cached, failedAt: now } : { failedAt: now, rates: [] };
+    }
+    if (kv) { try { await kv.put(RATES_KV_KEY, JSON.stringify(cached)); } catch {} }
+  }
+
+  if (!cached || !cached.rates || cached.rates.length === 0) {
+    return jsonResponse({ error: "Exchange rates are temporarily unavailable." }, 503, request);
+  }
+  const { failedAt, ...out } = cached;
+  return new Response(JSON.stringify(out), {
+    status: 200,
+    headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=900", ...corsHeaders(request) },
+  });
+}
+
+// ---- Exchange (on-post) gas prices — entered by the site owner in admin.html ----
+// The Exchange no longer publishes overseas pump prices in a readable feed, so the owner
+// types them in from the pump sign / Exchange posts. Stored per base in KV.
+const GAS_BASES = ["ramstein", "fortbragg", "camppendleton", "yokota", "norfolk", "humphreys", "campbell"];
+const LITERS_PER_GALLON = 3.785411784;
+
+async function handleGetGas(request, env) {
+  const base = new URL(request.url).searchParams.get("base") || "";
+  if (!GAS_BASES.includes(base)) return jsonResponse({ error: "Unknown base" }, 400, request);
+  if (!env.REVIEWS_KV) return jsonResponse({ prices: [] }, 200, request);
+  let data = null;
+  try { data = JSON.parse((await env.REVIEWS_KV.get(`gas:${base}`)) || "null"); } catch { data = null; }
+  return new Response(JSON.stringify(data || { prices: [] }), {
+    status: 200,
+    headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=300", ...corsHeaders(request) },
+  });
+}
+
+async function handlePostGas(request, env) {
+  if (!env.REVIEWS_KV) return jsonResponse({ error: "Storage isn't set up yet (REVIEWS_KV binding missing)." }, 503, request);
+  if (!env.ADMIN_KEY) return jsonResponse({ error: "Admin access isn't set up yet (ADMIN_KEY secret missing)." }, 503, request);
+  let body;
+  try { body = await request.json(); } catch { return jsonResponse({ error: "Invalid JSON" }, 400, request); }
+  if ((body.adminKey || "").toString() !== env.ADMIN_KEY) return jsonResponse({ error: "Incorrect admin password." }, 401, request);
+  const base = (body.base || "").toString();
+  if (!GAS_BASES.includes(base)) return jsonResponse({ error: "Unknown base" }, 400, request);
+
+  if (body.clear === true) {
+    await env.REVIEWS_KV.delete(`gas:${base}`);
+    return jsonResponse({ ok: true, cleared: true }, 200, request);
+  }
+  const asOf = (body.asOf || "").toString();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(asOf)) return jsonResponse({ error: "Please pick the date the prices apply from." }, 400, request);
+  const region = stripTags(body.region || "").slice(0, 40);
+  const prices = [];
+  for (const p of Array.isArray(body.prices) ? body.prices.slice(0, 6) : []) {
+    const type = stripTags(p && p.type).slice(0, 30);
+    const gallon = Math.round(parseFloat(p && p.gallon) * 1000) / 1000;
+    if (!type || !(gallon >= 0.5 && gallon <= 20)) continue;
+    prices.push({ type, gallon, liter: Math.round((gallon / LITERS_PER_GALLON) * 1000) / 1000 });
+  }
+  if (prices.length === 0) return jsonResponse({ error: "Enter at least one price per gallon (between $0.50 and $20)." }, 400, request);
+  const record = { base, region, asOf, prices, savedAt: new Date().toISOString() };
+  await env.REVIEWS_KV.put(`gas:${base}`, JSON.stringify(record));
+  return jsonResponse({ ok: true, record }, 200, request);
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+    if (url.pathname === "/api/rates" && request.method === "GET") {
+      return handleGetRates(request, env);
+    }
+
+    if (url.pathname === "/api/gas") {
+      if (request.method === "OPTIONS") {
+        return new Response(null, {
+          headers: {
+            ...corsHeaders(request),
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+          },
+        });
+      }
+      if (request.method === "GET") return handleGetGas(request, env);
+      if (request.method === "POST") return handlePostGas(request, env);
+      return jsonResponse({ error: "Method not allowed" }, 405, request);
+    }
 
     if (url.pathname === "/api/reviews") {
       if (request.method === "OPTIONS") {
