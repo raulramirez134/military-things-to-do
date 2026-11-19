@@ -233,7 +233,7 @@ async function handleDeleteReview(request, env) {
 
 const MAX_SUGGESTIONS_STORED = 500;
 const MAX_SUGGESTION_FIELD_LENGTH = 500;
-const VALID_BASE_KEYS = ["ramstein", "fortbragg", "camppendleton", "yokota", "norfolk", "humphreys"];
+const VALID_BASE_KEYS = ["ramstein", "fortbragg", "camppendleton", "yokota", "norfolk", "humphreys", "campbell"];
 
 // Owner notification via Discord webhook — best-effort only. If the webhook
 // isn't configured yet, or Discord is briefly unreachable, this never blocks
@@ -493,6 +493,7 @@ const LISTING_BASE_CONFIG = {
   yokota: { label: "Yokota", refWord: "base", dataFile: "data-yokota.js" },
   norfolk: { label: "Naval Station Norfolk", refWord: "gate", dataFile: "data-norfolk.js" },
   humphreys: { label: "Camp Humphreys", refWord: "gate", dataFile: "data-humphreys.js" },
+  campbell: { label: "Fort Campbell", refWord: "gate", dataFile: "data-campbell.js" },
 };
 
 function escapeHtmlAttr(str){

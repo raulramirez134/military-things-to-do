@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>New to Fort Campbell? Start Here — Military Things To Do</title>
+<meta name="description" content="A step-by-step checklist for your first weeks at Fort Campbell — Kalsu sign-in, housing, Kentucky vs. Tennessee licensing, schools, TRICARE at Blanchfield, and more.">
+<link rel="canonical" href="https://militarythingstodo.com/guide-campbell">
+<meta property="og:title" content="New to Fort Campbell? Start Here — Military Things To Do">
+<meta property="og:description" content="A step-by-step checklist for your first weeks at Fort Campbell — Kalsu sign-in, housing, Kentucky vs. Tennessee licensing, schools, TRICARE at Blanchfield, and more.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://militarythingstodo.com/guide-campbell">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="New to Fort Campbell? Start Here — Military Things To Do">
+<meta name="twitter:description" content="A step-by-step checklist for your first weeks at Fort Campbell — Kalsu sign-in, housing, Kentucky vs. Tennessee licensing, schools, TRICARE at Blanchfield, and more.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#182420; --ink-soft:#223129; --parchment:#EDE7D6; --parchment-dim:#E1DAC4;
+    --olive:#5B6B4F; --brass:#C08A34; --brass-bright:#D9A24C; --rust:#A8472C; --steel:#3F5C6B;
+    --line: rgba(24,36,32,0.14); --line-dark: rgba(237,231,214,0.16);
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:var(--parchment); color:var(--ink); font-family:'Source Sans 3', sans-serif; -webkit-font-smoothing:antialiased; }
+  a{ color:var(--olive); }
+  header.brief{
+    background: radial-gradient(1200px 500px at 15% -10%, #22352c 0%, var(--ink) 55%), var(--ink);
+    color:var(--parchment); padding: 22px 24px 40px; border-bottom: 6px solid var(--brass);
+  }
+  .topbar{ display:flex; align-items:center; justify-content:space-between; max-width:900px; margin:0 auto 30px;
+    font-family:'JetBrains Mono', monospace; font-size:12px; color: rgba(237,231,214,0.72); flex-wrap:wrap; gap:10px; }
+  .brand{ display:flex; align-items:center; gap:9px; font-family:'Big Shoulders Display', sans-serif; font-weight:800;
+    font-size:15px; letter-spacing:0.02em; color:var(--parchment); text-transform:uppercase; text-decoration:none; }
+  .brand .mark{ width:22px; height:22px; border-radius:4px; background:var(--brass); display:inline-flex;
+    align-items:center; justify-content:center; color:var(--ink); font-size:12px; font-weight:800; }
+  .back-link{ color: rgba(237,231,214,0.8); text-decoration:none; font-size:12px; }
+  .brief-inner{ max-width:900px; margin:0 auto; }
+  .eyebrow{ font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:0.14em; color:var(--brass-bright);
+    text-transform:uppercase; margin-bottom:14px; }
+  h1.title{ font-family:'Big Shoulders Display', sans-serif; font-weight:800; font-size: clamp(34px, 6vw, 54px);
+    line-height:1.0; margin:0 0 16px; }
+  .brief-sub{ font-size:16px; line-height:1.55; color: rgba(237,231,214,0.82); max-width:600px; margin:0; }
+
+  main{ max-width:900px; margin:0 auto; padding: 40px 24px 80px; }
+  .stage{ margin-bottom:44px; }
+  .stage-head{ display:flex; align-items:baseline; gap:14px; margin-bottom:16px; }
+  .stage-num{ font-family:'JetBrains Mono', monospace; font-size:13px; color:var(--brass); border:1px solid var(--brass);
+    border-radius:20px; padding:3px 11px; }
+  .checklist{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+  .checklist li{ border-radius:4px; }
+  .check-row{
+    background:#fff; border:1px solid var(--line); border-radius:4px; padding:14px 16px;
+    display:flex; gap:12px; align-items:flex-start; font-size:14.5px; line-height:1.55;
+    cursor:pointer; transition:background 0.15s, border-color 0.15s;
+  }
+  .check-row:hover{ border-color: var(--brass); }
+  .check-input{
+    appearance:none; -webkit-appearance:none; flex-shrink:0; margin:1px 0 0;
+    width:18px; height:18px; border:1.5px solid var(--brass); border-radius:3px;
+    background:#fff; cursor:pointer; position:relative;
+  }
+  .check-input:checked{ background:var(--brass); }
+  .check-input:checked::after{
+    content:"✓"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:12px; font-weight:700; line-height:1;
+  }
+  .check-input:focus-visible{ outline:2px solid var(--steel); outline-offset:2px; }
+  .checklist li.done .check-row{ background: rgba(91,107,79,0.06); }
+  .checklist li.done .check-row > div{ opacity:0.6; text-decoration: line-through; text-decoration-color: rgba(24,36,32,0.35); }
+  .checklist li b{ font-family:'Source Sans 3', sans-serif; }
+  .checklist li .note{ display:block; color:#69665B; font-size:13px; margin-top:3px; text-decoration:none; }
+  .cta-row{ margin-top:10px; font-size:13px; }
+  .progress-wrap{ max-width:900px; margin:0 auto 34px; display:flex; align-items:center; gap:14px; }
+  .progress-label{ font-family:'JetBrains Mono', monospace; font-size:12.5px; color:var(--ink); white-space:nowrap; }
+  .progress-track{ flex:1; height:8px; background: var(--parchment-dim); border-radius:20px; overflow:hidden; border:1px solid var(--line); }
+  .progress-fill{ height:100%; background:var(--brass); border-radius:20px; width:0%; transition:width 0.25s ease; }
+  .progress-reset{ font-family:'JetBrains Mono', monospace; font-size:11.5px; color:var(--olive); background:none; border:none;
+    cursor:pointer; text-decoration:underline; padding:0; white-space:nowrap; }
+  footer{ background:var(--ink); color: rgba(237,231,214,0.55); padding: 26px 24px; font-size:12px; line-height:1.7; }
+  footer .footer-inner{ max-width:900px; margin:0 auto; }
+</style>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2511246091167745" crossorigin="anonymous"></script>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#182420">
+</head>
+<body>
+  <header class="brief">
+    <div class="topbar">
+      <a class="brand" href="campbell.html"><span class="mark">M</span> Military Things To Do</a>
+      <a class="back-link" href="campbell.html">← Back to Fort Campbell listings</a>
+    </div>
+    <div class="brief-inner">
+      <div class="eyebrow">New Arrival Guide — Fort Campbell</div>
+      <h1 class="title">First weeks at Fort Campbell,<br>step by step.</h1>
+      <p class="brief-sub">A general checklist for getting settled — order isn't rigid, and dates depend on your unit, but this is roughly how it goes for most families arriving stateside.</p>
+    </div>
+  </header>
+
+  <div class="progress-wrap">
+    <span class="progress-label" id="progressLabel">0 of 14 done</span>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <button class="progress-reset" id="progressReset" type="button">Reset</button>
+  </div>
+
+  <main>
+    <div class="stage">
+      <div class="stage-head"><span class="stage-num">Before you arrive</span></div>
+      <ul class="checklist">
+        <li data-id="sponsor"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Request a sponsor</b> as soon as you get orders — complete DA Form 5434 through Army Career Tracker so your gaining unit in the 101st Airborne Division (Air Assault) or a tenant unit can assign one.<span class="note">Your sponsor knows current wait times for housing, child care and in-processing better than any website.</span></div></label></li>
+        <li data-id="dps-paperwork"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Start your household goods paperwork early</b> through the Defense Personal Property System (DPS) — Fort Campbell's transportation office is in the Soldier Support Center; contact it as soon as you have orders.</div></label></li>
+        <li data-id="welcome-packet"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Read the Kalsu welcome packet and plan your route in</b> — most people fly into Nashville (BNA), about an hour away; the information desk on the airport's first floor has welcome bags for soldiers.<span class="note">Gates 4, 7 and 10 are open 24/7. Visitors without a DoD ID get passes at the Visitor Control Center at Gate 7.</span></div></label></li>
+      </ul>
+    </div>
+
+    <div class="stage">
+      <div class="stage-head"><span class="stage-num">First week</span></div>
+      <ul class="checklist">
+        <li data-id="kalsu"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Sign in at the Kalsu Installation Reception Company</b> — 2443 Kentucky Ave. &amp; 20th St., open 24/7. Bring your IPPSA PCS absence and PCS orders, and wear ACUs if you arrive between 5:30 a.m. and 5 p.m. Phone (270) 798-2813.<span class="note">Report the day after the end date on your absence or on your report date, whichever comes first. Families can stay at the on-post Holiday Inn Express (Turner Guesthouse) when space allows.</span></div></label></li>
+        <li data-id="deers"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Enroll family members in DEERS and update ID cards</b> at the ID card section of the Soldier Support Center.</div></label></li>
+        <li data-id="housing-office"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Talk to the Housing Services Office before you sign any lease</b> — every service member is asked to check with them first, for on- or off-post housing. Off-post help: (270) 798-3808, Mon–Fri 7:30–16:00. On-post homes are run by Campbell Crossing: (931) 431-9003.<span class="note">Single soldiers E-1 to E-5 without dependents live in the barracks. Housing problems that aren't getting fixed: 24/7 hotline (270) 956-4728.</span></div></label></li>
+        <li data-id="newcomers"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Go to the Newcomers Orientation</b> — every Thursday, 9:00–14:00, at Army Community Service (Bldg 1501, William C. Lee Rd). Spouses are welcome and it's the fastest way to learn the post.</div></label></li>
+      </ul>
+    </div>
+
+    <div class="stage">
+      <div class="stage-head"><span class="stage-num">First month</span></div>
+      <ul class="checklist">
+        <li data-id="state-line"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Sort out your license and plates — and know which state you live in</b>. Fort Campbell straddles Kentucky and Tennessee (the mailing address is always Fort Campbell, KY). Active-duty members and families can keep a valid license from another state. If you register a car where you live: Kentucky plates come from the Christian County Clerk in Hopkinsville, Tennessee plates from the Montgomery County Clerk in Clarksville.<span class="note">Kentucky asks newcomers to register a vehicle within 15 days of bringing it into the state. Both offices are listed on the garrison's Driver's License &amp; Vehicle Registration page.</span></div></label></li>
+        <li data-id="school-cdc"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Enroll kids in school and get on the child care list</b> as early as possible — on-post families use the DoDEA Fort Campbell schools; off post it's Clarksville-Montgomery County Schools (Tennessee) or Christian County Public Schools (Kentucky), depending on your address.<span class="note">Register for CDC/child care through Parent Central Services. See Schools &amp; Childcare on the main listings page.</span></div></label></li>
+        <li data-id="tricare"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Enroll in TRICARE and get a Primary Care Manager</b> at Blanchfield Army Community Hospital (BACH), so appointments and referrals work before you need them. Appointment line: (270) 798-4677.</div></label></li>
+        <li data-id="banking-bah"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Set up banking and check your BAH</b> — Fort Campbell Federal Credit Union and several banks have branches on post; check your first LES to confirm BAH is paying at the Fort Campbell rate.</div></label></li>
+      </ul>
+    </div>
+
+    <div class="stage">
+      <div class="stage-head"><span class="stage-num">Settling in</span></div>
+      <ul class="checklist">
+        <li data-id="frg"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Connect with your unit's SFRG and a spouses' group</b> — with the 101st's training and deployment pace, that network matters. ACS can point you to groups, classes and spouse employment help.</div></label></li>
+        <li data-id="off-limits"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Check the off-limits list</b> before renting a storage unit or an apartment off post — the garrison keeps a current list of off-limits businesses and mobile-home parks in Clarksville, Oak Grove and Hopkinsville, plus all rock quarries.</div></label></li>
+        <li data-id="explore"><label class="check-row"><input type="checkbox" class="check-input"><div><b>Explore beyond the gate</b> — downtown Clarksville and the Cumberland RiverWalk are close by, Nashville is about an hour away, and Land Between the Lakes and Lake Barkley are great weekend trips.</div></label></li>
+      </ul>
+    </div>
+
+    <p class="cta-row"><a href="campbell.html">→ Browse the full Fort Campbell listings</a></p>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <p><b>Military Things To Do</b> is an independent community resource, not an official U.S. Department of Defense publication. Requirements and processes change — always confirm current steps with your sponsor, unit, or the relevant garrison office before relying on this checklist.</p>
+    </div>
+  </footer>
+<script>
+(function(){
+  var STORAGE_KEY = 'arrival_checklist_campbell';
+  var items = Array.prototype.slice.call(document.querySelectorAll('.checklist li[data-id]'));
+  var total = items.length;
+  var fillEl = document.getElementById('progressFill');
+  var labelEl = document.getElementById('progressLabel');
+  var resetBtn = document.getElementById('progressReset');
+
+  function loadState(){
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch(e) { return {}; }
+  }
+  function saveState(state){
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) { /* private mode etc — fail silently */ }
+  }
+  function updateProgress(){
+    var done = items.filter(function(li){ return li.classList.contains('done'); }).length;
+    labelEl.textContent = done + ' of ' + total + ' done';
+    fillEl.style.width = (total ? (done/total*100) : 0) + '%';
+  }
+
+  var state = loadState();
+  items.forEach(function(li){
+    var id = li.getAttribute('data-id');
+    var checkbox = li.querySelector('.check-input');
+    if (state[id]) {
+      checkbox.checked = true;
+      li.classList.add('done');
+    }
+    checkbox.addEventListener('change', function(){
+      if (checkbox.checked) { li.classList.add('done'); state[id] = true; }
+      else { li.classList.remove('done'); delete state[id]; }
+      saveState(state);
+      updateProgress();
+    });
+  });
+  updateProgress();
+
+  resetBtn.addEventListener('click', function(){
+    state = {};
+    saveState(state);
+    items.forEach(function(li){
+      li.classList.remove('done');
+      li.querySelector('.check-input').checked = false;
+    });
+    updateProgress();
+  });
+})();
+</script>
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "accc7ee5b3ea402cabc45138d3ff02bf"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
