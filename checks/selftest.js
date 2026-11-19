@@ -35,6 +35,8 @@ const M = [
   ["All view no longer capped", "browser:humphreys", () => edit("humphreys.html", (s) => s.replace("const CAP_PER_SECTION = 6;", "const CAP_PER_SECTION = 999;")), /sections over 6|Show-all/],
   ["timezone off by an hour", "browser:ramstein", () => edit("hours.js", (s) => s.replace("minutes: hour * 60 + minute, month", "minutes: hour * 60 + minute + 60, month")), /clock check|should be/],
   ["Open/Closed logic inverted", "browser:fortbragg", () => edit("hours.js", (s) => s.replace("if (t >= hs && t < he) return true;", "if (t >= hs && t < he) return false;")), /should be (Open|Closed)/],
+  ["motion layer not loaded", "static", () => edit("norfolk.html", (s) => s.replace('<script src="/motion.js"></script>', "")), /lenis\.min\.js.*motion\.js/],
+  ["cards never reveal", "browser:yokota", () => edit("motion.js", (s) => s.replace('el.classList.remove("mtd-pending");', "")), /stayed invisible/],
   ["hours parser unit regression", "static", () => edit("hours.js", (s) => s.replace('if (part === "weekends" || part === "weekend")', 'if (false)')), /unit tests fail/],
   ["hours parser drops a format for many listings", "static", () => edit("hours.js", (s) => s.replace("spec.split(/\\s*(?:,|&|\\band\\b)\\s*/)", "spec.split(/\\s*,\\s*/)")), /stopped being readable|unit tests fail/],
   ["old inline hours parser pasted back", "static", () => edit("norfolk.html", (s) => s.replace("// Open/Closed parsing (parseHoursString", "function parseHoursString(x){ return null; }\n// Open/Closed parsing (parseHoursString")), /defines its own parseHoursString/],

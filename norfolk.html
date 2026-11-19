@@ -561,6 +561,34 @@
     a{ color:var(--ink); text-decoration:underline; }
     .open-badge{ border:1px solid currentColor; background:none !important; }
   }
+  /* ---- Motion layer (/motion.js): intro, first-time card reveal, smooth scrolling ---- */
+  :root{ --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1); }
+  @keyframes mtdRise { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
+  @keyframes mtdSettle { from { opacity:0; transform:translateY(6px) scale(.96); } to { opacity:1; transform:none; } }
+  @keyframes mtdFade { from { opacity:0; } to { opacity:1; } }
+
+  /* 1) Intro: runs once on load, pure CSS so it stays smooth while the page is still loading. */
+  .brief-copy > *, .coords-row { animation: mtdRise 560ms var(--ease-out-strong) both; }
+  .brief-copy > .title { animation-delay: 60ms; }
+  .brief-copy > .brief-sub { animation-delay: 130ms; }
+  .coords-row { animation-delay: 240ms; }
+  .brief-graphic { animation: mtdSettle 640ms var(--ease-out-strong) 120ms both; }
+
+  /* 2) First-time reveal for cards and section headings (classes are set by motion.js). */
+  .mtd-pending { opacity:0; transform:translateY(14px); }
+  .mtd-in { animation: mtdRise 420ms var(--ease-out-strong) var(--mtd-delay, 0ms) both; }
+
+  /* 3) Smooth scrolling: Lenis replaces the native smooth anchor scroll while it is on. */
+  html.lenis, html.lenis body { height:auto; }
+  .lenis.lenis-smooth { scroll-behavior:auto !important; }
+  .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior:contain; }
+  .lenis.lenis-stopped { overflow:clip; }
+
+  @media (prefers-reduced-motion: reduce){
+    .brief-copy > *, .coords-row, .brief-graphic { animation: mtdFade 200ms ease-out both; animation-delay:0ms; }
+    .mtd-pending { opacity:1; transform:none; }
+    .mtd-in { animation:none; }
+  }
 </style>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -1852,6 +1880,8 @@ document.getElementById("legendAllBtn").addEventListener("click", ()=>{
   });
 });
 </script>
+<script src="/lenis.min.js"></script>
+<script src="/motion.js"></script>
 <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "accc7ee5b3ea402cabc45138d3ff02bf"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>

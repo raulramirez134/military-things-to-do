@@ -180,6 +180,14 @@ for (const k of keys) {
       R.check(!/function parseHoursString\s*\(/.test(h), f, "defines its own parseHoursString — delete it, the shared /hours.js is the only copy");
       R.check(tag >= 0 && (use < 0 || tag < use), f, 'must load <script src="/hours.js"></script> before its inline script (Open/Closed badges)');
     }
+    // motion layer: self-hosted Lenis then /motion.js on every base page, with the reduced-motion fallback in its CSS
+    R.check(exists("lenis.min.js") && exists("motion.js"), S, "lenis.min.js or motion.js is missing");
+    for (const f of keys.map((k) => cfg.bases[k].page)) {
+      if (!exists(f)) continue;
+      const h = read(f), a = h.indexOf('<script src="/lenis.min.js"></script>'), b = h.indexOf('<script src="/motion.js"></script>');
+      R.check(a >= 0 && b > a, f, 'must load <script src="/lenis.min.js"></script> then <script src="/motion.js"></script> (intro, card reveal, smooth scroll)');
+      R.check(h.includes(".mtd-pending { opacity:1; transform:none; }"), f, "motion CSS lacks the reduced-motion fallback (cards must show without movement)");
+    }
     // every listing: parsed schedules are sane, and no 12-hour times hiding in a 24-hour field
     for (const k of keys) {
       if (!datas[k]) continue; let readable = 0, placeholder = 0;
