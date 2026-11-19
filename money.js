@@ -54,10 +54,11 @@
     var r = data.rates[0];
     if (!r || !(r.rate > 0)) return;
     var sym = esc(r.symbol || ""), fmt = function (n) { return Number(n).toLocaleString("en-US"); };
+    var chunk = r.rate >= 500 ? 10000 : 1000; // ₩10,000 is a more useful example than ₩1,000
     local = { symbol: r.symbol || "", rate: r.rate, decimals: 0, note: "Local-currency figures use today's Community Bank rate." };
     var rows = '<tr><td>Buying ' + esc(r.name.split(" ").pop().toLowerCase()) + ' with dollars</td><td class="m-num">$1 = ' + sym + fmt(r.rate) + "</td></tr>" +
       (r.reconversion ? '<tr><td>Selling it back for dollars</td><td class="m-num">' + sym + fmt(r.reconversion) + " = $1</td></tr>" : "") +
-      '<tr><td>' + sym + '1,000 costs about</td><td class="m-num">$' + (1000 / r.rate).toFixed(2) + "</td></tr>";
+      '<tr><td>' + sym + fmt(chunk) + ' costs about</td><td class="m-num">$' + (chunk / r.rate).toFixed(2) + "</td></tr>";
     ratesCard.innerHTML =
       '<div class="m-head">Exchange Rate</div>' +
       '<div class="m-sub">Community Bank · on-base rate in ' + esc(data.country || "") + "</div>" +
