@@ -651,38 +651,57 @@ async function handleExportData(request, env) {
 
 // ---- Currency exchange rates (Service Credit Union) ----
 // Service CU publishes the official military accommodation rate once per business day
-// (by 4 p.m. CET). We read their public rates page at most every few hours, keep the
-// last good copy in KV, and serve that — so a slow or failed fetch never breaks a page.
+// (by 4 p.m. CET). Their rates page reads it from a public JSON feed; we read the same feed
+// at most every few hours, keep the last good copy in KV, and serve that — so a slow or
+// failed read never breaks a page.
 const SCU_RATES_URL = "https://servicecu.org/international-services/exchange-rates/";
-const RATES_KV_KEY = "fx:scu:v2";
+const SCU_RATES_API = "https://servicecu.org/api/default/exchangerates?%24orderby=Date%20desc%2CPublicationDate%20desc&%24top=10";
+const RATES_KV_KEY = "fx:scu:v3";
 const RATES_REFRESH_MS = 3 * 60 * 60 * 1000;     // re-read Service CU at most every 3 hours
 const RATES_RETRY_MS = 30 * 60 * 1000;           // after a failed read, wait 30 min before retrying
+const SCU_CURRENCIES = { EUR: "Euro", CZK: "Czech Koruna", DKK: "Danish Krone", GBP: "British Pound", PLN: "Polish Zloty", RON: "Romanian Leu", SEK: "Swedish Krona", CHF: "Swiss Franc", NOK: "Norwegian Krone", AUD: "Australian Dollar", CAD: "Canadian Dollar", HKD: "Hong Kong Dollar", ILS: "Israeli New Shekel", NZD: "New Zealand Dollar", SGD: "Singapore Dollar", ZAR: "South African Rand" };
 
 function stripTags(s) {
   return String(s || "").replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
 }
 
-// Pulls the rates table out of the Service CU page. Returns null if the layout isn't recognised.
-function parseScuRates(html) {
-  const table = (html.match(/<table[^>]*exchange-rates__table[\s\S]*?<\/table>/i) || [])[0];
-  if (!table) return null;
-  const rates = [];
-  for (const row of table.match(/<tr[^>]*>[\s\S]*?<\/tr>/gi) || []) {
-    const cells = [...row.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)].map(m => m[1]);
-    if (cells.length < 2) continue;
-    const name = stripTags(cells[0]);
-    const code = (name.match(/\(([A-Z]{3})\)/) || [])[1];
-    const rate = parseFloat(stripTags(cells[1]));
-    if (!code || !(rate > 0)) continue;
-    const cls = (row.match(/<tr[^>]*class="([^"]*)"/i) || [])[1] || "";
-    const change = /is-up/.test(cls) ? "up" : /is-down/.test(cls) ? "down" : "";
-    const reconv = parseFloat(stripTags(cells[3] || ""));
-    const validFrom = stripTags(cells[4] || "");
-    rates.push({ code, name: name.replace(/\s*\([A-Z]{3}\)\s*/, ""), rate, change, reconversion: reconv > 0 ? reconv : null, validFrom });
+function scuItemRates(item) {
+  let arr = [];
+  try { arr = JSON.parse((item && item.Data) || "[]"); } catch { arr = []; }
+  const out = {};
+  for (const r of Array.isArray(arr) ? arr : []) {
+    const code = String((r && r.currency) || "").trim().toUpperCase();
+    const rate = parseFloat(String(r.accommodation_rate || "").replace(",", "."));
+    if (!SCU_CURRENCIES[code] || !(rate > 0)) continue;
+    const reconv = parseFloat(String(r.reconversion_rate || "").replace(",", "."));
+    out[code] = { rate, reconversion: reconv > 0 ? reconv : null, start: String(r.rate_start_date || "").slice(0, 10) };
   }
-  if (!rates.some(r => r.code === "EUR")) return null;
-  const updated = (html.match(/Last updated:\s*([0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4})/i) || [])[1] || "";
-  return { source: "Service Credit Union", sourceUrl: SCU_RATES_URL, updated, rates };
+  return out;
+}
+
+// Turns Service CU's feed ({ value: [ { Date, Data: "<json list>" }, ... ] }, newest first) into
+// the rows we show. "Change" compares with the most recent earlier set that actually differs.
+function parseScuFeed(json) {
+  const items = Array.isArray(json && json.value) ? json.value : [];
+  if (!items.length) return null;
+  const cur = scuItemRates(items[0]);
+  if (!cur.EUR) return null;
+  const sig = (m) => JSON.stringify(Object.keys(m).sort().map(k => [k, m[k].rate]));
+  let prev = null;
+  for (const it of items.slice(1)) { const m = scuItemRates(it); if (Object.keys(m).length && sig(m) !== sig(cur)) { prev = m; break; } }
+  const rates = Object.keys(SCU_CURRENCIES).filter(c => cur[c]).map(code => {
+    const r = cur[code], p = prev && prev[code];
+    const change = p ? (r.rate > p.rate ? "up" : r.rate < p.rate ? "down" : "same") : "";
+    return { code, name: SCU_CURRENCIES[code], rate: r.rate, change, reconversion: code === "EUR" ? r.reconversion : null, validFrom: r.start };
+  });
+  // Service CU shows "Last updated" as the day before the rates take effect.
+  let updated = "";
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(cur.EUR.start);
+  if (m) {
+    const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3] - 1));
+    updated = `${String(d.getUTCMonth() + 1).padStart(2, "0")}/${String(d.getUTCDate()).padStart(2, "0")}/${d.getUTCFullYear()}`;
+  }
+  return { source: "Service Credit Union", sourceUrl: SCU_RATES_URL, updated, validFrom: cur.EUR.start, rates };
 }
 
 async function handleGetRates(request, env) {
@@ -697,17 +716,19 @@ async function handleGetRates(request, env) {
 
   if (!fresh && !recentlyFailed) {
     try {
-      const res = await fetch(SCU_RATES_URL, {
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; MilitaryThingsToDo/1.0; +https://militarythingstodo.com)", "Accept": "text/html" },
-        cf: { cacheTtl: 1800, cacheEverything: true },
+      const res = await fetch(SCU_RATES_API, {
+        headers: { "User-Agent": "Mozilla/5.0 (compatible; MilitaryThingsToDo/1.0; +https://militarythingstodo.com)", "Accept": "application/json" },
       });
-      const body = await res.text();
-      const parsed = res.ok ? parseScuRates(body) : null;
+      let parsed = null, failReason = "";
+      if (res.ok) {
+        try { parsed = parseScuFeed(await res.json()); } catch { parsed = null; }
+        if (!parsed) failReason = "Service CU feed had no usable rates";
+      } else {
+        failReason = `Service CU answered ${res.status}`;
+      }
       if (parsed) {
         cached = { ...parsed, fetchedAt: now };
       } else {
-        // Short, non-sensitive note on why the read failed — shown in the 503 to help fix it.
-        const failReason = res.ok ? `rates table not found (page ${body.length} bytes, table ${/exchange-rates__table/.test(body) ? "present" : "absent"})` : `Service CU answered ${res.status}`;
         cached = cached ? { ...cached, failedAt: now, failReason } : { failedAt: now, failReason, rates: [] };
       }
     } catch (e) {
