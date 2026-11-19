@@ -17,7 +17,7 @@ const norm = (b) => b.toString().replace(/<script>\(function\(\)\{function c\(\)
 const sha = (b) => crypto.createHash("sha256").update(norm(b)).digest("hex");
 const files = [];
 for (const k of Object.keys(cfg.bases)) { const b = cfg.bases[k]; files.push([b.page.replace(".html", ""), b.page], [b.data, b.data], [b.guide.replace(".html", ""), b.guide]); }
-files.push(["index.html", "index.html"], ["listing", "listing.html"], ["sitemap.xml", "sitemap.xml"], ["robots.txt", "robots.txt"], ["search", "search.html"]);
+files.push(["index.html", "index.html"], ["hours.js", "hours.js"], ["listing", "listing.html"], ["sitemap.xml", "sitemap.xml"], ["robots.txt", "robots.txt"], ["search", "search.html"]);
 const stale = () => files.filter(([u, f]) => {
   const r = curl(`${SITE}/${u}?cb=${Date.now()}`); if (r.s !== 200) return true;
   const local = fs.readFileSync(path.join(ROOT, f));
