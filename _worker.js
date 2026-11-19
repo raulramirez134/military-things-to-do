@@ -654,7 +654,7 @@ async function handleExportData(request, env) {
 // (by 4 p.m. CET). We read their public rates page at most every few hours, keep the
 // last good copy in KV, and serve that — so a slow or failed fetch never breaks a page.
 const SCU_RATES_URL = "https://servicecu.org/international-services/exchange-rates/";
-const RATES_KV_KEY = "fx:scu";
+const RATES_KV_KEY = "fx:scu:v2";
 const RATES_REFRESH_MS = 3 * 60 * 60 * 1000;     // re-read Service CU at most every 3 hours
 const RATES_RETRY_MS = 30 * 60 * 1000;           // after a failed read, wait 30 min before retrying
 
@@ -701,22 +701,26 @@ async function handleGetRates(request, env) {
         headers: { "User-Agent": "Mozilla/5.0 (compatible; MilitaryThingsToDo/1.0; +https://militarythingstodo.com)", "Accept": "text/html" },
         cf: { cacheTtl: 1800, cacheEverything: true },
       });
-      const parsed = res.ok ? parseScuRates(await res.text()) : null;
+      const body = await res.text();
+      const parsed = res.ok ? parseScuRates(body) : null;
       if (parsed) {
         cached = { ...parsed, fetchedAt: now };
       } else {
-        cached = cached ? { ...cached, failedAt: now } : { failedAt: now, rates: [] };
+        // Short, non-sensitive note on why the read failed — shown in the 503 to help fix it.
+        const failReason = res.ok ? `rates table not found (page ${body.length} bytes, table ${/exchange-rates__table/.test(body) ? "present" : "absent"})` : `Service CU answered ${res.status}`;
+        cached = cached ? { ...cached, failedAt: now, failReason } : { failedAt: now, failReason, rates: [] };
       }
-    } catch {
-      cached = cached ? { ...cached, failedAt: now } : { failedAt: now, rates: [] };
+    } catch (e) {
+      const failReason = "could not reach Service CU";
+      cached = cached ? { ...cached, failedAt: now, failReason } : { failedAt: now, failReason, rates: [] };
     }
     if (kv) { try { await kv.put(RATES_KV_KEY, JSON.stringify(cached)); } catch {} }
   }
 
   if (!cached || !cached.rates || cached.rates.length === 0) {
-    return jsonResponse({ error: "Exchange rates are temporarily unavailable." }, 503, request);
+    return jsonResponse({ error: "Exchange rates are temporarily unavailable.", reason: (cached && cached.failReason) || "" }, 503, request);
   }
-  const { failedAt, ...out } = cached;
+  const { failedAt, failReason, ...out } = cached;
   return new Response(JSON.stringify(out), {
     status: 200,
     headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=900", ...corsHeaders(request) },
