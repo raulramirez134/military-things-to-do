@@ -1,5 +1,5 @@
 // Static checks: no browser, no network. Run: node checks/check-static.js
-const fs = require("fs"), vm = require("vm");
+const fs = require("fs"), vm = require("vm"), path = require("path");
 const { ROOT, read, exists, loadData, hav, stripDiv, Report } = require("./lib");
 const cfg = require("./config");
 const R = new Report("static");
@@ -223,6 +223,73 @@ for (const k of keys) {
 for (const k of keys) R.check(locs.includes(`${cfg.siteUrl}/${k}`) || locs.includes(`${cfg.siteUrl}/${cfg.bases[k].page.replace(".html", "")}`), "sitemap", `base page ${k} is not in the sitemap`);
 R.check(/Disallow:\s*\/admin/.test(read("robots.txt")), "robots", "robots.txt must disallow /admin");
 R.check(!locs.some((l) => /\/admin/.test(l)), "sitemap", "admin must not be in the sitemap");
+
+// ---------- duplicates inside each base's data ----------
+const norm = (t) => String(t).toLowerCase().replace(/&amp;/g, "&").replace(/[^a-z0-9　-鿿가-힯]+/g, " ").trim();
+const phoneDigits = (t) => String(t || "").replace(/\(DSN[^)]*\)/gi, "").replace(/ext\.?\s*\d+/gi, "").replace(/\D/g, "");
+const allPhones = new Map();
+for (const k of keys) {
+  if (!datas[k]) continue; const places = datas[k].places, S = k;
+  const byBlurb = new Map(), byNameAddr = new Map(), byPhone = new Map();
+  for (const p of places) {
+    const bl = norm(p.blurb); (byBlurb.get(bl) || byBlurb.set(bl, []).get(bl)).push(p.id);
+    const na = norm(p.name) + "|" + norm(p.addr); (byNameAddr.get(na) || byNameAddr.set(na, []).get(na)).push(p.id);
+    const ph = phoneDigits(p.phone);
+    if (ph.length >= 7 && !/^(1?(800|888|877|866|855|844|833)|0120|0800|00800)/.test(ph)) {
+      (byPhone.get(ph) || byPhone.set(ph, []).get(ph)).push(p.id);
+      (allPhones.get(ph) || allPhones.set(ph, []).get(ph)).push(k + ":" + p.id);
+    }
+  }
+  for (const [, ids] of byBlurb) if (ids.length > 1) R.fail(S, `identical blurb on ${ids.join(", ")} (copy-paste?)`);
+  for (const [, ids] of byNameAddr) if (ids.length > 1) R.fail(S, `same name + address: ${ids.join(", ")} (duplicate listing)`);
+  for (const [ph, ids] of byPhone) {
+    if (ids.length < 2 || (cfg.sharedListingPhones || []).includes(ph)) continue;
+    const pts = ids.map((id) => places.find((p) => p.id === id)); let far = 0;
+    for (const a of pts) for (const c of pts) far = Math.max(far, hav(a.lat, a.lng, c.lat, c.lng));
+    if (far > 3) R.warn(S + " dup phone", `${ph} is on ${ids.join(", ")} (${far.toFixed(0)} km apart) — copy-paste error unless it's a shared tourism/switchboard line`);
+  }
+  // near-duplicates: same normalized name within 100 m
+  for (let i = 0; i < places.length; i++) for (let j = i + 1; j < places.length; j++) {
+    const a = places[i], c = places[j];
+    if (norm(a.name) === norm(c.name) && hav(a.lat, a.lng, c.lat, c.lng) < 0.1) R.fail(S, `${a.id} and ${c.id} have the same name within 100 m (duplicate listing)`);
+  }
+}
+for (const [ph, ids] of allPhones) { const bs = new Set(ids.map((x) => x.split(":")[0])); if (bs.size > 1 && !(cfg.sharedListingPhones || []).includes(ph)) R.warn("cross-base phone", `${ph} appears in ${[...bs].join(" & ")}: ${ids.slice(0, 4).join(", ")}`); }
+
+// ---------- secrets anywhere in the repo ----------
+{
+  const bad = [
+    ["Discord webhook URL", new RegExp("discord(?:app)?\\.com/api/web" + "hooks/\\d+/[\\w-]{20,}")],
+    ["private key block", new RegExp("-----BEGIN [A-Z ]*PRIV" + "ATE KEY-----")],
+    ["GitHub token", /\bgh[pousr]_[A-Za-z0-9]{30,}\b/],
+    ["AWS access key", /\bAKIA[0-9A-Z]{16}\b/],
+    ["Slack token", /\bxox[abprs]-[\w-]{10,}/],
+    ["API secret key (sk-…)", /\bsk-[A-Za-z0-9_-]{24,}\b/],
+    ["Cloudflare API token", /\b(?:cf|cloudflare)[_-]?(?:api[_-]?)?token\s*[:=]\s*["'][A-Za-z0-9_-]{30,}["']/i],
+    ["hard-coded secret/password/admin key", /\b(?:ADMIN_KEY|TURNSTILE_SECRET(?:_KEY)?|DISCORD_WEBHOOK_URL|api[_-]?secret|client[_-]?secret|password)\b\s*[:=]\s*["'][^"'\s]{8,}["']/i],
+  ];
+  const skipDir = new Set([".git", "node_modules", ".wrangler"]), binExt = /\.(png|jpe?g|gif|ico|webp|woff2?|ttf|pdf|zip)$/i;
+  const walk = (d) => fs.readdirSync(path.join(ROOT, d), { withFileTypes: true }).flatMap((e) => e.isDirectory() ? (skipDir.has(e.name) ? [] : walk(path.join(d, e.name))) : binExt.test(e.name) ? [] : [path.join(d, e.name)]);
+  let scanned = 0;
+  for (const f of walk("")) {
+    if (f === path.join("checks", "check-static.js")) continue;
+    let t; try { t = read(f); } catch (e) { continue; } scanned++;
+    for (const [name, re] of bad) { const m = t.match(re); if (m) R.fail("secrets", `${f}: looks like a ${name} ("${m[0].slice(0, 12)}…") — remove it and rotate the secret`); }
+  }
+  R.ok(scanned);
+}
+
+// ---------- change summary vs the last shipped baseline ----------
+{
+  const bl = require("./baseline"); const old = bl.load(), cur = bl.snapshot();
+  if (!old) R.warn("baseline", "no checks/baseline.json yet — run: node checks/baseline.js --update");
+  else for (const d of bl.diff(cur, old)) {
+    if (d.isNew) { R.info(d.base, `NEW base: ${d.added.length} listings`); continue; }
+    if (d.added.length || d.removed.length) R.info(d.base, `${d.dTotal >= 0 ? "+" : ""}${d.dTotal} listings (${d.added.length} added${d.removed.length ? `, ${d.removed.length} removed: ${d.removed.slice(0, 6).join(", ")}` : ""}); by category ${Object.entries(d.catChanges).map(([c, n]) => `${c} ${n > 0 ? "+" : ""}${n}`).join(", ") || "—"}`);
+    R.check(d.removed.length <= 3, d.base, `${d.removed.length} listings disappeared since the last ship (${d.removed.slice(0, 5).join(", ")}…) — if intentional, run: node checks/baseline.js --update`);
+    R.check(!d.catsGone.length, d.base, `category fully emptied since the last ship: ${d.catsGone}`);
+  }
+}
 
 // ---------- shared phone numbers across base pages (emergency/help cards) ----------
 const nums = {};
