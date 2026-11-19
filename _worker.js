@@ -704,40 +704,74 @@ function parseScuFeed(json) {
   return { source: "Service Credit Union", sourceUrl: SCU_RATES_URL, updated, validFrom: cur.EUR.start, rates };
 }
 
-async function handleGetRates(request, env) {
+// ---- Community Bank (on-base bank in Japan and Korea) — yen and won ----
+// Community Bank prints the day's in-country rate on its public currency pages.
+const CB_PAGES = {
+  yen: { url: "https://www.dodcommunitybank.com/home/currency_exchange/yen", code: "JPY", name: "Japanese Yen", symbol: "¥", country: "Japan" },
+  won: { url: "https://www.dodcommunitybank.com/home/currency_exchange/won", code: "KRW", name: "Korean Won", symbol: "₩", country: "South Korea" },
+};
+
+function parseCommunityBank(html, page) {
+  const num = (id) => {
+    const m = new RegExp('id="' + id + '"[^>]*>[\\s\\S]{0,200}?<span>\\s*[^0-9<]*([0-9][0-9,.]*)\\s*</span>', "i").exec(html);
+    return m ? parseFloat(m[1].replace(/,/g, "")) : NaN;
+  };
+  const buy = num("dollar_buys"), back = num("dollar_equivalent");
+  const eff = (/id="date_effective"[^>]*>[^<]*<\/span>\s*([0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4})/i.exec(html) || [])[1] || "";
+  if (!(buy > 0)) return null;
+  let validFrom = "";
+  const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(eff);
+  if (m) validFrom = `${m[3]}-${m[1].padStart(2, "0")}-${m[2].padStart(2, "0")}`;
+  return {
+    source: "Community Bank", sourceUrl: page.url, updated: eff, validFrom, country: page.country,
+    rates: [{ code: page.code, name: page.name, symbol: page.symbol, rate: buy, change: "", reconversion: back > 0 ? back : null, validFrom }],
+  };
+}
+
+// Reads a rates source at most every few hours, keeps the last good copy in KV and serves that.
+async function cachedRates(env, kvKey, load) {
   const kv = env.REVIEWS_KV;
   let cached = null;
   if (kv) {
-    try { cached = JSON.parse((await kv.get(RATES_KV_KEY)) || "null"); } catch { cached = null; }
+    try { cached = JSON.parse((await kv.get(kvKey)) || "null"); } catch { cached = null; }
   }
   const now = Date.now();
   const fresh = cached && cached.fetchedAt && now - cached.fetchedAt < RATES_REFRESH_MS;
   const recentlyFailed = cached && cached.failedAt && now - cached.failedAt < RATES_RETRY_MS;
-
   if (!fresh && !recentlyFailed) {
-    try {
-      const res = await fetch(SCU_RATES_API, {
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; MilitaryThingsToDo/1.0; +https://militarythingstodo.com)", "Accept": "application/json" },
-      });
-      let parsed = null, failReason = "";
-      if (res.ok) {
-        try { parsed = parseScuFeed(await res.json()); } catch { parsed = null; }
-        if (!parsed) failReason = "Service CU feed had no usable rates";
-      } else {
-        failReason = `Service CU answered ${res.status}`;
-      }
-      if (parsed) {
-        cached = { ...parsed, fetchedAt: now };
-      } else {
-        cached = cached ? { ...cached, failedAt: now, failReason } : { failedAt: now, failReason, rates: [] };
-      }
-    } catch (e) {
-      const failReason = "could not reach Service CU";
-      cached = cached ? { ...cached, failedAt: now, failReason } : { failedAt: now, failReason, rates: [] };
-    }
-    if (kv) { try { await kv.put(RATES_KV_KEY, JSON.stringify(cached)); } catch {} }
+    let parsed = null, failReason = "";
+    try { ({ parsed, failReason } = await load()); } catch { failReason = "could not reach the rates source"; }
+    if (parsed) cached = { ...parsed, fetchedAt: now };
+    else cached = cached ? { ...cached, failedAt: now, failReason } : { failedAt: now, failReason, rates: [] };
+    if (kv) { try { await kv.put(kvKey, JSON.stringify(cached)); } catch {} }
   }
+  return cached;
+}
 
+const RATES_UA = "Mozilla/5.0 (compatible; MilitaryThingsToDo/1.0; +https://militarythingstodo.com)";
+
+async function handleGetRates(request, env) {
+  const which = new URL(request.url).searchParams.get("source") || "scu";
+  let cached;
+  if (which === "scu") {
+    cached = await cachedRates(env, RATES_KV_KEY, async () => {
+      const res = await fetch(SCU_RATES_API, { headers: { "User-Agent": RATES_UA, "Accept": "application/json" } });
+      if (!res.ok) return { parsed: null, failReason: `Service CU answered ${res.status}` };
+      let parsed = null;
+      try { parsed = parseScuFeed(await res.json()); } catch { parsed = null; }
+      return { parsed, failReason: parsed ? "" : "Service CU feed had no usable rates" };
+    });
+  } else if (CB_PAGES[which]) {
+    const page = CB_PAGES[which];
+    cached = await cachedRates(env, `fx:cb:${which}`, async () => {
+      const res = await fetch(page.url, { headers: { "User-Agent": RATES_UA, "Accept": "text/html" } });
+      if (!res.ok) return { parsed: null, failReason: `Community Bank answered ${res.status}` };
+      const parsed = parseCommunityBank(await res.text(), page);
+      return { parsed, failReason: parsed ? "" : "Community Bank page had no rate" };
+    });
+  } else {
+    return jsonResponse({ error: "Unknown rates source" }, 400, request);
+  }
   if (!cached || !cached.rates || cached.rates.length === 0) {
     return jsonResponse({ error: "Exchange rates are temporarily unavailable.", reason: (cached && cached.failReason) || "" }, 503, request);
   }

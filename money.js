@@ -9,7 +9,8 @@
   var wanted = (section.getAttribute("data-currencies") || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean);
   var ratesCard = document.getElementById("ratesCard");
   var gasCard = document.getElementById("gasCard");
-  var euroRate = null;
+  var ratesSource = section.getAttribute("data-rates") || (wanted.length ? "scu" : "");
+  var local = null; // { symbol, rate, decimals } — for the local-currency column in the gas box
   var gasData = null;
 
   function esc(s) {
@@ -31,11 +32,11 @@
 
   function renderGas() {
     if (!gasCard || !gasData || !gasData.prices || !gasData.prices.length) return;
-    var euroCol = euroRate ? '<th class="m-num">€ / liter</th>' : "";
+    var euroCol = local ? '<th class="m-num">' + local.symbol + ' / liter</th>' : "";
     var rows = gasData.prices.map(function (p) {
       return "<tr><td>" + esc(p.type) + '</td><td class="m-num">$' + Number(p.gallon).toFixed(3) +
         '</td><td class="m-num">$' + Number(p.liter).toFixed(3) + "</td>" +
-        (euroRate ? '<td class="m-num m-dim">≈ €' + (p.liter * euroRate).toFixed(2) + "</td>" : "") + "</tr>";
+        (local ? '<td class="m-num m-dim">≈ ' + local.symbol + (p.liter * local.rate).toLocaleString("en-US", { minimumFractionDigits: local.decimals, maximumFractionDigits: local.decimals }) + "</td>" : "") + "</tr>";
     }).join("");
     gasCard.innerHTML =
       '<div class="m-head">Gas Prices on Post</div>' +
@@ -45,18 +46,38 @@
       '<p class="m-note">' + (base === "ramstein"
         ? "Paid in U.S. dollars with your Exchange ESSO fuel ration card. Prices change with the market — check the pump sign."
         : "Prices change with the market — check the pump sign.") +
-      (euroRate ? " Euro figures use today's Service CU rate." : "") + "</p>";
+      (local ? " " + local.note : "") + "</p>";
     show(gasCard);
+  }
+
+  function renderCommunityBank(data) {
+    var r = data.rates[0];
+    if (!r || !(r.rate > 0)) return;
+    var sym = esc(r.symbol || ""), fmt = function (n) { return Number(n).toLocaleString("en-US"); };
+    local = { symbol: r.symbol || "", rate: r.rate, decimals: 0, note: "Local-currency figures use today's Community Bank rate." };
+    var rows = '<tr><td>Buying ' + esc(r.name.split(" ").pop().toLowerCase()) + ' with dollars</td><td class="m-num">$1 = ' + sym + fmt(r.rate) + "</td></tr>" +
+      (r.reconversion ? '<tr><td>Selling it back for dollars</td><td class="m-num">' + sym + fmt(r.reconversion) + " = $1</td></tr>" : "") +
+      '<tr><td>' + sym + '1,000 costs about</td><td class="m-num">$' + (1000 / r.rate).toFixed(2) + "</td></tr>";
+    ratesCard.innerHTML =
+      '<div class="m-head">Exchange Rate</div>' +
+      '<div class="m-sub">Community Bank · on-base rate in ' + esc(data.country || "") + "</div>" +
+      '<div class="m-date">' + (data.validFrom ? "Effective " + esc(fmtDate(data.validFrom)) : "") + "</div>" +
+      '<div class="m-big">$1 USD buys <b>' + sym + fmt(r.rate) + "</b></div>" +
+      '<table class="m-table"><tbody>' + rows + "</tbody></table>" +
+      '<p class="m-note">Rates courtesy of <a href="' + esc(data.sourceUrl) + '" target="_blank" rel="noopener">Community Bank</a>, the on-base bank, for its banking centers and ATMs in ' + esc(data.country || "country") + ". Off-base banks and exchange counters set their own rates; ask your banking center about buy-back limits.</p>";
+    show(ratesCard);
+    renderGas();
   }
 
   function renderRates(data) {
     if (!ratesCard || !data || !data.rates || !data.rates.length) return;
+    if (data.source === "Community Bank") return renderCommunityBank(data);
     var byCode = {};
     data.rates.forEach(function (r) { byCode[r.code] = r; });
     var list = (wanted.length ? wanted : data.rates.map(function (r) { return r.code; }))
       .map(function (c) { return byCode[c]; }).filter(Boolean);
     if (!list.length) return;
-    if (byCode.EUR) euroRate = byCode.EUR.rate;
+    if (byCode.EUR) local = { symbol: "€", rate: byCode.EUR.rate, decimals: 2, note: "Euro figures use today's Service CU rate." };
     var rows = list.map(function (r) {
       var arrow = r.change === "up" ? '<span class="m-up" title="Up since the last rate">▲</span>' :
         r.change === "down" ? '<span class="m-down" title="Down since the last rate">▼</span>' : "";
@@ -77,8 +98,8 @@
     renderGas(); // re-render gas so it can add the euro column
   }
 
-  if (ratesCard && wanted.length) {
-    fetch("/api/rates").then(function (r) { return r.ok ? r.json() : null; }).then(renderRates).catch(function () {});
+  if (ratesCard && ratesSource) {
+    fetch("/api/rates?source=" + encodeURIComponent(ratesSource)).then(function (r) { return r.ok ? r.json() : null; }).then(renderRates).catch(function () {});
   }
   if (gasCard && base) {
     fetch("/api/gas?base=" + encodeURIComponent(base)).then(function (r) { return r.ok ? r.json() : null; })
