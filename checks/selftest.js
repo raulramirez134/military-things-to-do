@@ -33,6 +33,9 @@ const M = [
   ["5 listings deleted by accident", "static", () => edit("data-yokota.js", (s) => { let n = 0; return s.split("\n").filter((l) => !(l.startsWith("  { id:") && n++ < 5)).join("\n"); }), /disappeared since the last ship/],
   ["ad put back into a pop-up", "static", () => edit("norfolk.html", (s) => s.replace('<div class="ad-overlay hidden" id="welcomeOverlay">', '<div class="ad-overlay hidden" id="welcomeOverlay"><ins class="adsbygoogle" data-ad-slot="1"></ins>')), /AdSense unit sits inside a pop-up/],
   ["All view no longer capped", "browser:humphreys", () => edit("humphreys.html", (s) => s.replace("const CAP_PER_SECTION = 6;", "const CAP_PER_SECTION = 999;")), /sections over 6|Show-all/],
+  ["worker stops pre-filling base pages", "worker", () => edit("_worker.js", (s) => s.replace("if (!places.length) return passthrough;", "return passthrough;")), /pre-fill every card/],
+  ["Google ratings back in the markup", "worker", () => edit("_worker.js", (s) => s.replace("if (place.phone) ld.telephone = place.phone;", "if (place.phone) ld.telephone = place.phone; ld.aggregateRating = { ratingValue: 4 };")), /aggregateRating in the markup/],
+  ["listing page loses its no-JS content", "worker", () => edit("_worker.js", (s) => s.replace("html = html.replace('<div class=\"main-col\" id=\"mainContent\"></div>', main);", "")), /description is not in the raw HTML/],
   ["timezone off by an hour", "browser:ramstein", () => edit("hours.js", (s) => s.replace("minutes: hour * 60 + minute, month", "minutes: hour * 60 + minute + 60, month")), /clock check|should be/],
   ["Open/Closed logic inverted", "browser:fortbragg", () => edit("hours.js", (s) => s.replace("if (t >= hs && t < he) return true;", "if (t >= hs && t < he) return false;")), /should be (Open|Closed)/],
   ["motion layer not loaded", "static", () => edit("norfolk.html", (s) => s.replace('<script src="/motion.js"></script>', "")), /lenis\.min\.js.*motion\.js/],
@@ -46,8 +49,8 @@ const M = [
 let missed = 0;
 for (const [name, kind, mut, re] of M) {
   copy(); try { mut(); } catch (e) { console.log(`?? ${name}: could not apply mutation (${e.message})`); missed++; continue; }
-  const args = kind === "static" ? ["checks/check-static.js"] : ["checks/check-browser.js", kind.split(":")[1]];
-  const r = cp.spawnSync("node", args, { cwd: tmp, encoding: "utf8", env: { ...process.env, NODE_PATH: process.env.NODE_PATH || cp.execSync("npm root -g").toString().trim() }, timeout: 200000 });
+  const args = kind === "static" ? ["checks/check-static.js"] : kind === "worker" ? ["checks/check-worker.js"] : ["checks/check-browser.js", kind.split(":")[1]];
+  const r = cp.spawnSync("node", args, { cwd: tmp, encoding: "utf8", env: { ...process.env, NODE_PATH: process.env.NODE_PATH || cp.execSync("npm root -g").toString().trim() }, timeout: 400000 });
   const out = (r.stdout || "") + (r.stderr || "");
   const caught = r.status !== 0 && re.test(out);
   if (!caught) missed++;
