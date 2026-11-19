@@ -413,25 +413,19 @@ function injectStructuredData(place, cfg, baseKey){
     description: place.blurb,
     address: { "@type": "PostalAddress", streetAddress: place.addr },
     geo: { "@type": "GeoCoordinates", latitude: place.lat, longitude: place.lng },
-    url: window.location.origin + window.location.pathname + window.location.search,
+    url: `https://militarythingstodo.com/listing?base=${baseKey}&id=${place.id}`,
   };
   if (place.phone) data.telephone = place.phone;
-  if (place.rating != null && place.reviewCount) {
-    data.aggregateRating = {
-      "@type": "AggregateRating",
-      ratingValue: place.rating,
-      reviewCount: place.reviewCount,
-      bestRating: 5,
-      worstRating: 1,
-    };
-  }
+  // No star-rating markup here: the ratings shown come from Google, and Google's structured-data rules
+  // don't allow marking up ratings collected on other sites.
   const hoursSpec = buildOpeningHoursSpec(place.hours);
   if (hoursSpec) data.openingHoursSpecification = hoursSpec;
 
-  const script = document.createElement("script");
-  script.type = "application/ld+json";
+  // The worker already put a basic version in the page (id="ldListing"); upgrade it in place
+  // (adds opening hours) instead of adding a second copy.
+  let script = document.getElementById("ldListing");
+  if (!script) { script = document.createElement("script"); script.type = "application/ld+json"; script.id = "ldListing"; document.head.appendChild(script); }
   script.textContent = JSON.stringify(data);
-  document.head.appendChild(script);
 }
 
 // Shared across all 4 bases via one localStorage key, matching the same
@@ -473,9 +467,12 @@ function initPage(){
 
   injectStructuredData(place, cfg, baseKey);
   recordRecentlyViewed(place, baseKey);
-  document.title = `${place.name} — Military Things To Do`;
+  document.title = `${place.name} — ${cfg.label} | Military Things To Do`;
 
-  document.getElementById("metaDescTag").content = `${place.name}: ${place.blurb} Distance from ${cfg.label} ${cfg.refWord}, hours, contact info, and reviews.`;
+  // Same wording the worker writes server-side (blurb + distance, max 160 characters)
+  { const d = place.dist === 0 ? "" : ` ${cfg.unit === "mi" ? milesFrom(place.dist) + " mi" : place.dist.toFixed(1) + " km"} from ${cfg.label} ${cfg.refWord}.`;
+    let t = place.blurb + d; if (t.length > 160) { t = t.slice(0, 159); t = t.slice(0, t.lastIndexOf(" ")) + "…"; }
+    document.getElementById("metaDescTag").content = t; }
   document.getElementById("canonicalTag").href = `https://militarythingstodo.com/listing?base=${baseKey}&id=${place.id}`;
 
   document.getElementById("headerInner").innerHTML = `

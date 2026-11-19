@@ -9,6 +9,7 @@ msg="${1:?usage: checks/ship.sh <commit-message-file>}"
 checks/run.sh all || { echo "STOPPED: checks failed, nothing was committed or merged."; exit 1; }
 echo; echo "### changes since the last ship"; node checks/baseline.js || true
 node checks/baseline.js --update >/dev/null
+node checks/sitemap-lastmod.js   # date-stamp only the pages/listings that changed
 git add -A
 git diff --cached --quiet || git commit -q -F "$msg"
 git push -q origin staging

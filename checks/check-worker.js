@@ -9,6 +9,8 @@ R.check(!/\bnew Function\s*\(|\beval\s*\(/.test(read("_worker.js").replace(/\/\*
 const wr = JSON.parse(read("wrangler.jsonc").replace(/^\s*\/\/.*$/gm, ""));
 const rwf = wr.assets && wr.assets.run_worker_first;
 R.check(Array.isArray(rwf) ? rwf.includes("/api/*") && rwf.includes("/listing") : rwf === true, "wrangler", 'assets.run_worker_first must include "/listing" and "/api/*"');
+for (const k of Object.keys(cfg.bases)) R.check(rwf === true || (Array.isArray(rwf) && rwf.includes("/" + cfg.bases[k].page.replace(".html", ""))), "wrangler", `assets.run_worker_first is missing "/${cfg.bases[k].page.replace(".html", "")}" — the base page won't be pre-filled for crawlers`);
+for (const k of Object.keys(cfg.bases)) R.check(fs.existsSync(path.join(ROOT, "og", k + ".jpg")), "og", `og/${k}.jpg (share image) is missing`);
 
 function wranglerBin() {
   for (const c of [process.env.WRANGLER_BIN, "/tmp/wr/node_modules/.bin/wrangler", path.join(os.tmpdir(), "mtd-wrangler/node_modules/.bin/wrangler")]) if (c && fs.existsSync(c)) return c;
@@ -38,9 +40,23 @@ const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, 
         const og = (r.t.match(/property="og:title" content="([^"]*)"/) || [])[1] || "";
         R.check(og.includes(esc(pl.name)) || og.includes(pl.name), k, `/listing ${pl.id}: og:title is "${og}"`);
         R.check(r.t.includes(`https://militarythingstodo.com/listing?base=${k}&id=${pl.id}`) || r.t.includes(`base=${k}&amp;id=${pl.id}`), k, `/listing ${pl.id}: canonical URL not injected`);
+        // readable without JavaScript: real heading + description in the HTML, never the "loading"/"not found" shells
+        const h1s = [...r.t.replace(/<script[\s\S]*?<\/script>/g, "").matchAll(/<h1[^>]*>([^<]*)<\/h1>/g)].map((m) => m[1]);
+        R.check(h1s.length === 1 && (h1s[0] === esc(pl.name) || h1s[0] === pl.name), k, `/listing ${pl.id}: raw HTML headings are ${JSON.stringify(h1s)} — crawlers without JavaScript should see the listing name`);
+        const body = (r.t.split("<body")[1] || "").replace(/<script[\s\S]*?<\/script>/g, "");
+        R.check(pl.blurb && body.includes(esc(pl.blurb).slice(0, 40)), k, `/listing ${pl.id}: description is not in the raw HTML`);
+        const ld = [...r.t.matchAll(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
+        let ok = ld.length >= 2; try { ld.forEach((x) => JSON.parse(x)); } catch { ok = false; }
+        R.check(ok, k, `/listing ${pl.id}: structured data missing or not valid JSON (${ld.length} blocks)`);
+        R.check(!ld.some((x) => /aggregateRating/i.test(x)) && !/aggregateRating\s*[:=]/.test(r.t), k, `/listing ${pl.id}: aggregateRating in the markup — the ratings are Google's, and Google forbids marking up other sites' ratings`);
+        R.check(/property="og:image" content="https:\/\/militarythingstodo\.com\/og\/[a-z]+\.jpg"/.test(r.t), k, `/listing ${pl.id}: no og:image`);
       }
+      const missing = await get(`/listing?base=${k}&id=no-such-listing-xyz`);
+      R.check(missing.s === 404 && /Listing not found/.test(missing.t), k, `unknown listing id returned ${missing.s} — should be a real 404`);
       const pg = await get("/" + b.page.replace(".html", "")); const pg2 = pg.s >= 300 && pg.s < 400 ? await get(pg.h.get("location")) : pg;
       R.check(pg2.s === 200 && pg2.t.includes("CURRENT_BASE_KEY"), k, `base page /${b.page} returned ${pg2.s}`);
+      const links = new Set([...pg2.t.matchAll(new RegExp(`href="listing\\.html\\?base=${k}&amp;id=([^"]+)"`, "g"))].map((m) => m[1]));
+      R.check(links.size === places.length, k, `base page raw HTML links to ${links.size}/${places.length} listings — the worker should pre-fill every card for crawlers without JavaScript`);
       const dj = await get("/" + b.data); R.check(dj.s === 200 && /javascript/.test(dj.h.get("content-type") || ""), k, `${b.data} returned ${dj.s} (${dj.h.get("content-type")})`);
     }
     const a = await get("/api/reviews?placeId=checks-probe");

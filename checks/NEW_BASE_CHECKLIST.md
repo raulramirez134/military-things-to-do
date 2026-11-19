@@ -13,7 +13,8 @@
 ## When you add a base — do this first
 1. Add it to `checks/config.js` (key, page, data file, guide, timezone, unit, reference point(s), region box, distinctive proper nouns). The suite fails if a `data*.js` or `guide*.html` exists that isn't configured.
 2. Register it in: `_worker.js` (`VALID_BASE_KEYS`, `LISTING_BASE_CONFIG`), `listing.html` (`BASE_CONFIG`), `search.html` (`BASES`), `suggest.html`, `admin.html` (`BASE_LABELS`), `index.html` (base card + status), the base switcher on every base page, `sitemap.xml`.
-3. Run `checks/run.sh all` and fix everything red.
+3. Add `"/<page>"` to `assets.run_worker_first` in `wrangler.jsonc` (the worker pre-fills the base page for crawlers), add the base to `LISTING_BASE_CONFIG` in `_worker.js` (label, full, refWord, unit, dataFile), make a 1200×630 share image at `og/<key>.jpg`, and add the base to `llms.txt`.
+4. Run `checks/run.sh all` and fix everything red.
 
 ## What is checked automatically
 **Leftovers from the template copy** — other bases' names/cities/hospitals anywhere on the page or in the data; other bases' reference coordinates; `<script src>` pointing at the wrong data file; `CURRENT_BASE_KEY`; `HUB_TIME_ZONE`; map centre and base marker; stats text ("N locations / M categories"); "Start Guide" link.

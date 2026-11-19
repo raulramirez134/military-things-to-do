@@ -487,13 +487,27 @@ async function handleMarkFeedbackHandled(request, env) {
 }
 
 const LISTING_BASE_CONFIG = {
-  ramstein: { label: "Ramstein", refWord: "gate", dataFile: "data.js" },
-  fortbragg: { label: "Fort Bragg", refWord: "post", dataFile: "data-fortbragg.js" },
-  camppendleton: { label: "Camp Pendleton", refWord: "base", dataFile: "data-camppendleton.js" },
-  yokota: { label: "Yokota", refWord: "base", dataFile: "data-yokota.js" },
-  norfolk: { label: "Naval Station Norfolk", refWord: "gate", dataFile: "data-norfolk.js" },
-  humphreys: { label: "Camp Humphreys", refWord: "gate", dataFile: "data-humphreys.js" },
-  campbell: { label: "Fort Campbell", refWord: "gate", dataFile: "data-campbell.js" },
+  ramstein: { label: "Ramstein", full: "Ramstein Air Base", refWord: "gate", unit: "km", dataFile: "data.js" },
+  fortbragg: { label: "Fort Bragg", full: "Fort Bragg", refWord: "post", unit: "mi", dataFile: "data-fortbragg.js" },
+  camppendleton: { label: "Camp Pendleton", full: "Camp Pendleton", refWord: "base", unit: "mi", dataFile: "data-camppendleton.js" },
+  yokota: { label: "Yokota", full: "Yokota Air Base", refWord: "base", unit: "km", dataFile: "data-yokota.js" },
+  norfolk: { label: "Naval Station Norfolk", full: "Naval Station Norfolk", refWord: "gate", unit: "mi", dataFile: "data-norfolk.js" },
+  humphreys: { label: "Camp Humphreys", full: "Camp Humphreys", refWord: "gate", unit: "km", dataFile: "data-humphreys.js" },
+  campbell: { label: "Fort Campbell", full: "Fort Campbell", refWord: "gate", unit: "mi", dataFile: "data-campbell.js" },
+};
+const SITE = "https://militarythingstodo.com";
+
+// schema.org type per category (same map listing.html uses)
+const SCHEMA_TYPE_MAP = {
+  restaurant: "Restaurant", bars: "BarOrPub", grocery: "GroceryStore",
+  shopping: "Store", farmers: "Store", furniture: "Store", tailor: "Store",
+  cars: "AutomotiveBusiness", auto: "AutomotiveBusiness", phone: "Store",
+  health: "MedicalBusiness", banking: "BankOrCreditUnion", religious: "PlaceOfWorship",
+  fitness: "ExerciseGym", wine: "Winery", attraction: "TouristAttraction",
+  museum: "Museum", castles: "TouristAttraction", tokyo: "TouristAttraction",
+  sandiego: "TouristAttraction", onsen: "TouristAttraction", outdoors: "TouristAttraction",
+  beaches: "TouristAttraction", rec: "TouristAttraction", ski: "TouristAttraction",
+  mountains: "TouristAttraction", coast: "TouristAttraction", pets: "Store", kids: "TouristAttraction",
 };
 
 function escapeHtmlAttr(str){
@@ -514,6 +528,18 @@ function escapeHtmlAttr(str){
 // Cloudflare Workers forbid eval / new Function ("Code generation from strings disallowed"),
 // so the data files can't simply be executed. Each listing is a single line of the form
 // { id:"x", name:"...", ..., blurb:"...", ... }, so pull the fields out with a string-aware regex.
+function parsePlaceLine(line) {
+  const str = (key) => {
+    const m = line.match(new RegExp(`\\b${key}:\\s*("(?:[^"\\\\]|\\\\.)*")`));
+    if (!m) return null;
+    try { return JSON.parse(m[1]); } catch { return null; }
+  };
+  const num = (key) => { const m = line.match(new RegExp(`\\b${key}:\\s*(-?[0-9.]+)`)); return m ? parseFloat(m[1]) : null; };
+  const id = str("id"), name = str("name");
+  if (!id || !name) return null;
+  return { id, name, cat: str("cat") || "", blurb: str("blurb") || "", addr: str("addr") || "", hours: str("hours") || "",
+    phone: str("phone"), area: str("area"), dist: num("dist"), lat: num("lat"), lng: num("lng") };
+}
 function extractPlace(dataText, id) {
   const marker = `id:${JSON.stringify(id)}`;
   const at = dataText.indexOf(marker);
@@ -521,17 +547,34 @@ function extractPlace(dataText, id) {
   const start = dataText.lastIndexOf("\n", at) + 1;
   let end = dataText.indexOf("\n", at);
   if (end === -1) end = dataText.length;
-  const line = dataText.slice(start, end);
-  const str = (key) => {
-    const m = line.match(new RegExp(`\\b${key}:\\s*("(?:[^"\\\\]|\\\\.)*")`));
-    if (!m) return null;
-    try { return JSON.parse(m[1]); } catch { return null; }
-  };
-  const name = str("name");
-  const blurb = str("blurb");
-  if (!name) return null;
-  return { id, name, blurb: blurb || "" };
+  const place = parsePlaceLine(dataText.slice(start, end));
+  return place && place.id === id ? place : null;
 }
+function extractAllPlaces(dataText) {
+  return dataText.split("\n").filter((l) => /^\s*\{\s*id:"/.test(l)).map(parsePlaceLine).filter(Boolean);
+}
+function extractCatLabels(dataText) {
+  const m = dataText.match(/const catLabels\s*=\s*\{([^\n]*)\}/);
+  const out = {};
+  if (m) for (const p of m[1].matchAll(/([a-z]+)\s*:\s*("(?:[^"\\]|\\.)*")/g)) { try { out[p[1]] = JSON.parse(p[2]); } catch {} }
+  return out;
+}
+function distLabel(place, cfg, baseKey) {
+  const ref = baseKey === "camppendleton" ? (place.area === "south" ? "South Area" : "North Area") : cfg.refWord;
+  if (place.dist == null) return "";
+  if (place.dist === 0) return `On ${cfg.refWord === "post" ? "post" : "base"}`;
+  const km = place.dist.toFixed(1), mi = (place.dist * 0.621371).toFixed(1);
+  return cfg.unit === "mi" ? `${mi} mi / ${km} km from ${ref}` : `${km} km / ${mi} mi from ${ref}`;
+}
+function clip(text, max) {
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max - 1);
+  return cut.slice(0, cut.lastIndexOf(" ")).replace(/[,;:—–-]\s*$/, "") + "…";
+}
+function jsonLd(obj, id) {
+  return `<script type="application/ld+json"${id ? ` id="${id}"` : ""}>${JSON.stringify(obj).replace(/</g, "\\u003c")}</script>`;
+}
+const ogImageFor = (baseKey) => `${SITE}/og/${baseKey}.jpg`;
 
 async function handleListingPage(request, env) {
   const url = new URL(request.url);
@@ -544,43 +587,93 @@ async function handleListingPage(request, env) {
   if (!id) return assetResponse;
 
   const cfg = LISTING_BASE_CONFIG[baseKey];
+  const hub = `${baseKey}.html`;
   let html = await assetResponse.text();
   // The body can only be read once, so any fallback must rebuild the response from `html`.
   const passthrough = new Response(html, { status: assetResponse.status, headers: assetResponse.headers });
+  const E = escapeHtmlAttr;
 
   try {
     const dataUrl = new URL("/" + cfg.dataFile, url);
     const dataResponse = await env.ASSETS.fetch(new Request(dataUrl, request));
     const dataText = await dataResponse.text();
     const place = extractPlace(dataText, id);
-    if (!place) return passthrough;
 
-    const title = `${place.name} — Military Things To Do`;
-    const description = `${place.name}: ${place.blurb} Distance from ${cfg.label} ${cfg.refWord}, hours, contact info, and reviews.`;
-    const canonicalUrl = `https://militarythingstodo.com/listing?base=${baseKey}&id=${id}`;
+    // Shared by both branches: the right base in the top bar
+    html = html.replace('<a class="brand" href="ramstein.html">', `<a class="brand" href="${hub}">`)
+      .replace('<a class="back-link" href="ramstein.html">← Back to Ramstein listings</a>', `<a class="back-link" href="${hub}">← Back to ${E(cfg.label)} listings</a>`);
 
-    html = html.replace(
-      "<title>Listing — Military Things To Do</title>",
-      `<title>${escapeHtmlAttr(title)}</title>`
-    );
-    html = html.replace(
-      /<meta name="description" content="[^"]*" id="metaDescTag">/,
-      `<meta name="description" content="${escapeHtmlAttr(description)}" id="metaDescTag">`
-    );
-    html = html.replace(
-      /<link rel="canonical" href="[^"]*" id="canonicalTag">/,
-      `<link rel="canonical" href="${escapeHtmlAttr(canonicalUrl)}" id="canonicalTag">`
-    );
-    const ogTags = `<meta property="og:title" content="${escapeHtmlAttr(title)}">
-<meta property="og:description" content="${escapeHtmlAttr(description)}">
+    if (!place) {
+      // Unknown listing: a real 404 (not a 200 "not found" page), with a way back
+      html = html.replace(/<div class="header-inner" id="headerInner">[\s\S]*?<\/div>\n/, `<div class="header-inner" id="headerInner"><h1 class="title">Listing not found</h1></div>\n`)
+        .replace('<div class="main-col" id="mainContent"></div>', `<div class="main-col" id="mainContent"><div class="not-found"><p>That listing doesn't exist — it may have been renamed or removed.</p><p><a href="${hub}">← Back to the full ${E(cfg.label)} list</a></p></div></div>`)
+        .replace("<head>", '<head>\n<meta name="robots" content="noindex">');
+      const h = new Headers(assetResponse.headers);
+      return new Response(html, { status: 404, headers: h });
+    }
+
+    const catLabels = extractCatLabels(dataText);
+    const catLabel = catLabels[place.cat] || "";
+    const dist = distLabel(place, cfg, baseKey);
+    const title = `${place.name} — ${cfg.label} | Military Things To Do`;
+    const short = place.dist ? ` ${cfg.unit === "mi" ? (place.dist * 0.621371).toFixed(1) + " mi" : place.dist.toFixed(1) + " km"} from ${cfg.label} ${cfg.refWord}.` : "";
+    const description = clip(place.blurb + short, 160);
+    const canonicalUrl = `${SITE}/listing?base=${baseKey}&id=${id}`;
+
+    html = html.replace("<title>Listing — Military Things To Do</title>", `<title>${E(title)}</title>`);
+    html = html.replace(/<meta name="description" content="[^"]*" id="metaDescTag">/, `<meta name="description" content="${E(description)}" id="metaDescTag">`);
+    html = html.replace(/<link rel="canonical" href="[^"]*" id="canonicalTag">/, `<link rel="canonical" href="${E(canonicalUrl)}" id="canonicalTag">`);
+
+    // Readable without JavaScript (AI answer engines, link previews, Google's first pass).
+    // listing.html's script replaces these blocks with the full interactive version.
+    const header = `<div class="header-inner" id="headerInner">
+      <div class="header-copy">
+        ${catLabel ? `<div class="tag-inline">${E(catLabel)}</div>` : ""}
+        <h1 class="title">${E(place.name)}</h1>
+      </div>
+    </div>\n`;
+    html = html.replace(/<div class="header-inner" id="headerInner">[\s\S]*?<\/div>\n/, header);
+    const row = (k, v) => `<div class="detail-card"><div><div class="k">${k}</div><div class="v">${E(v)}</div></div></div>`;
+    const main = `<div class="main-col" id="mainContent">
+      <p class="blurb-block">${E(place.blurb)}</p>
+      <div class="detail-grid">
+        ${place.addr ? row("Address", place.addr) : ""}
+        ${dist ? row(`Distance from ${cfg.label}`, dist) : ""}
+        ${place.hours ? row("Hours", place.hours) : ""}
+        ${row("Phone", place.phone || "Not listed")}
+      </div>
+      <p><a href="${hub}">← All ${E(cfg.label)} listings</a></p>
+    </div>`;
+    html = html.replace('<div class="main-col" id="mainContent"></div>', main);
+
+    // Structured data: the business itself + breadcrumbs. No aggregateRating — the ratings
+    // shown on the page come from Google, and Google's rules forbid marking up ratings from other sites.
+    const ld = { "@context": "https://schema.org", "@type": SCHEMA_TYPE_MAP[place.cat] || "LocalBusiness",
+      name: place.name, description: place.blurb, url: canonicalUrl };
+    if (place.addr) ld.address = { "@type": "PostalAddress", streetAddress: place.addr };
+    if (place.lat != null && place.lng != null) ld.geo = { "@type": "GeoCoordinates", latitude: place.lat, longitude: place.lng };
+    if (place.phone) ld.telephone = place.phone;
+    const crumbs = { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Military Things To Do", item: `${SITE}/` },
+      { "@type": "ListItem", position: 2, name: cfg.full, item: `${SITE}/${baseKey}` },
+      { "@type": "ListItem", position: 3, name: place.name, item: canonicalUrl } ] };
+
+    const headTags = `<meta property="og:title" content="${E(title)}">
+<meta property="og:description" content="${E(description)}">
 <meta property="og:type" content="website">
-<meta property="og:url" content="${escapeHtmlAttr(canonicalUrl)}">
+<meta property="og:url" content="${E(canonicalUrl)}">
 <meta property="og:site_name" content="Military Things To Do">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="${escapeHtmlAttr(title)}">
-<meta name="twitter:description" content="${escapeHtmlAttr(description)}">
+<meta property="og:image" content="${ogImageFor(baseKey)}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${E(title)}">
+<meta name="twitter:description" content="${E(description)}">
+<meta name="twitter:image" content="${ogImageFor(baseKey)}">
+${jsonLd(ld, "ldListing")}
+${jsonLd(crumbs, "ldCrumbs")}
 </head>`;
-    html = html.replace("</head>", ogTags);
+    html = html.replace("</head>", headTags);
   } catch (err) {
     console.log("listing inject failed:", String(err && err.stack || err));
     // If anything goes wrong (malformed data file, unexpected place shape, etc.),
@@ -592,6 +685,41 @@ async function handleListingPage(request, env) {
     status: assetResponse.status,
     headers: assetResponse.headers,
   });
+}
+
+// Base pages (/ramstein, /humphreys, …) build their listing cards with JavaScript. Crawlers that
+// don't run JavaScript (ChatGPT search, Perplexity, Claude, link previews) would see no listings at
+// all, so pre-fill every category grid with plain cards; the page's own render() replaces them.
+async function handleBasePage(request, env, baseKey) {
+  const assetResponse = await env.ASSETS.fetch(request);
+  const contentType = assetResponse.headers.get("Content-Type") || "";
+  if (assetResponse.status !== 200 || !contentType.includes("text/html")) return assetResponse;
+  let html = await assetResponse.text();
+  const passthrough = new Response(html, { status: 200, headers: assetResponse.headers });
+  try {
+    const cfg = LISTING_BASE_CONFIG[baseKey];
+    const dataResponse = await env.ASSETS.fetch(new Request(new URL("/" + cfg.dataFile, request.url), request));
+    const dataText = await dataResponse.text();
+    const places = extractAllPlaces(dataText);
+    if (!places.length) return passthrough;
+    const labels = extractCatLabels(dataText);
+    const E = escapeHtmlAttr;
+    const byCat = {};
+    for (const p of places) (byCat[p.cat] = byCat[p.cat] || []).push(p);
+    html = html.replace(/<div class="grid" data-group="([a-z]+)" id="grid-\1"><\/div>/g, (m, cat) => {
+      const items = (byCat[cat] || []).slice().sort((a, b) => (a.dist ?? 999) - (b.dist ?? 999));
+      if (!items.length) return m;
+      const cards = items.map((p) => `<div class="card" data-cat="${E(cat)}"><div class="card-top"><div class="name-row"><a class="card-name" href="listing.html?base=${baseKey}&amp;id=${E(p.id)}">${E(p.name)}</a></div></div>` +
+        (labels[cat] ? `<div class="tag ${E(cat)}">${E(labels[cat])}</div>` : "") +
+        `<div class="card-blurb">${E(p.blurb)}</div>` + (p.addr ? `<div class="card-addr">${E(p.addr)}</div>` : "") +
+        `<div class="card-meta"><span class="dist">${E(distLabel(p, cfg, baseKey))}</span><span>${E(p.hours)}</span></div></div>`).join("");
+      return `<div class="grid" data-group="${cat}" id="grid-${cat}">${cards}</div>`;
+    });
+  } catch (err) {
+    console.log("base page prefill failed:", String(err && err.stack || err));
+    return passthrough;
+  }
+  return new Response(html, { status: 200, headers: assetResponse.headers });
 }
 
 // Full backup export — pulls every review (stored per-listing under "reviews:{id}"),
@@ -930,6 +1058,10 @@ export default {
     // so the per-listing tag injection must match the clean path (the .html path only redirects).
     if ((url.pathname === "/listing" || url.pathname === "/listing.html") && request.method === "GET") {
       return handleListingPage(request, env);
+    }
+    const pageKey = url.pathname.slice(1);
+    if (request.method === "GET" && Object.prototype.hasOwnProperty.call(LISTING_BASE_CONFIG, pageKey)) {
+      return handleBasePage(request, env, pageKey);
     }
 
     return env.ASSETS.fetch(request);

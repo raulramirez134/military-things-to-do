@@ -1,0 +1,32 @@
+# Military Things To Do
+
+> Free, independent guides for U.S. service members and military families arriving at a new duty station. Each base page lists restaurants, groceries, schools and childcare, medical and emergency help, banks, auto services, family activities and day trips near the base, with hours, phone numbers and the distance from the base gate. Not affiliated with the U.S. Department of Defense.
+
+Each listing page shows the place's description, address, distance from the base gate (km and miles), opening hours with a live open/closed badge, phone number, directions, and visitor reviews written on this site. Star ratings shown on listings are Google ratings, included for reference. Every base also has a step-by-step arrival checklist for the first weeks after arriving.
+
+## Bases
+
+- [Ramstein Air Base & Kaiserslautern Military Community (KMC), Germany](https://militarythingstodo.com/ramstein): places near Ramstein AB, Kaiserslautern and Landstuhl, plus wine country, castle and ski day trips
+- [Fort Bragg & Fayetteville, North Carolina](https://militarythingstodo.com/fortbragg): places near Fort Bragg, mountain and coast day trips
+- [Camp Pendleton, Oceanside & North County San Diego, California](https://militarythingstodo.com/camppendleton): places near the North and South areas of Camp Pendleton, beaches, San Diego
+- [Yokota Air Base, Fussa & western Tokyo, Japan](https://militarythingstodo.com/yokota): places near Yokota AB, onsen, Mount Fuji and Tokyo day trips
+- [Naval Station Norfolk & Hampton Roads, Virginia](https://militarythingstodo.com/norfolk): places near Naval Station Norfolk
+- [Camp Humphreys & Pyeongtaek, South Korea](https://militarythingstodo.com/humphreys): places near USAG Humphreys and Anjeong-ri, Seoul and DMZ day trips
+- [Fort Campbell, Clarksville & Oak Grove, Kentucky/Tennessee](https://militarythingstodo.com/campbell): places near Fort Campbell, Nashville and Land Between the Lakes day trips
+
+## Arrival checklists
+
+- [New to Ramstein / KMC](https://militarythingstodo.com/guide)
+- [New to Fort Bragg](https://militarythingstodo.com/guide-fortbragg)
+- [New to Camp Pendleton](https://militarythingstodo.com/guide-camppendleton)
+- [New to Yokota](https://militarythingstodo.com/guide-yokota)
+- [New to Naval Station Norfolk](https://militarythingstodo.com/guide-norfolk)
+- [New to Camp Humphreys](https://militarythingstodo.com/guide-humphreys)
+- [New to Fort Campbell](https://militarythingstodo.com/guide-campbell)
+
+## More
+
+- [Search every base at once](https://militarythingstodo.com/search)
+- [Suggest a place that's missing](https://militarythingstodo.com/suggest)
+- [About this site](https://militarythingstodo.com/about)
+- [Sitemap with every listing page](https://militarythingstodo.com/sitemap.xml)
