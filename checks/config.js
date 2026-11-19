@@ -18,6 +18,8 @@ module.exports = {
     { re: /o'?connor brewing|smartmouth/i, why: "closed (Norfolk)" },
     { re: /kid'?s club daycare|military pawn shop|wolf soldier|wolf military/i, why: "USAG Humphreys off-limits list (Dec 2025)", base: "humphreys" },
     { re: /\b(abba|woomi|uptown|sun realty|un village)\b/i, why: "USAG Humphreys off-limits realtor (Dec 2025)", base: "humphreys", cat: "housing" },
+    { re: /storage rentals of america|devon self storage|lee'?s lounge|winner'?s circle motel|mr\.? billy'?s|church court apartments|laptoyz|britlee|militaryzone|adult toy box|shady oaks|brayboys|american financial systems|superior carpentry|military housing department/i, why: "Fort Campbell off-limits list (Sept 2026)", base: "campbell" },
+    { re: /kingsdale|carter'?s mobile home|darnell mobile home|blue sky estates|live ?oaks village|prewitt'?s mobile home/i, why: "Fort Campbell off-limits list (Sept 2026)", base: "campbell", cat: "housing" },
   ],
   // Categories that must not exist for a base (off-limits business types).
   bannedCats: { humphreys: ["tattoo"] },
@@ -57,6 +59,12 @@ module.exports = {
       tz: "Asia/Seoul", unit: "km", refWord: "gate", refs: [[36.967, 127.033]],
       bbox: [36.4, 126.5, 38.0, 127.6], tokens: ["Humphreys", "Pyeongtaek", "Anjeong", "Allgood"],
       phone: /^(\+82|0)/, topbar: "HUMPHREYS",
+    },
+    campbell: {
+      label: "Fort Campbell", status: "live", page: "campbell.html", data: "data-campbell.js", guide: "guide-campbell.html",
+      tz: "America/Chicago", unit: "mi", refWord: "gate", refs: [[36.6436477, -87.4409467]],
+      bbox: [35.8, -88.6, 37.3, -86.3], tokens: ["Fort Campbell", "Clarksville", "Blanchfield", "Oak Grove"],
+      phone: /^(\+1|\(?\d{3}\)?)/, topbar: "FORT CAMPBELL",
     },
   },
 };
