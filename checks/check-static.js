@@ -291,6 +291,15 @@ for (const k of keys) {
 }
 for (const [ph, ids] of allPhones) { const bs = new Set(ids.map((x) => x.split(":")[0])); if (bs.size > 1 && !(cfg.sharedListingPhones || []).includes(ph)) R.warn("cross-base phone", `${ph} appears in ${[...bs].join(" & ")}: ${ids.slice(0, 4).join(", ")}`); }
 
+// ---------- ads: never inside a pop-up/overlay (AdSense placement policy + Better Ads "pop-up ad") ----------
+for (const f of fs.readdirSync(ROOT).filter((f) => f.endsWith(".html"))) {
+  const t = fs.readFileSync(path.join(ROOT, f), "utf8");
+  for (const m of t.matchAll(/<div[^>]*class="[^"]*\b(?:ad-overlay|modal|overlay)\b[^"]*"[^>]*>/g)) {
+    const rest = t.slice(m.index, m.index + 4000), close = rest.search(/\n {2}<\/div>\n/);
+    if (/class="adsbygoogle"/.test(close > 0 ? rest.slice(0, close) : rest)) R.fail("ads", `${f}: an AdSense unit sits inside a pop-up/overlay — Google doesn't allow ads in pop-ups; place it in the page flow`);
+  }
+}
+
 // ---------- secrets anywhere in the repo ----------
 {
   const bad = [
