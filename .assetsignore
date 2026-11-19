@@ -5,3 +5,6 @@ _worker.js
 .gitignore
 README.md
 node_modules
+
+checks
+.wrangler
