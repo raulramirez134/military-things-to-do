@@ -13,6 +13,7 @@ Each listing page shows the place's description, address, distance from the base
 - [Naval Station Norfolk & Hampton Roads, Virginia](https://militarythingstodo.com/norfolk): places near Naval Station Norfolk
 - [Camp Humphreys & Pyeongtaek, South Korea](https://militarythingstodo.com/humphreys): places near USAG Humphreys and Anjeong-ri, Seoul and DMZ day trips
 - [Fort Campbell, Clarksville & Oak Grove, Kentucky/Tennessee](https://militarythingstodo.com/campbell): places near Fort Campbell, Nashville and Land Between the Lakes day trips
+- [USAG Stuttgart (Patch, Panzer, Kelley, Robinson Barracks & the Army Airfield), Germany](https://militarythingstodo.com/stuttgart): places near the Stuttgart military community, Black Forest, castle and Lake Constance day trips
 
 ## Arrival checklists
 
@@ -23,6 +24,7 @@ Each listing page shows the place's description, address, distance from the base
 - [New to Naval Station Norfolk](https://militarythingstodo.com/guide-norfolk)
 - [New to Camp Humphreys](https://militarythingstodo.com/guide-humphreys)
 - [New to Fort Campbell](https://militarythingstodo.com/guide-campbell)
+- [New to Stuttgart](https://militarythingstodo.com/guide-stuttgart)
 
 ## More
 

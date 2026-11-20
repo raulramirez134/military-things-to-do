@@ -4,7 +4,7 @@
 module.exports = {
   siteUrl: "https://militarythingstodo.com",
   // Phone numbers that are legitimately shared between base pages (national / DoD-wide lines), digits only.
-  sharedNumbers: ["988", "8003429647", "8779955247", "8002221222", "911", "18003429647", "18002221222", "18779955247", "18772727337", "110", "112", "119", "825033573102", "19316485732", "19316457476"],
+  sharedNumbers: ["988", "8003429647", "8779955247", "8002221222", "911", "18003429647", "18002221222", "18779955247", "18772727337", "110", "112", "119", "825033573102", "19316485732", "19316457476", "49637194642900"],
   // ^ last three: Humphreys Religious Support Office (all chapels), Montgomery County Parks & Rec, Clarksville Parks & Rec — shared office lines
   // Businesses that must never be listed (confirmed closed or off-limits). Matched against listing names.
   neverList: [
@@ -78,6 +78,15 @@ module.exports = {
       bbox: [35.8, -88.6, 37.3, -85.9], tokens: ["Fort Campbell", "Clarksville", "Blanchfield", "Oak Grove"],
       phone: /^(\+1|\(?\d{3}\)?)/, topbar: "FORT CAMPBELL",
       emergency: "911", money: null,
+    },
+    stuttgart: {
+      label: "Stuttgart", status: "live", page: "stuttgart.html", data: "data-stuttgart.js", guide: "guide-stuttgart.html",
+      tz: "Europe/Berlin", unit: "km", refWord: "base",
+      // USAG Stuttgart has five sites; dist = km to the nearest: Patch Barracks (Vaihingen), Panzer Kaserne (Böblingen), Kelley Barracks (Möhringen), Robinson Barracks (Zuffenhausen), Stuttgart Army Airfield (Filderstadt)
+      refs: [[48.7355296, 9.0809489], [48.6822793, 9.0477244], [48.7244651, 9.1782672], [48.8226902, 9.1914956], [48.6794792, 9.191243]],
+      bbox: [47.5, 7.5, 49.7, 10.3], tokens: ["Patch Barracks", "Panzer Kaserne", "Kelley Barracks", "Robinson Barracks", "Böblingen", "Vaihingen"],
+      phone: /^(\+49|0)/, topbar: "STUTTGART",
+      emergency: "112", money: 'data-currencies="EUR', addrRe: /\b\d{5}\b/,
     },
   },
 };

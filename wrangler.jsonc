@@ -7,7 +7,7 @@
     "directory": ".",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
-    "run_worker_first": ["/listing", "/listing.html", "/api/*", "/ramstein", "/fortbragg", "/camppendleton", "/yokota", "/norfolk", "/humphreys", "/campbell"]
+    "run_worker_first": ["/listing", "/listing.html", "/api/*", "/ramstein", "/fortbragg", "/camppendleton", "/yokota", "/norfolk", "/humphreys", "/campbell", "/stuttgart"]
   },
   "kv_namespaces": [
     {
