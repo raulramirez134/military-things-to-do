@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Search All Bases — Military Things To Do</title>
 <meta name="description" content="Search restaurants, groceries, attractions, and more across all Military Things To Do bases at once.">
+<meta name="robots" content="noindex, follow">
 <link rel="canonical" href="https://militarythingstodo.com/search">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -132,8 +133,8 @@
 
   <header class="brief">
     <div class="topbar">
-      <a class="brand" href="index.html"><span class="mark">M</span> Military Things To Do</a>
-      <a class="back-link" href="index.html">← Back to base picker</a>
+      <a class="brand" href="/"><span class="mark">M</span> Military Things To Do</a>
+      <a class="back-link" href="/">← Back to base picker</a>
     </div>
     <div class="header-inner">
       <div class="eyebrow">Search — All Bases</div>
@@ -217,13 +218,13 @@ const icons = {
 };
 
 const BASES = [
-  { key: "ramstein", label: "Ramstein", hub: "ramstein.html", dataFile: "data.js", timeZone: "Europe/Berlin" },
-  { key: "fortbragg", label: "Fort Bragg", hub: "fortbragg.html", dataFile: "data-fortbragg.js", timeZone: "America/New_York" },
-  { key: "camppendleton", label: "Camp Pendleton", hub: "camppendleton.html", dataFile: "data-camppendleton.js", timeZone: "America/Los_Angeles" },
-  { key: "yokota", label: "Yokota", hub: "yokota.html", dataFile: "data-yokota.js", timeZone: "Asia/Tokyo" },
-  { key: "norfolk", label: "Naval Station Norfolk", hub: "norfolk.html", dataFile: "data-norfolk.js", timeZone: "America/New_York" },
-  { key: "humphreys", label: "Camp Humphreys", hub: "humphreys.html", dataFile: "data-humphreys.js", timeZone: "Asia/Seoul" },
-  { key: "campbell", label: "Fort Campbell", hub: "campbell.html", dataFile: "data-campbell.js", timeZone: "America/Chicago" },
+  { key: "ramstein", label: "Ramstein", hub: "/ramstein", dataFile: "data.js", timeZone: "Europe/Berlin" },
+  { key: "fortbragg", label: "Fort Bragg", hub: "/fortbragg", dataFile: "data-fortbragg.js", timeZone: "America/New_York" },
+  { key: "camppendleton", label: "Camp Pendleton", hub: "/camppendleton", dataFile: "data-camppendleton.js", timeZone: "America/Los_Angeles" },
+  { key: "yokota", label: "Yokota", hub: "/yokota", dataFile: "data-yokota.js", timeZone: "Asia/Tokyo" },
+  { key: "norfolk", label: "Naval Station Norfolk", hub: "/norfolk", dataFile: "data-norfolk.js", timeZone: "America/New_York" },
+  { key: "humphreys", label: "Camp Humphreys", hub: "/humphreys", dataFile: "data-humphreys.js", timeZone: "Asia/Seoul" },
+  { key: "campbell", label: "Fort Campbell", hub: "/campbell", dataFile: "data-campbell.js", timeZone: "America/Chicago" },
 ];
 const BASE_TIME_ZONES = Object.fromEntries(BASES.map(b => [b.key, b.timeZone]));
 
@@ -462,7 +463,7 @@ function renderResults(matches, grid, emptyState, resultCount, isFavoritesView){
     const isFav = isFavorited(p.baseKey, p.id);
     return `
     <div class="card">
-      <a class="card-link" href="listing.html?base=${p.baseKey}&id=${p.id}">
+      <a class="card-link" href="/listing?base=${p.baseKey}&id=${p.id}">
         <div class="card-top">
           <div class="emblem">${icons[p.cat] || icons.attraction}</div>
           <div class="card-name">${p.name}</div>

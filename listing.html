@@ -235,8 +235,8 @@
 <body>
   <header class="brief">
     <div class="topbar">
-      <a class="brand" href="ramstein.html"><span class="mark">M</span> Military Things To Do</a>
-      <a class="back-link" href="ramstein.html">← Back to Ramstein listings</a>
+      <a class="brand" href="/ramstein"><span class="mark">M</span> Military Things To Do</a>
+      <a class="back-link" href="/ramstein">← Back to Ramstein listings</a>
     </div>
     <div class="header-inner" id="headerInner">
       <p class="mono" style="color:rgba(237,231,214,0.5); font-size:12px;">Loading…</p>
@@ -257,13 +257,13 @@
 <script src="/hours.js"></script>
 <script>
 const BASE_CONFIG = {
-  ramstein: { label: "Ramstein", hub: "ramstein.html", dataFile: "data.js", refWord: "gate", unit: "km", timeZone: "Europe/Berlin" },
-  fortbragg: { label: "Fort Bragg", hub: "fortbragg.html", dataFile: "data-fortbragg.js", refWord: "post", unit: "mi", timeZone: "America/New_York" },
-  camppendleton: { label: "Camp Pendleton", hub: "camppendleton.html", dataFile: "data-camppendleton.js", refWord: "base", unit: "mi", timeZone: "America/Los_Angeles" },
-  yokota: { label: "Yokota", hub: "yokota.html", dataFile: "data-yokota.js", refWord: "base", unit: "km", timeZone: "Asia/Tokyo" },
-  norfolk: { label: "Naval Station Norfolk", hub: "norfolk.html", dataFile: "data-norfolk.js", refWord: "gate", unit: "mi", timeZone: "America/New_York" },
-  humphreys: { label: "Camp Humphreys", hub: "humphreys.html", dataFile: "data-humphreys.js", refWord: "gate", unit: "km", timeZone: "Asia/Seoul" },
-  campbell: { label: "Fort Campbell", hub: "campbell.html", dataFile: "data-campbell.js", refWord: "gate", unit: "mi", timeZone: "America/Chicago" },
+  ramstein: { label: "Ramstein", hub: "/ramstein", dataFile: "data.js", refWord: "gate", unit: "km", timeZone: "Europe/Berlin" },
+  fortbragg: { label: "Fort Bragg", hub: "/fortbragg", dataFile: "data-fortbragg.js", refWord: "post", unit: "mi", timeZone: "America/New_York" },
+  camppendleton: { label: "Camp Pendleton", hub: "/camppendleton", dataFile: "data-camppendleton.js", refWord: "base", unit: "mi", timeZone: "America/Los_Angeles" },
+  yokota: { label: "Yokota", hub: "/yokota", dataFile: "data-yokota.js", refWord: "base", unit: "km", timeZone: "Asia/Tokyo" },
+  norfolk: { label: "Naval Station Norfolk", hub: "/norfolk", dataFile: "data-norfolk.js", refWord: "gate", unit: "mi", timeZone: "America/New_York" },
+  humphreys: { label: "Camp Humphreys", hub: "/humphreys", dataFile: "data-humphreys.js", refWord: "gate", unit: "km", timeZone: "Asia/Seoul" },
+  campbell: { label: "Fort Campbell", hub: "/campbell", dataFile: "data-campbell.js", refWord: "gate", unit: "mi", timeZone: "America/Chicago" },
 };
 
 // Open/Closed parsing (parseHoursString, getOpenStatus, ...) lives in /hours.js — shared by all pages.
@@ -802,7 +802,7 @@ function initPage(){
         const isCurrent = p.id === place.id;
         const pDist = p.dist === 0 ? "On base" : `${p.dist.toFixed(1)} km`;
         return `
-        <a class="sidebar-item ${isCurrent ? 'current' : ''}" href="${isCurrent ? '#' : `listing.html?base=${baseKey}&id=${p.id}`}">
+        <a class="sidebar-item ${isCurrent ? 'current' : ''}" href="${isCurrent ? '#' : `/listing?base=${baseKey}&id=${p.id}`}">
           <span class="si-thumb" style="background:${catColors[p.cat] || '#3f5c6b'}22;">${icons[p.cat] || icons.attraction}</span>
           <span class="si-body">
             <span class="si-name">${p.name}</span>

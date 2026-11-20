@@ -4,6 +4,7 @@ const { ROOT, read, exists, loadData, hav, stripDiv, Report } = require("./lib")
 const cfg = require("./config");
 const R = new Report("static");
 const keys = Object.keys(cfg.bases);
+const clean = (f) => "/" + f.replace(/\.html$/, ""); // internal links use clean URLs (no .html hop through a 307)
 const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const now = new Date();
 
@@ -150,17 +151,17 @@ for (const k of keys) {
   const sw = html.slice(html.indexOf('<div class="base-dropdown"'));
   const swEnd = sw.indexOf("</div>\n      </div>"); const swHtml = swEnd > 0 ? sw.slice(0, swEnd + 6) : sw.slice(0, 1500);
   const hrefs = [...swHtml.matchAll(/<a class="opt" href="([^"]+)"/g)].map((m) => m[1]).sort();
-  const want = keys.filter((x) => x !== k).map((x) => cfg.bases[x].page).sort();
+  const want = keys.filter((x) => x !== k).map((x) => clean(cfg.bases[x].page)).sort();
   R.check(JSON.stringify(hrefs) === JSON.stringify(want), S, `base switcher links [${hrefs}] should be exactly the other bases [${want}]`);
   R.check((swHtml.match(/class="opt active"/g) || []).length === 1, S, "base switcher must have exactly one active entry");
   for (const x of keys.filter((y) => y !== k)) {
-    const m = swHtml.match(new RegExp(`href="${esc(cfg.bases[x].page)}"[^>]*>[\\s\\S]*?<span class="soon">([^<]*)</span>`));
+    const m = swHtml.match(new RegExp(`href="${esc(clean(cfg.bases[x].page))}"[^>]*>[\\s\\S]*?<span class="soon">([^<]*)</span>`));
     R.check(m && m[1].trim().toLowerCase() === cfg.bases[x].status, S, `switcher badge for ${x} is "${m && m[1]}", expected "${cfg.bases[x].status}"`);
   }
   R.check(html.toUpperCase().includes(`>${b.topbar}`) || new RegExp(`<b[^>]*>[^<]*${b.topbar}`, "i").test(html), S, `topbar label doesn't mention ${b.topbar}`);
   // ---------- 9. Start Guide link ----------
-  const gl = (html.match(/href="(guide[^"]*\.html)"/) || [])[1];
-  R.check(gl === b.guide, S, `"Start Guide" link points to ${gl}, expected ${b.guide}`);
+  const gl = (html.match(/href="(\/guide[^"]*)"/) || [])[1];
+  R.check(gl === clean(b.guide), S, `"Start Guide" link points to ${gl}, expected ${clean(b.guide)}`);
 }
 
 // ---------- Open/Closed hours parser (/hours.js) ----------
@@ -224,6 +225,20 @@ for (const f of allPages) {
 }
 
 // ---------- cross-file registration ----------
+// internal links must be clean URLs: "x.html" costs every visitor and crawler a 307 hop
+for (const f of fs.readdirSync(ROOT).filter((f) => f.endsWith(".html") && f !== "404.html")) {
+  const bad = [...read(f).matchAll(/href="(?!https?:)\/?[a-z-]+\.html[^"]*"/g)].map((m) => m[0]);
+  R.check(!bad.length, f, `internal link uses .html (use the clean URL): ${bad.slice(0, 3).join(" ")}`);
+}
+// structured data blocks must be valid JSON, and every base page + guide carries a breadcrumb
+for (const f of fs.readdirSync(ROOT).filter((f) => f.endsWith(".html"))) {
+  const h = read(f);
+  for (const m of h.matchAll(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)) {
+    try { JSON.parse(m[1]); } catch (e) { R.fail(f, `invalid JSON-LD block: ${e.message}`); }
+  }
+}
+for (const k of keys) for (const f of [cfg.bases[k].page, cfg.bases[k].guide]) R.check(exists(f) && read(f).includes('"BreadcrumbList"'), f, "missing BreadcrumbList structured data");
+for (const f of ["search.html", "suggest.html"]) R.check(/<meta name="robots" content="noindex/.test(read(f)) && !read("sitemap.xml").includes(`/${f.replace(".html", "")}</loc>`), f, "utility page must be noindex and out of the sitemap");
 const worker = read("_worker.js"), listing = read("listing.html"), search = read("search.html"), suggest = read("suggest.html"), admin = read("admin.html"), index = read("index.html");
 const vbk = (worker.match(/const VALID_BASE_KEYS\s*=\s*\[([^\]]*)\]/) || [])[1] || "";
 const lbc = (worker.match(/const LISTING_BASE_CONFIG\s*=\s*\{([\s\S]*?)\n\};/) || [])[1] || "";
@@ -235,12 +250,12 @@ for (const k of keys) {
   const l1 = lbc.split("\n").find((l) => l.includes(`${k}:`)) || "";
   R.check(l1.includes(`dataFile: "${b.data}"`) && l1.includes(`refWord: "${b.refWord}"`), "registration", `_worker.js LISTING_BASE_CONFIG.${k} missing or wrong dataFile/refWord`);
   const l2 = blc.split("\n").find((l) => l.includes(`${k}:`)) || "";
-  R.check(l2.includes(`hub: "${b.page}"`) && l2.includes(`dataFile: "${b.data}"`) && l2.includes(`timeZone: "${b.tz}"`) && l2.includes(`unit: "${b.unit}"`) && l2.includes(`refWord: "${b.refWord}"`), "registration", `listing.html BASE_CONFIG.${k} missing or wrong (hub/dataFile/timeZone/unit/refWord)`);
+  R.check(l2.includes(`hub: "${clean(b.page)}"`) && l2.includes(`dataFile: "${b.data}"`) && l2.includes(`timeZone: "${b.tz}"`) && l2.includes(`unit: "${b.unit}"`) && l2.includes(`refWord: "${b.refWord}"`), "registration", `listing.html BASE_CONFIG.${k} missing or wrong (hub/dataFile/timeZone/unit/refWord)`);
   const l3 = bas.split("\n").find((l) => l.includes(`key: "${k}"`)) || "";
-  R.check(l3.includes(`hub: "${b.page}"`) && l3.includes(`dataFile: "${b.data}"`) && l3.includes(`timeZone: "${b.tz}"`), "registration", `search.html BASES entry for ${k} missing or wrong`);
+  R.check(l3.includes(`hub: "${clean(b.page)}"`) && l3.includes(`dataFile: "${b.data}"`) && l3.includes(`timeZone: "${b.tz}"`), "registration", `search.html BASES entry for ${k} missing or wrong`);
   R.check(suggest.includes(`value="${k}"`), "registration", `suggest.html dropdown is missing ${k}`);
   R.check(new RegExp(`\\b${k}\\s*:\\s*"`).test((admin.match(/const BASE_LABELS\s*=\s*\{[^}]*\}/) || [""])[0]), "registration", `admin.html BASE_LABELS is missing ${k}`);
-  const row = index.match(new RegExp(`<a class="base-row (\\w+)" href="${esc(b.page)}"[\\s\\S]*?<span class="base-status (\\w+)">([^<]*)</span>`));
+  const row = index.match(new RegExp(`<a class="base-row (\\w+)" href="${esc(clean(b.page))}"[\\s\\S]*?<span class="base-status (\\w+)">([^<]*)</span>`));
   R.check(row && row[1] === b.status && row[2] === b.status && row[3].toLowerCase() === b.status, "registration", `index.html base card for ${k} missing or wrong status (expected ${b.status})`);
 }
 R.check((index.match(/class="base-row/g) || []).length === keys.length, "registration", `index.html has ${(index.match(/class="base-row/g) || []).length} base cards, config has ${keys.length}`);

@@ -587,7 +587,7 @@ async function handleListingPage(request, env) {
   if (!id) return assetResponse;
 
   const cfg = LISTING_BASE_CONFIG[baseKey];
-  const hub = `${baseKey}.html`;
+  const hub = `/${baseKey}`;
   let html = await assetResponse.text();
   // The body can only be read once, so any fallback must rebuild the response from `html`.
   const passthrough = new Response(html, { status: assetResponse.status, headers: assetResponse.headers });
@@ -600,8 +600,8 @@ async function handleListingPage(request, env) {
     const place = extractPlace(dataText, id);
 
     // Shared by both branches: the right base in the top bar
-    html = html.replace('<a class="brand" href="ramstein.html">', `<a class="brand" href="${hub}">`)
-      .replace('<a class="back-link" href="ramstein.html">← Back to Ramstein listings</a>', `<a class="back-link" href="${hub}">← Back to ${E(cfg.label)} listings</a>`);
+    html = html.replace('<a class="brand" href="/ramstein">', `<a class="brand" href="${hub}">`)
+      .replace('<a class="back-link" href="/ramstein">← Back to Ramstein listings</a>', `<a class="back-link" href="${hub}">← Back to ${E(cfg.label)} listings</a>`);
 
     if (!place) {
       // Unknown listing: a real 404 (not a 200 "not found" page), with a way back
@@ -709,7 +709,7 @@ async function handleBasePage(request, env, baseKey) {
     html = html.replace(/<div class="grid" data-group="([a-z]+)" id="grid-\1"><\/div>/g, (m, cat) => {
       const items = (byCat[cat] || []).slice().sort((a, b) => (a.dist ?? 999) - (b.dist ?? 999));
       if (!items.length) return m;
-      const cards = items.map((p) => `<div class="card" data-cat="${E(cat)}"><div class="card-top"><div class="name-row"><a class="card-name" href="listing.html?base=${baseKey}&amp;id=${E(p.id)}">${E(p.name)}</a></div></div>` +
+      const cards = items.map((p) => `<div class="card" data-cat="${E(cat)}"><div class="card-top"><div class="name-row"><a class="card-name" href="/listing?base=${baseKey}&amp;id=${E(p.id)}">${E(p.name)}</a></div></div>` +
         (labels[cat] ? `<div class="tag ${E(cat)}">${E(labels[cat])}</div>` : "") +
         `<div class="card-blurb">${E(p.blurb)}</div>` + (p.addr ? `<div class="card-addr">${E(p.addr)}</div>` : "") +
         `<div class="card-meta"><span class="dist">${E(distLabel(p, cfg, baseKey))}</span><span>${E(p.hours)}</span></div></div>`).join("");
