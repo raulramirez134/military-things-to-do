@@ -3,4 +3,13 @@ Allow: /
 Disallow: /admin.html
 Disallow: /admin
 
+# Let Gemini use these pages in its answers. Cloudflare's managed section above blocks
+# Google-Extended; Google combines every group for the same crawler and, when an Allow and a
+# Disallow match equally, follows the Allow. Other AI-training crawlers stay blocked.
+# Google-Extended does not affect Google Search or AI Overviews either way.
+User-agent: Google-Extended
+Allow: /
+Disallow: /admin.html
+Disallow: /admin
+
 Sitemap: https://militarythingstodo.com/sitemap.xml
