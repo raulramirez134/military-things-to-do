@@ -4,7 +4,7 @@
 module.exports = {
   siteUrl: "https://militarythingstodo.com",
   // Phone numbers that are legitimately shared between base pages (national / DoD-wide lines), digits only.
-  sharedNumbers: ["988", "8003429647", "8779955247", "8002221222", "911", "18003429647", "18002221222", "18779955247", "18772727337", "110", "112", "119", "825033573102", "19316485732", "19316457476", "49637194642900", "499641705963074", "4971189535111"],
+  sharedNumbers: ["988", "8003429647", "8779955247", "8002221222", "911", "18003429647", "18002221222", "18779955247", "18772727337", "110", "112", "119", "825033573102", "19316485732", "19316457476", "49637194642900", "499641705963074", "4971189535111", "496111435485178", "49637194645762", "18447025495"],
   // ^ last three: Humphreys Religious Support Office (all chapels), Montgomery County Parks & Rec, Clarksville Parks & Rec — shared office lines
   // Businesses that must never be listed (confirmed closed or off-limits). Matched against listing names.
   neverList: [
@@ -29,13 +29,14 @@ module.exports = {
   // dayTripCats = categories allowed to be far from the base (everything else must be within `near` km/mi).
   dayTripCats: ["attraction","museum","outdoors","castles","ski","wine","mountains","coast","beaches","historic","culture","sandiego","tokyo","seoul","dmz","nashville","lakes","onsen","rec","kids"],
   // Bases held to the stricter fill rules (Q30 every category populated, Q31 no avoidable vague hours). Every new base goes here from day one.
-  strictBases: ["stuttgart"],
+  strictBases: ["stuttgart", "wiesbaden"],
   // Q31 allow-list: listings whose hours genuinely cannot be written as a time (id -> why). Anything else with vague hours must be filled in.
   vagueHoursOk: {
     "panzer-exchange-food-court": "each outlet posts its own times; no single published schedule",
     "patch-exchange-food-court": "each outlet posts its own times; no single published schedule",
     "o2-shop-sindelfingen": "shop publishes hours only in-store",
     "patch-alterations-shop": "hours posted at the counter only",
+    "kinderspielplatz-am-schlosspark": "open-air public playground with no posted hours",
   },
   essentialCats: ["restaurant","grocery","health","banking","housing","schools","auto","attraction"],
   bases: {
@@ -95,6 +96,15 @@ module.exports = {
       refs: [[48.7355296, 9.0809489], [48.6822793, 9.0477244], [48.7244651, 9.1782672], [48.8226902, 9.1914956], [48.6794792, 9.191243]],
       bbox: [47.5, 7.5, 49.7, 10.3], tokens: ["Patch Barracks", "Panzer Kaserne", "Kelley Barracks", "Robinson Barracks", "Böblingen", "Vaihingen"],
       phone: /^(\+49|0)/, topbar: "STUTTGART",
+      emergency: "112", money: 'data-currencies="EUR', addrRe: /\b\d{5}\b/,
+    },
+    wiesbaden: {
+      label: "Wiesbaden", status: "live", page: "wiesbaden.html", data: "data-wiesbaden.js", guide: "guide-wiesbaden.html",
+      tz: "Europe/Berlin", unit: "km", refWord: "base",
+      // USAG Wiesbaden: dist = km to the nearest of Lucius D. Clay Kaserne (Erbenheim), the Hainerberg housing area (centre of the PX / commissary / school cluster) and Aukamm housing; on-post listings read "On base"
+      refs: [[50.0433496, 8.3246242], [50.0725, 8.2690], [50.0925, 8.2735]],
+      bbox: [49.5, 7.5, 50.6, 9.0], tokens: ["Clay Kaserne", "Hainerberg", "Wiesbaden", "Aukamm"],
+      phone: /^(\+49|0)/, topbar: "WIESBADEN",
       emergency: "112", money: 'data-currencies="EUR', addrRe: /\b\d{5}\b/,
     },
   },
