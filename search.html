@@ -152,6 +152,7 @@
         <button class="base-chip" data-base="norfolk">Norfolk</button>
         <button class="base-chip" data-base="humphreys">Humphreys</button>
         <button class="base-chip" data-base="campbell">Fort Campbell</button>
+        <button class="base-chip" data-base="stuttgart">Stuttgart</button>
         <button class="base-chip" id="favoritesChip" type="button" style="margin-left:8px;">★ My Favorites</button>
       </div>
     </div>
@@ -225,6 +226,7 @@ const BASES = [
   { key: "norfolk", label: "Naval Station Norfolk", hub: "/norfolk", dataFile: "data-norfolk.js", timeZone: "America/New_York" },
   { key: "humphreys", label: "Camp Humphreys", hub: "/humphreys", dataFile: "data-humphreys.js", timeZone: "Asia/Seoul" },
   { key: "campbell", label: "Fort Campbell", hub: "/campbell", dataFile: "data-campbell.js", timeZone: "America/Chicago" },
+  { key: "stuttgart", label: "Stuttgart", hub: "/stuttgart", dataFile: "data-stuttgart.js", timeZone: "Europe/Berlin" },
 ];
 const BASE_TIME_ZONES = Object.fromEntries(BASES.map(b => [b.key, b.timeZone]));
 
