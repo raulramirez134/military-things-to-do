@@ -698,7 +698,7 @@
       </div>
       <div class="coords-row">
         <span><b>35.7428° N, 139.3384° E</b> — Yokota AB (ref. point)</span>
-        <span><b>23</b> categories mapped</span>
+        <span><b>22</b> categories mapped</span>
         <span><b>107</b> locations logged</span>
       </div>
     </div>
@@ -733,7 +733,6 @@
           </div>
           <div class="sub-row" data-group="care" role="group" aria-label="Health &amp; Personal categories">
             <button class="cat-tab sub-tab" data-cat="health">Health &amp; Personal Care</button>
-            <button class="cat-tab sub-tab" data-cat="tailor">Tailoring &amp; Alterations</button>
             <button class="cat-tab sub-tab" data-cat="pets">Pet Services</button>
           </div>
           <div class="sub-row" data-group="family" role="group" aria-label="Family &amp; Community categories">
@@ -878,9 +877,6 @@
 
       <h2 class="section-label">Phone &amp; Internet Providers</h2>
       <div class="grid" data-group="phone" id="grid-phone"></div>
-
-      <h2 class="section-label">Tailoring &amp; Alterations</h2>
-      <div class="grid" data-group="tailor" id="grid-tailor"></div>
 
       <h2 class="section-label">Bars &amp; Nightlife</h2>
       <div class="grid" data-group="bars" id="grid-bars"></div>
@@ -1319,7 +1315,7 @@ function sortPlaces(items, sortBy){
 
 function render(){
   const sortBy = document.getElementById("sortSelect") ? document.getElementById("sortSelect").value : "distance";
-  ["restaurant","grocery","attraction","auto","health","banking","housing","pets","fitness","religious","museum","kids","phone","tailor","bars","rec","shopping","onsen","tokyo","outdoors","legal","schools","community"].forEach(cat=>{
+  ["restaurant","grocery","attraction","auto","health","banking","housing","pets","fitness","religious","museum","kids","phone","bars","rec","shopping","onsen","tokyo","outdoors","legal","schools","community"].forEach(cat=>{
     const el = document.getElementById("grid-"+cat);
     const items = sortPlaces(places.filter(p=>p.cat===cat), sortBy);
     el.innerHTML = items.map(cardHTML).join("");
@@ -1337,7 +1333,7 @@ const CAT_GROUPS = {
   food: ["restaurant", "bars", "grocery"],
   shop: ["shopping", "auto"],
   settle: ["housing", "banking", "phone", "legal"],
-  care: ["health", "tailor", "pets"],
+  care: ["health", "pets"],
   family: ["schools", "kids", "community", "religious"],
   fun: ["attraction", "rec", "fitness", "outdoors", "museum", "events"],
   trips: ["onsen", "tokyo"]

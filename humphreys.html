@@ -666,7 +666,7 @@
       </div>
       <div class="coords-row">
         <span><b>36.967° N, 127.033° E</b> — Camp Humphreys (ref. point)</span>
-        <span><b>33</b> categories mapped</span>
+        <span><b>25</b> categories mapped</span>
         <span><b>163</b> locations logged</span>
       </div>
     </div>
@@ -698,23 +698,16 @@
           </div>
           <div class="sub-row" data-group="settle" role="group" aria-label="Getting Settled categories">
             <button class="cat-tab sub-tab" data-cat="housing">Housing &amp; Off-Base Living</button>
-            <button class="cat-tab sub-tab" data-cat="pcs">PCS &amp; Household Goods</button>
-            <button class="cat-tab sub-tab" data-cat="storage">Storage &amp; Moving</button>
-            <button class="cat-tab sub-tab" data-cat="phone">Phone &amp; Internet</button>
             <button class="cat-tab sub-tab" data-cat="banking">Banking &amp; Money</button>
             <button class="cat-tab sub-tab" data-cat="services">Base Services</button>
           </div>
           <div class="sub-row" data-group="care" role="group" aria-label="Health &amp; Personal categories">
             <button class="cat-tab sub-tab" data-cat="health">Health &amp; Personal Care</button>
-            <button class="cat-tab sub-tab" data-cat="legal">Legal &amp; Financial Services</button>
-            <button class="cat-tab sub-tab" data-cat="notary">Notary &amp; Shipping</button>
             <button class="cat-tab sub-tab" data-cat="tailor">Tailoring &amp; Alterations</button>
-            <button class="cat-tab sub-tab" data-cat="pets">Pet Services</button>
           </div>
           <div class="sub-row" data-group="family" role="group" aria-label="Family &amp; Community categories">
             <button class="cat-tab sub-tab" data-cat="schools">Schools &amp; Childcare</button>
             <button class="cat-tab sub-tab" data-cat="kids">Kids &amp; Playgrounds</button>
-            <button class="cat-tab sub-tab" data-cat="language">Language Schools</button>
             <button class="cat-tab sub-tab" data-cat="education">Education &amp; Career</button>
             <button class="cat-tab sub-tab" data-cat="community">Community &amp; Spouse Groups</button>
             <button class="cat-tab sub-tab" data-cat="religious">Religious Services</button>
@@ -729,7 +722,6 @@
           </div>
           <div class="sub-row" data-group="trips" role="group" aria-label="Day Trips categories">
             <button class="cat-tab sub-tab" data-cat="seoul">Seoul Day Trips</button>
-            <button class="cat-tab sub-tab" data-cat="dmz">DMZ &amp; History Tours</button>
             <button class="cat-tab sub-tab" data-cat="culture">Korean Culture &amp; Palaces</button>
           </div>
         </div>
@@ -817,9 +809,6 @@
       <h2 class="section-label">Grocery &amp; Food Stores</h2>
       <div class="grid" data-group="grocery" id="grid-grocery"></div>
 
-      <h2 class="section-label">Language Schools</h2>
-      <div class="grid" data-group="language" id="grid-language"></div>
-
       <h2 class="section-label">Parks &amp; Family Attractions</h2>
       <div class="grid" data-group="attraction" id="grid-attraction"></div>
 
@@ -838,9 +827,6 @@
       <h2 class="section-label">Schools &amp; Childcare</h2>
       <div class="grid" data-group="schools" id="grid-schools"></div>
 
-      <h2 class="section-label">Pet Services</h2>
-      <div class="grid" data-group="pets" id="grid-pets"></div>
-
       <h2 class="section-label">Fitness &amp; Recreation</h2>
       <div class="grid" data-group="fitness" id="grid-fitness"></div>
 
@@ -855,12 +841,6 @@
 
       <h2 class="section-label">Base Services</h2>
       <div class="grid" data-group="services" id="grid-services"></div>
-
-      <h2 class="section-label">PCS &amp; Household Goods</h2>
-      <div class="grid" data-group="pcs" id="grid-pcs"></div>
-
-      <h2 class="section-label">Legal &amp; Financial Services</h2>
-      <div class="grid" data-group="legal" id="grid-legal"></div>
 
       <h2 class="section-label">Education &amp; Career</h2>
       <div class="grid" data-group="education" id="grid-education"></div>
@@ -880,17 +860,11 @@
       <h2 class="section-label">Museums &amp; Local History</h2>
       <div class="grid" data-group="museum" id="grid-museum"></div>
 
-      <h2 class="section-label">Storage &amp; Moving</h2>
-      <div class="grid" data-group="storage" id="grid-storage"></div>
-
       <h2 class="section-label">Farmers Markets</h2>
       <div class="grid" data-group="farmers" id="grid-farmers"></div>
 
       <h2 class="section-label">Bars &amp; Nightlife</h2>
       <div class="grid" data-group="bars" id="grid-bars"></div>
-
-      <h2 class="section-label">Phone &amp; Internet Providers</h2>
-      <div class="grid" data-group="phone" id="grid-phone"></div>
 
       <h2 class="section-label">Car Dealerships &amp; Buying</h2>
       <div class="grid" data-group="cars" id="grid-cars"></div>
@@ -900,15 +874,6 @@
 
       <h2 class="section-label">Seoul Day Trips</h2>
       <div class="grid" data-group="seoul" id="grid-seoul"></div>
-
-      <h2 class="section-label">Tattoo Shops</h2>
-      <div class="grid" data-group="tattoo" id="grid-tattoo"></div>
-
-      <h2 class="section-label">Notary &amp; Shipping Services</h2>
-      <div class="grid" data-group="notary" id="grid-notary"></div>
-
-      <h2 class="section-label">DMZ &amp; History Tours</h2>
-      <div class="grid" data-group="dmz" id="grid-dmz"></div>
 
       <h2 class="section-label">Korean Culture &amp; Palaces</h2>
       <div class="grid" data-group="culture" id="grid-culture"></div>
@@ -1345,7 +1310,7 @@ function sortPlaces(items, sortBy){
 
 function render(){
   const sortBy = document.getElementById("sortSelect") ? document.getElementById("sortSelect").value : "distance";
-  ["restaurant","grocery","language","attraction","auto","health","banking","housing","schools","pets","fitness","community","religious","rec","services","pcs","legal","education","shopping","kids","outdoors","tailor","museum","storage","farmers","bars","phone","cars","furniture","seoul","tattoo","notary","dmz","culture"].forEach(cat=>{
+  ["restaurant","grocery","attraction","auto","health","banking","housing","schools","fitness","community","religious","rec","services","education","shopping","kids","outdoors","tailor","museum","farmers","bars","cars","furniture","seoul","culture"].forEach(cat=>{
     const el = document.getElementById("grid-"+cat);
     const items = sortPlaces(places.filter(p=>p.cat===cat), sortBy);
     el.innerHTML = items.map(cardHTML).join("");
@@ -1362,11 +1327,11 @@ initRecentlyViewedStrip();
 const CAT_GROUPS = {
   food: ["restaurant", "bars", "grocery", "farmers"],
   shop: ["shopping", "furniture", "auto", "cars"],
-  settle: ["housing", "pcs", "storage", "phone", "banking", "services"],
-  care: ["health", "legal", "notary", "tailor", "pets"],
-  family: ["schools", "kids", "language", "education", "community", "religious"],
+  settle: ["housing", "banking", "services"],
+  care: ["health", "tailor"],
+  family: ["schools", "kids", "education", "community", "religious"],
   fun: ["attraction", "rec", "fitness", "outdoors", "museum", "events"],
-  trips: ["seoul", "dmz", "culture"]
+  trips: ["seoul", "culture"]
 };
 function syncGroupRow(){
   const active = document.querySelector(".cat-tab.active").dataset.cat;

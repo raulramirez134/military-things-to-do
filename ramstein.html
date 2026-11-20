@@ -660,7 +660,7 @@
       </div>
       <div class="coords-row">
         <span><b>49.4513° N, 7.5845° E</b> — Ramstein AB (ref. point)</span>
-        <span><b>34</b> categories mapped</span>
+        <span><b>33</b> categories mapped</span>
         <span><b>222</b> locations logged</span>
       </div>
     </div>
@@ -692,7 +692,6 @@
           </div>
           <div class="sub-row" data-group="settle" role="group" aria-label="Getting Settled categories">
             <button class="cat-tab sub-tab" data-cat="housing">Housing &amp; Off-Base Living</button>
-            <button class="cat-tab sub-tab" data-cat="pcs">PCS &amp; Household Goods</button>
             <button class="cat-tab sub-tab" data-cat="storage">Storage &amp; Moving</button>
             <button class="cat-tab sub-tab" data-cat="phone">Phone &amp; Internet</button>
             <button class="cat-tab sub-tab" data-cat="banking">Banking &amp; Money</button>
@@ -849,9 +848,6 @@
 
       <h2 class="section-label">Base Services</h2>
       <div class="grid" data-group="services" id="grid-services"></div>
-
-      <h2 class="section-label">PCS &amp; Household Goods</h2>
-      <div class="grid" data-group="pcs" id="grid-pcs"></div>
 
       <h2 class="section-label">Legal &amp; Financial Services</h2>
       <div class="grid" data-group="legal" id="grid-legal"></div>
@@ -1352,7 +1348,7 @@ function sortPlaces(items, sortBy){
 
 function render(){
   const sortBy = document.getElementById("sortSelect") ? document.getElementById("sortSelect").value : "distance";
-  ["restaurant","grocery","language","attraction","auto","health","banking","housing","schools","pets","fitness","community","religious","rec","services","pcs","legal","education","shopping","kids","outdoors","tailor","museum","storage","farmers","bars","phone","cars","furniture","wine","tattoo","notary","ski","castles"].forEach(cat=>{
+  ["restaurant","grocery","language","attraction","auto","health","banking","housing","schools","pets","fitness","community","religious","rec","services","legal","education","shopping","kids","outdoors","tailor","museum","storage","farmers","bars","phone","cars","furniture","wine","tattoo","notary","ski","castles"].forEach(cat=>{
     const el = document.getElementById("grid-"+cat);
     const items = sortPlaces(places.filter(p=>p.cat===cat), sortBy);
     el.innerHTML = items.map(cardHTML).join("");
@@ -1369,7 +1365,7 @@ initRecentlyViewedStrip();
 const CAT_GROUPS = {
   food: ["restaurant", "bars", "grocery", "farmers"],
   shop: ["shopping", "furniture", "auto", "cars"],
-  settle: ["housing", "pcs", "storage", "phone", "banking", "services"],
+  settle: ["housing", "storage", "phone", "banking", "services"],
   care: ["health", "legal", "notary", "tailor", "tattoo", "pets"],
   family: ["schools", "kids", "language", "education", "community", "religious"],
   fun: ["attraction", "rec", "fitness", "outdoors", "museum", "events"],

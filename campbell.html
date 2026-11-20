@@ -711,8 +711,8 @@
       </div>
       <div class="coords-row">
         <span><b>36.6436° N, 87.4409° W</b> — Gate 4, T.C. Freeman Gate (ref. point)</span>
-        <span><b>26</b> categories mapped</span>
-        <span><b>97</b> locations logged</span>
+        <span><b>24</b> categories mapped</span>
+        <span><b>101</b> locations logged</span>
       </div>
     </div>
   </header>
@@ -738,7 +738,6 @@
           <div class="sub-row" data-group="shop" role="group" aria-label="Shopping &amp; Auto categories">
             <button class="cat-tab sub-tab" data-cat="shopping">Exchange &amp; Shopping</button>
             <button class="cat-tab sub-tab" data-cat="auto">Auto &amp; Transportation</button>
-            <button class="cat-tab sub-tab" data-cat="cars">Car Dealerships</button>
           </div>
           <div class="sub-row" data-group="settle" role="group" aria-label="Getting Settled categories">
             <button class="cat-tab sub-tab" data-cat="housing">Housing &amp; Off-Post Living</button>
@@ -749,7 +748,6 @@
           </div>
           <div class="sub-row" data-group="care" role="group" aria-label="Health &amp; Personal categories">
             <button class="cat-tab sub-tab" data-cat="health">Health &amp; Medical</button>
-            <button class="cat-tab sub-tab" data-cat="tailor">Tailoring &amp; Alterations</button>
             <button class="cat-tab sub-tab" data-cat="pets">Pet Services</button>
           </div>
           <div class="sub-row" data-group="family" role="group" aria-label="Family &amp; Community categories">
@@ -827,7 +825,7 @@
           <div class="legend-items" id="legendItems"></div>
         </div>
       </div>
-      <p style="font-size:12px; color:#69665B; margin-top:8px;">All 97 logged locations at once — zoom, click a pin for details, or toggle categories in the legend.</p>
+      <p style="font-size:12px; color:#69665B; margin-top:8px;">All 101 logged locations at once — zoom, click a pin for details, or toggle categories in the legend.</p>
     </div>
 
     <div id="listView" tabindex="-1">
@@ -865,9 +863,6 @@
       <h2 class="section-label">Auto &amp; Transportation</h2>
       <div class="grid" data-group="auto" id="grid-auto"></div>
 
-      <h2 class="section-label">Car Dealerships</h2>
-      <div class="grid" data-group="cars" id="grid-cars"></div>
-
       <h2 class="section-label">Health &amp; Medical</h2>
       <div class="grid" data-group="health" id="grid-health"></div>
 
@@ -882,9 +877,6 @@
 
       <h2 class="section-label">Phone &amp; Internet</h2>
       <div class="grid" data-group="phone" id="grid-phone"></div>
-
-      <h2 class="section-label">Tailoring &amp; Alterations</h2>
-      <div class="grid" data-group="tailor" id="grid-tailor"></div>
 
       <h2 class="section-label">Pet Services</h2>
       <div class="grid" data-group="pets" id="grid-pets"></div>
@@ -1372,7 +1364,7 @@ function sortPlaces(items, sortBy){
 
 function render(){
   const sortBy = document.getElementById("sortSelect") ? document.getElementById("sortSelect").value : "distance";
-  ["restaurant","bars","grocery","farmers","shopping","auto","cars","health","banking","housing","storage","phone","tailor","pets","services","schools","community","religious","fitness","rec","outdoors","attraction","kids","museum","nashville","lakes"].forEach(cat=>{
+  ["restaurant","bars","grocery","farmers","shopping","auto","health","banking","housing","storage","phone","pets","services","schools","community","religious","fitness","rec","outdoors","attraction","kids","museum","nashville","lakes"].forEach(cat=>{
     const el = document.getElementById("grid-"+cat);
     const items = sortPlaces(places.filter(p=>p.cat===cat), sortBy);
     el.innerHTML = items.map(cardHTML).join("");
@@ -1388,9 +1380,9 @@ initRecentlyViewedStrip();
 // Category groups (progressive disclosure): top row = groups, second row = that group's categories
 const CAT_GROUPS = {
   food: ["restaurant", "bars", "grocery", "farmers"],
-  shop: ["shopping", "auto", "cars"],
+  shop: ["shopping", "auto"],
   settle: ["housing", "services", "storage", "phone", "banking"],
-  care: ["health", "tailor", "pets"],
+  care: ["health", "pets"],
   family: ["schools", "kids", "community", "religious"],
   fun: ["attraction", "rec", "fitness", "outdoors", "museum", "events"],
   trips: ["nashville", "lakes"]

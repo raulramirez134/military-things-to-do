@@ -74,14 +74,68 @@ const M = [
   ["Q27 listing with no hours text", "quality", () => edit("data-yokota.js", (s) => s.replace(/hours:"[^"]+"/, 'hours:""')), /Q27/],
   ["Q28 events section loses its dates", "quality", () => edit("yokota.html", (s) => s.replace(/Typical dates/g, "Dates")), /Q28/],
   ["Q29 sitemap date in the future", "quality", () => edit("sitemap.xml", (s) => s.replace(/<lastmod>[^<]+/, "<lastmod>2099-01-01")), /Q29/],
+  // ---- extended rules Q33–Q87 (kind "quality-warn" = a warning rule: the output must name it, the exit code may stay 0) ----
+  ["Q33 TODO left in a blurb", "quality", () => edit("data-yokota.js", (s) => s.replace(/blurb:"/, 'blurb:"TODO ')), /Q33/],
+  ["Q34 web address in a blurb", "quality-warn", () => edit("data-yokota.js", (s) => s.replace(/blurb:"/, 'blurb:"See https://example.com ')), /Q34/],
+  ["Q35 shouting blurb", "quality-warn", () => edit("data-yokota.js", (s) => s.replace(/blurb:"/, 'blurb:"AMAZINGLYGOOD ')), /Q35/],
+  ["Q36 double exclamation", "quality-warn", () => edit("data-yokota.js", (s) => s.replace(/blurb:"/, 'blurb:"Wow!! ')), /Q36/],
+  ["Q37 advertising superlative", "quality-warn", () => edit("data-yokota.js", (s) => s.replace(/blurb:"/, 'blurb:"A world-class spot. ')), /Q37/],
+  ["Q38 time-sensitive wording", "quality-warn", () => edit("data-yokota.js", (s) => s.replace(/blurb:"/, 'blurb:"Grand opening this year. ')), /Q38/],
+  ["Q39 blurb mentions a future year", "quality", () => edit("data-yokota.js", (s) => s.replace(/blurb:"/, 'blurb:"Opens in 2099. ')), /Q39/],
+  ["Q40 hours say Closed forever", "quality", () => edit("data-yokota.js", (s) => s.replace(/hours:"[^"]+"/, 'hours:"Closed"')), /Q40/],
+  ["Q41 hours end with a separator", "quality", () => edit("data-yokota.js", (s) => s.replace(/hours:"[^"]+"/, 'hours:"Daily 9:00–17:00 ·"')), /Q41/],
+  ["Q42 impossible clock time", "quality", () => edit("data-yokota.js", (s) => s.replace(/hours:"[^"]+"/, 'hours:"Daily 9:00–25:00"')), /Q42/],
+  ["Q43 zero-length hours", "quality", () => edit("data-yokota.js", (s) => s.replace(/hours:"[^"]+"/, 'hours:"Daily 9:00–9:00"')), /Q43/],
+  ["Q44 non-standard day abbreviation", "quality-warn", () => edit("data-yokota.js", (s) => s.replace(/hours:"[^"]+"/, 'hours:"Tues–Thurs 9:00–17:00"')), /Q44/],
+  ["Q45 hyphen between times", "quality-warn", () => edit("data-yokota.js", (s) => s.replace(/hours:"[^"]+"/, 'hours:"Daily 9:00-17:00"')), /Q45/],
+  ["Q46 address ends with a comma", "quality", () => edit("data-yokota.js", (s) => s.replace(/addr:"([^"]+)"/, 'addr:"$1,"')), /Q46/],
+  ["Q47 address repeats the name", "quality-warn", () => edit("data-yokota.js", (s) => s.replace(/name:("[^"]+"), cat:("[^"]+"), dist:([\d.]+), lat:([\d.]+), lng:([\d.]+), addr:"[^"]+"/, 'name:$1, cat:$2, dist:$3, lat:$4, lng:$5, addr:$1')), /Q47/],
+  ["Q48 name ends with a dash", "quality", () => edit("data-yokota.js", (s) => s.replace(/name:"([^"]+)"/, 'name:"$1 -"')), /Q48/],
+  ["Q49 same name twice in a base", "quality-warn", () => edit("data-yokota.js", (s) => { const ns = [...s.matchAll(/name:("[^"]+")/g)]; return s.replace(ns[3][0], "name:" + ns[2][1]); }), /Q49/],
+  ["Q50 rating of 7", "quality", () => edit("data-yokota.js", (s) => s.replace(/rating:null/, "rating:7")), /Q50/],
+  ["Q51 rating with no reviews", "quality-warn", () => edit("data-yokota.js", (s) => s.replace(/rating:null, reviewCount:0/, "rating:4.5, reviewCount:0")), /Q51/],
+  ["Q52 two categories share a label", "quality", () => edit("data-yokota.js", (s) => s.replace('fitness:"Fitness"', 'fitness:"Health"')), /Q52/],
+  ["Q53 listing uses an undeclared category", "quality", () => edit("data-yokota.js", (s) => s.replace(/cat:"restaurant"/, 'cat:"zzz"')), /Q53/],
+  ["Q54 on-base listing loses its pin note", "quality-warn", () => edit("data-wiesbaden.js", (s) => s.replace(/(id:"shawingz-hainerberg"[^\n]*?) \(Pin marks the installation area, not the exact building\.\)/, "$1")), /Q54/],
+  ["Q55 listing id carries another base's key", "quality", () => edit("data-yokota.js", (s) => s.replace('id:"fussa-express"', 'id:"fussa-ramstein-express"')), /Q55/],
+  ["Q60 latitude out of range", "quality", () => edit("data-yokota.js", (s) => s.replace(/lat:[\d.]+/, "lat:999")), /Q60/],
+  ["Q61 negative distance", "quality", () => edit("data-yokota.js", (s) => s.replace(/dist:[\d.]+/, "dist:-1")), /Q61/],
+  ["Q62 misspelled field (silently ignored)", "quality-warn", () => edit("data-yokota.js", (s) => s.replace(/, hours:/, ", hourz:")), /Q62/],
+  ["Q63 Pendleton area typo", "quality", () => edit("data-camppendleton.js", (s) => s.replace(/area:"north"/, 'area:"nroth"')), /Q63/],
+  ["Q64 data file with Windows line endings", "quality", () => edit("data-yokota.js", (s) => s.replace("\n", "\r\n")), /Q64/],
+  ["Q65 page loses its canonical", "quality", () => edit("about.html", (s) => s.replace(/<link rel="canonical"[^>]*>\n/, "")), /Q65/],
+  ["Q66 og:url differs from canonical", "quality", () => edit("about.html", (s) => s.replace('og:url" content="https://militarythingstodo.com/about"', 'og:url" content="https://militarythingstodo.com/abut"')), /Q66/],
+  ["Q67 broken JSON-LD", "quality", () => edit("guide-yokota.html", (s) => s.replace(/(<script type="application\/ld\+json">)\s*\{/, "$1 {,")), /Q67/],
+  ["Q68 duplicate element id", "quality", () => edit("privacy.html", (s) => s.replace("</body>", '<div id="dupx"></div><div id="dupx"></div></body>')), /Q68/],
+  ["Q69 link to a missing section", "quality", () => edit("privacy.html", (s) => s.replace("</body>", '<a href="#nowhere">x</a></body>')), /Q69/],
+  ["Q70 page loses its charset", "quality", () => edit("about.html", (s) => s.replace(/<meta charset="UTF-8" \/>\n/, "")), /Q70/],
+  ["Q71 console.log left in a page", "quality", () => edit("about.html", (s) => s.replace("</body>", "<script>console.log(1)</script></body>")), /Q71/],
+  ["Q72 TODO text on a page", "quality", () => edit("about.html", (s) => s.replace("</body>", "<p>TODO write this</p></body>")), /Q72/],
+  ["Q73 link to localhost", "quality", () => edit("about.html", (s) => s.replace("</body>", '<a href="https://localhost:8787/x">x</a></body>')), /Q73/],
+  ["Q74 page loses its favicon", "quality", () => edit("privacy.html", (s) => s.replace(/<link rel="icon"[^>]*>\n/g, "")), /Q74/],
+  ["Q75 script that does not exist", "quality", () => edit("privacy.html", (s) => s.replace("</body>", '<script src="/nope.js"></script></body>')), /Q75/],
+  ["Q76 link to a page that does not exist", "quality", () => edit("privacy.html", (s) => s.replace("</body>", '<a href="/nonexistent-page">x</a></body>')), /Q76/],
+  ["Q77 h3 above the h1", "quality", () => edit("privacy.html", (s) => s.replace(/<body[^>]*>/, (m) => m + "<h3>x</h3>")), /Q77/],
+  ["Q78 empty button", "quality", () => edit("privacy.html", (s) => s.replace("</body>", "<button></button></body>")), /Q78/],
+  ["Q79 empty alt on a content image", "quality-warn", () => edit("privacy.html", (s) => s.replace("</body>", '<img src="/og/home.jpg" alt=""></body>')), /Q79/],
+  ["Q80 admin page becomes indexable", "quality", () => edit("admin.html", (s) => s.replace('<meta name="robots" content="noindex, nofollow">', "")), /Q80/],
+  ["Q81 two pages share a title", "quality", () => edit("terms.html", (s) => { const t = fs.readFileSync(path.join(tmp, "privacy.html"), "utf8").match(/<title>([^<]*)<\/title>/)[1]; return s.replace(/<title>[^<]*<\/title>/, `<title>${t}</title>`); }), /Q81/],
+  ["Q82 two pages share a description", "quality", () => edit("terms.html", (s) => { const d = fs.readFileSync(path.join(tmp, "privacy.html"), "utf8").match(/<meta name="description" content="([^"]*)"/)[1]; return s.replace(/(<meta name="description" content=")[^"]*"/, `$1${d}"`); }), /Q82/],
+  ["Q83 duplicate sitemap URL", "quality", () => edit("sitemap.xml", (s) => s.replace(/(  <url><loc>https:\/\/militarythingstodo\.com\/about<\/loc>[^\n]*\n)/, "$1$1")), /Q83/],
+  ["Q84 sitemap lists a listing that does not exist", "quality", () => edit("sitemap.xml", (s) => s.replace("</urlset>", "  <url><loc>https://militarythingstodo.com/listing?base=yokota&amp;id=ghost-place</loc></url>\n</urlset>")), /Q84/],
+  ["Q85 wrangler.jsonc broken", "quality", () => edit("wrangler.jsonc", (s) => "{ not json " + s), /Q85/],
+  ["Q86 manifest icon missing", "quality", () => edit("manifest.json", (s) => s.replace("/icon-192.png", "/icon-missing.png")), /Q86/],
+  ["Q87 syntax error in a shipped script", "quality", () => edit("money.js", (s) => s + "\n}}}\n"), /Q87/],
 ];
 let missed = 0;
+const only = process.env.ONLY ? new RegExp(process.env.ONLY) : null;
 for (const [name, kind, mut, re] of M) {
+  if (only && !only.test(name)) continue;
   copy(); try { mut(); } catch (e) { console.log(`?? ${name}: could not apply mutation (${e.message})`); missed++; continue; }
-  const args = kind === "static" ? ["checks/check-static.js"] : kind === "quality" ? ["checks/check-quality.js"] : kind === "worker" ? ["checks/check-worker.js"] : ["checks/check-browser.js", kind.split(":")[1]];
+  const args = kind === "static" ? ["checks/check-static.js"] : /^quality/.test(kind) ? ["checks/check-quality.js"] : kind === "worker" ? ["checks/check-worker.js"] : ["checks/check-browser.js", kind.split(":")[1]];
   const r = cp.spawnSync("node", args, { cwd: tmp, encoding: "utf8", env: { ...process.env, NODE_PATH: process.env.NODE_PATH || cp.execSync("npm root -g").toString().trim() }, timeout: 400000 });
   const out = (r.stdout || "") + (r.stderr || "");
-  const caught = r.status !== 0 && re.test(out);
+  const caught = (kind === "quality-warn" ? true : r.status !== 0) && re.test(out);
   if (!caught) missed++;
   console.log(`${caught ? "caught " : "MISSED "} ${name}${caught ? "" : "\n" + out.split("\n").slice(0, 6).join("\n")}`);
 }
