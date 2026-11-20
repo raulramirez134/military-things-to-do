@@ -1,4 +1,4 @@
-// Base-quality checks (Q01-Q28): run when you create or edit a base. No browser, no network. Run: node checks/check-quality.js
+// Base-quality checks (Q01-Q32): run when you create or edit a base. No browser, no network. Run: node checks/check-quality.js
 // Scope names start with the check id ("Q07 …") so a failure says exactly which rule it broke.
 // FAIL = broken for visitors/search engines. warn = quality to-do (never blocks a ship).
 const fs = require("fs");
@@ -163,6 +163,21 @@ for (const k of keys) {
   bad("Q27", "hours present", P.filter((p) => !strip(p.hours).trim()).map((p) => p.name), "have no hours text at all (use \"Hours vary — check …\" if unknown)");
   const ph = P.filter((p) => /check current hours/i.test(strip(p.hours))).length;
   if (ph / P.length > 0.25) R.warn(S("Q27", "placeholder hours"), `${ph} of ${P.length} listings (${Math.round((100 * ph) / P.length)}%) still say "check current hours"`);
+
+  // Q30 every category the page offers has listings in it (an empty tab is a dead end; remove the category or fill it)
+  const catLab = loadData(b.data).catLabels || {}, strict = cfg.strictBases.includes(k);
+  const emptyCats = Object.keys(catLab).filter((c) => !cats[c]), thinCats = Object.keys(catLab).filter((c) => cats[c] === 1);
+  if (emptyCats.length) (strict ? R.fail : R.warn).call(R, S("Q30", "empty categories"), `${emptyCats.length} category(ies) have no listings: ${emptyCats.join(", ")} — find businesses to fill them, or remove the category`);
+  else R.ok();
+  if (thinCats.length) (strict ? R.fail : R.warn).call(R, S("Q30", "one-listing categories"), `${thinCats.length} category(ies) have only 1 listing: ${thinCats.join(", ")} — add a second or fold it into another category`);
+  else R.ok();
+  // Q31 hours carry a concrete time. "Posted in store" / "check ahead" is only allowed for ids in config.vagueHoursOk (with a reason).
+  const hasTime = (h) => /\d{1,2}:\d{2}|\b24\s?(hrs?|hours)\b|\b24\/7\b/i.test(h) || /\b\d{1,2}\s?(am|pm)\b/i.test(h);
+  const vagueH = P.filter((p) => !hasTime(strip(p.hours)) && !cfg.vagueHoursOk[p.id]);
+  if (vagueH.length) (strict ? R.fail : R.warn).call(R, S("Q31", "vague hours"), `${vagueH.length} listing(s) have no concrete opening time — look them up and fill them in (or add the id to vagueHoursOk with a reason): ${vagueH.slice(0, 5).map((p) => p.name).join("; ")}`);
+  else R.ok();
+  const stale = Object.keys(cfg.vagueHoursOk).filter((id) => P.some((p) => p.id === id && hasTime(strip(p.hours))));
+  if (stale.length && strict) R.warn(S("Q31", "stale allow-list"), `${stale.join(", ")} now have real hours — remove from vagueHoursOk`);
 }
 
 process.exit(R.print() ? 0 : 1);
