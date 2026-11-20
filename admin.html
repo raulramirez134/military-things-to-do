@@ -221,7 +221,7 @@ function renderFeedback(items){
       ${f.listingName ? `
         <div class="sc-listing">
           Regarding: <b>${escapeHtml(f.listingName)}</b>
-          ${(f.listingId && f.base) ? ` — <a href="https://militarythingstodo.com/listing.html?base=${encodeURIComponent(f.base)}&id=${encodeURIComponent(f.listingId)}" target="_blank" rel="noopener">View live listing →</a>` : ""}
+          ${(f.listingId && f.base) ? ` — <a href="https://militarythingstodo.com/listing?base=${encodeURIComponent(f.base)}&id=${encodeURIComponent(f.listingId)}" target="_blank" rel="noopener">View live listing →</a>` : ""}
         </div>
       ` : ""}
       <div class="sc-details">${escapeHtml(f.message)}</div>

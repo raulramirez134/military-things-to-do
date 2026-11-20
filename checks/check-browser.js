@@ -170,7 +170,7 @@ async function newPage(b, vp, errs, bad) {
       await lp.goto(`${URL0}/listing?base=${k}&id=${encodeURIComponent(pl.id)}`); await lp.waitForTimeout(500);
       const r = await lp.evaluate(() => ({ h1: (document.querySelector("h1") || {}).textContent || "", back: (document.querySelector(".back-link") || {}).getAttribute?.("href") || "", canon: (document.querySelector('link[rel="canonical"]') || {}).href || "" }));
       R.check(r.h1.trim() === pl.name, S, `listing ${pl.id}: heading is "${r.h1.trim().slice(0, 40)}", expected "${pl.name}"`);
-      R.check(r.back === base.page, S, `listing ${pl.id}: back link goes to "${r.back}", expected ${base.page}`);
+      R.check(r.back === "/" + base.page.replace(/\.html$/, ""), S, `listing ${pl.id}: back link goes to "${r.back}", expected ${base.page}`);
       R.check(r.canon.includes(`base=${k}`) && r.canon.includes(pl.id) && !/\.html/.test(r.canon), S, `listing ${pl.id}: canonical is "${r.canon}"`);
       R.check(le.length === 0, S, `listing ${pl.id} page errors: ${le[0]}`);
       await lp.close();

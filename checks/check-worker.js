@@ -55,7 +55,7 @@ const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, 
       R.check(missing.s === 404 && /Listing not found/.test(missing.t), k, `unknown listing id returned ${missing.s} — should be a real 404`);
       const pg = await get("/" + b.page.replace(".html", "")); const pg2 = pg.s >= 300 && pg.s < 400 ? await get(pg.h.get("location")) : pg;
       R.check(pg2.s === 200 && pg2.t.includes("CURRENT_BASE_KEY"), k, `base page /${b.page} returned ${pg2.s}`);
-      const links = new Set([...pg2.t.matchAll(new RegExp(`href="listing\\.html\\?base=${k}&amp;id=([^"]+)"`, "g"))].map((m) => m[1]));
+      const links = new Set([...pg2.t.matchAll(new RegExp(`href="/listing\\?base=${k}&amp;id=([^"]+)"`, "g"))].map((m) => m[1]));
       R.check(links.size === places.length, k, `base page raw HTML links to ${links.size}/${places.length} listings — the worker should pre-fill every card for crawlers without JavaScript`);
       const dj = await get("/" + b.data); R.check(dj.s === 200 && /javascript/.test(dj.h.get("content-type") || ""), k, `${b.data} returned ${dj.s} (${dj.h.get("content-type")})`);
     }

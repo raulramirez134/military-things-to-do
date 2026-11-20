@@ -612,6 +612,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#182420">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Military Things To Do","item":"https://militarythingstodo.com/"},{"@type":"ListItem","position":2,"name":"Camp Pendleton","item":"https://militarythingstodo.com/camppendleton"}]}</script>
 </head>
 <body>
   <a href="#listView" class="skip-link">Skip to listings</a>
@@ -658,13 +659,13 @@
         <b style="color:var(--parchment)">CAMP PENDLETON, CA</b>
         <span style="opacity:.6">▾</span>
         <div class="base-dropdown" id="baseDropdown">
-          <a class="opt" href="ramstein.html">Ramstein Air Base <span class="soon">Live</span></a>
-          <a class="opt" href="fortbragg.html">Fort Bragg <span class="soon">Live</span></a>
+          <a class="opt" href="/ramstein">Ramstein Air Base <span class="soon">Live</span></a>
+          <a class="opt" href="/fortbragg">Fort Bragg <span class="soon">Live</span></a>
           <div class="opt active">Camp Pendleton <span class="soon">Live</span></div>
-          <a class="opt" href="yokota.html">Yokota AB <span class="soon">Live</span></a>
-          <a class="opt" href="norfolk.html">Naval Station Norfolk <span class="soon">Live</span></a>
-          <a class="opt" href="humphreys.html">Camp Humphreys <span class="soon">Live</span></a>
-          <a class="opt" href="campbell.html">Fort Campbell <span class="soon">Live</span></a>
+          <a class="opt" href="/yokota">Yokota AB <span class="soon">Live</span></a>
+          <a class="opt" href="/norfolk">Naval Station Norfolk <span class="soon">Live</span></a>
+          <a class="opt" href="/humphreys">Camp Humphreys <span class="soon">Live</span></a>
+          <a class="opt" href="/campbell">Fort Campbell <span class="soon">Live</span></a>
         </div>
       </div>
     </div>
@@ -787,11 +788,11 @@
       </div>
       <div class="util-row" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
         <div class="util-links">
-          <a href="guide-camppendleton.html" class="cat-tab" style="text-decoration:none; display:inline-block; background:var(--brass); color:var(--ink); border-color:var(--brass);">New Here? Start Guide →</a>
+          <a href="/guide-camppendleton" class="cat-tab" style="text-decoration:none; display:inline-block; background:var(--brass); color:var(--ink); border-color:var(--brass);">New Here? Start Guide →</a>
           <button class="cat-tab" data-cat="map">Map View</button>
           <button class="cat-tab" data-cat="favorites" id="favTab">★ My Favorites</button>
-          <a href="search.html" class="cat-tab" style="text-decoration:none; display:inline-block;">🔍 Search All Bases</a>
-          <a href="suggest.html" class="cat-tab" style="text-decoration:none; display:inline-block;">💡 Suggest a Listing</a>
+          <a href="/search" class="cat-tab" style="text-decoration:none; display:inline-block;">🔍 Search All Bases</a>
+          <a href="/suggest" class="cat-tab" style="text-decoration:none; display:inline-block;">💡 Suggest a Listing</a>
           <a href="#moneySection" id="moneyNavLink" class="cat-tab" style="text-decoration:none; display:inline-block;" hidden>⛽ Gas Prices</a>
           <a href="#help-section" class="cat-tab" style="text-decoration:none; display:inline-block;">Emergency &amp; Health</a>
           <a href="#feedback-section" class="cat-tab" style="text-decoration:none; display:inline-block;">Feedback</a>
@@ -1184,7 +1185,7 @@
     <div class="footer-inner">
       <p><b>Military Things To Do</b> is an independent community resource. Not an official U.S. Department of Defense or U.S. Marine Corps publication, and not affiliated with or endorsed by the U.S. government. Hours, prices, and offerings change — always verify directly with a business before visiting.</p>
       <p>Distances are straight-line approximations from a central point on Camp Pendleton, not driving distance. Use "Directions" on any listing for an actual route.</p>
-      <p style="margin-top:14px;"><a href="about.html" style="color:rgba(237,231,214,0.75);">About</a> · <a href="privacy.html" style="color:rgba(237,231,214,0.75);">Privacy Policy</a> · <a href="terms.html" style="color:rgba(237,231,214,0.75);">Terms of Service</a> · <a href="#feedback-section" style="color:rgba(237,231,214,0.75);">Contact</a></p>
+      <p style="margin-top:14px;"><a href="/about" style="color:rgba(237,231,214,0.75);">About</a> · <a href="/privacy" style="color:rgba(237,231,214,0.75);">Privacy Policy</a> · <a href="/terms" style="color:rgba(237,231,214,0.75);">Terms of Service</a> · <a href="#feedback-section" style="color:rgba(237,231,214,0.75);">Contact</a></p>
     </div>
   </footer>
 
@@ -1205,7 +1206,7 @@ function initRecentlyViewedStrip(){
   const cardsContainer = document.getElementById("recentlyViewedCards");
   if(!strip || !cardsContainer) return;
   cardsContainer.innerHTML = filtered.map(item => `
-    <a href="listing.html?base=${item.base}&id=${item.id}" class="recently-viewed-card">
+    <a href="/listing?base=${item.base}&id=${item.id}" class="recently-viewed-card">
       ${icons[item.cat] || icons.attraction}
       <span>${item.name}</span>
     </a>
@@ -1350,7 +1351,7 @@ function cardHTML(p){
       <div class="card-top">
         <div class="name-row">
           <div class="emblem ${p.cat}">${icons[p.cat]}</div>
-          <a class="card-name" href="listing.html?base=camppendleton&id=${p.id}">${p.name}</a>
+          <a class="card-name" href="/listing?base=camppendleton&id=${p.id}">${p.name}</a>
         </div>
         <button class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${p.id}', '${p.name.replace(/'/g,"\\'")}', this)" aria-label="Save to favorites">★</button>
       </div>
@@ -1363,7 +1364,7 @@ function cardHTML(p){
         <span>${p.hours}</span>
       </div>
       <div class="card-actions">
-        <a class="action-btn" href="listing.html?base=camppendleton&id=${p.id}">${detailIcon} Details &amp; reviews</a>
+        <a class="action-btn" href="/listing?base=camppendleton&id=${p.id}">${detailIcon} Details &amp; reviews</a>
         <a class="action-btn" href="${dirUrl}" target="_blank" rel="noopener">${dirIcon} Directions</a>
         ${callHref
           ? `<a class="action-btn" href="${callHref}">${callIcon} ${p.phone}</a>`
