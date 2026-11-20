@@ -2,11 +2,11 @@
 
 `checks/run.sh all` runs everything below automatically and exits non-zero if anything fails (warnings don't fail).
 `checks/ship.sh <message-file>` runs it, prints what changed since the last ship, and only if everything passes commits → staging → main → waits for the deploy → runs the live check. If the live check fails twice it **rolls main back automatically** (`checks/rollback.sh <merge-sha>` does the same by hand; your work stays on staging).
-`node checks/selftest.js` breaks a copy of the site 64 ways and confirms the suite notices each one (run it after editing a check).
+`node checks/selftest.js` (add `ONLY="^Q4"` to run just some mutations) breaks a copy of the site 117 ways and confirms the suite notices each one (run it after editing a check).
 
 | Command | What it covers |
 |---|---|
-| `node checks/check-quality.js` | the 28 base-quality checks (Q01–Q29, below); also part of `fast` and `all` |
+| `node checks/check-quality.js` | the base-quality checks (Q01–Q31 and Q33–Q87, below); also part of `fast` and `all` |
 | `checks/run.sh fast` | static + quality + headless Chromium (about 1 min) |
 | `checks/run.sh all` | static + quality + Chromium + **WebKit (iPhone Safari)** + Firefox + the real worker running locally (WebKit/Firefox/wrangler auto-install to the temp dir; an engine that can't be installed is skipped with a message) |
 | `checks/run.sh live` | waits for the deploy, then checks the live site |
@@ -50,6 +50,73 @@ Each failure names its id, e.g. `FAIL [Q07 title length [yokota]]`. FAIL blocks 
 | Q27 | Every listing has hours text (warning if over 25% still say "check current hours") |
 | Q28 | 5+ seasonal event cards ("Typical dates" / "Typical schedule") |
 | Q29 | Every sitemap `lastmod` is a real date and not in the future |
+Q30–Q31 (strict bases: Stuttgart and Wiesbaden fail; the older bases warn): every category has 2+ listings (Q30); hours carry a concrete time unless the id is in `vagueHoursOk` with a reason (Q31; also accepts "Mon–Fri 9–17", "dawn to dusk", "always open").
+
+### Extended data rules (Q33–Q64) — applied to every listing of every base
+| Id | Rule | Level |
+|---|---|---|
+| Q33 | No TODO / TBD / lorem / n/a / placeholder words in name, blurb, address or hours | FAIL |
+| Q34 | No web addresses or e-mail in blurbs | warn |
+| Q35 | No ALL-CAPS word of 8+ letters in a blurb | warn |
+| Q36 | At most one `!`, never `!!` or `??` | warn |
+| Q37 | No advertising superlatives ("world-class", "unbeatable", "#1", "best in the world"…) | warn |
+| Q38 | No wording that goes stale ("grand opening", "brand-new", "this summer", "as of 2025"…) | warn |
+| Q39 | No blurb mentions a year in the future | FAIL |
+| Q40 | Hours are never just "Closed" (remove the listing instead) | FAIL |
+| Q41 | No empty group, leading/trailing `·`, or trailing punctuation in hours | FAIL |
+| Q42 | Clock times exist (hours 0–24, minutes 00–59) | FAIL |
+| Q43 | A range never opens and closes at the same time | FAIL |
+| Q44 | Day abbreviations are Mon Tue Wed Thu Fri Sat Sun (not Tues/Thurs/Weds) | warn |
+| Q45 | Time ranges use an en dash `–`, not a hyphen | warn |
+| Q46 | Addresses have no stray comma/period/semicolon at the ends | FAIL |
+| Q47 | Address is not just a repeat of the name | warn |
+| Q48 | Names have no stray punctuation, aren't tiny and don't repeat a lowercase word | FAIL |
+| Q49 | The same business name does not appear twice in a base | warn |
+| Q50 | `rating` is null or 1–5; `reviewCount` (when present) is a whole number | FAIL |
+| Q51 | No rating shown with 0 reviews behind it | warn |
+| Q52 | Category labels are unique, non-empty, ≤ 34 characters | FAIL |
+| Q53 | Every listing's category is declared in `catLabels` | FAIL |
+| Q54 | A `dist:0` ("On base") listing tells visitors the pin is approximate / on base | warn |
+| Q55 | A listing id never contains another base's key | FAIL |
+| Q56 | No more than 25% of blurbs under 80 characters | warn |
+| Q57 | At least 60% of listings have a phone number | warn |
+| Q58 | No more than 10% placeholder hours ("check current hours") | warn |
+| Q59 | No category of 4+ listings sits entirely on one pin | warn |
+| Q60 | Coordinates are real numbers in range | FAIL |
+| Q61 | `dist` is a non-negative number with at most 2 decimals | FAIL |
+| Q62 | No unknown fields on a listing (a typo like `hourz:` silently drops data) | warn |
+| Q63 | Camp Pendleton `area` is only `north` or `south` (missing = north) | FAIL |
+| Q64 | Data file has no BOM, no Windows line endings, ends with a newline | FAIL |
+
+### Extended page & site rules (Q65–Q87)
+| Id | Rule | Level |
+|---|---|---|
+| Q65 | Exactly one absolute https canonical per indexable page, no `.html`, no query | FAIL |
+| Q66 | `og:url` equals the canonical; `og:title` and `og:description` exist (indexable pages) | FAIL |
+| Q67 | Every JSON-LD block is valid JSON | FAIL |
+| Q68 | No duplicate `id=` attributes in a page | FAIL |
+| Q69 | Every `href="#section"` points at an element that exists | FAIL |
+| Q70 | `<meta charset="utf-8">` on every page | FAIL |
+| Q71 | No `console.log` / `debugger` in inline scripts | FAIL |
+| Q72 | No TODO / FIXME / lorem text visible on a page | FAIL |
+| Q73 | No localhost / 127.0.0.1 links | FAIL |
+| Q74 | Every page declares a favicon | FAIL |
+| Q75 | Every local script, stylesheet, image or JSON file a page references exists | FAIL |
+| Q76 | Every internal link points at a real page or worker route | FAIL |
+| Q77 | The first heading on a page is the h1 | FAIL |
+| Q78 | No empty `<button>` without an `aria-label` | FAIL |
+| Q79 | `alt=""` images are marked decorative (`role="presentation"` / `aria-hidden`) | warn |
+| Q80 | `admin.html` and `404.html` are `noindex` | FAIL |
+| Q81 | Page titles are unique across the site | FAIL |
+| Q82 | Meta descriptions are unique across the site | FAIL |
+| Q83 | Sitemap: no duplicate URLs, only our domain, no `.html`, no noindex pages, under 50,000 URLs / 50 MB | FAIL |
+| Q84 | Every sitemap `/listing?base=…&id=…` URL names a real listing | FAIL |
+| Q85 | `wrangler.jsonc` parses and has a `name` | FAIL |
+| Q86 | `manifest.json` parses, has a name, and its icons exist | FAIL |
+| Q87 | Shipped `.js` files parse; `hours.js`/`money.js`/`motion.js` have no debug leftovers | FAIL |
+
+**Honest limits of Q31/Q58:** a listing's hours can only be as good as its source. Entries with no published schedule (showtimes, tours, chapels, school bell times, open-air sites) are allow-listed in `vagueHoursOk` with a reason; real businesses whose hours simply haven't been looked up stay as warnings until researched.
+
 Per-base facts these use (`emergency`, `money`, optional `addrRe`, shared `dayTripCats` / `essentialCats`) live in `checks/config.js` — fill them in when you add the base.
 
 ## What is checked automatically

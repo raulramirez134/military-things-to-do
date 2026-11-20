@@ -1,7 +1,7 @@
 {
   "name": "Military Things To Do",
   "short_name": "Mil Things To Do",
-  "description": "Find restaurants, shops, and activities near U.S. military bases — Ramstein, Fort Bragg, Camp Pendleton, and Yokota.",
+  "description": "Find restaurants, shops, and activities near U.S. military bases — Ramstein, Stuttgart, Wiesbaden, Fort Bragg, Camp Pendleton, Norfolk, Fort Campbell, Yokota and Humphreys.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

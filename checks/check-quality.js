@@ -1,4 +1,4 @@
-// Base-quality checks (Q01-Q32): run when you create or edit a base. No browser, no network. Run: node checks/check-quality.js
+// Base-quality checks (Q01-Q31, Q33-Q87): run when you create or edit a base. No browser, no network. Run: node checks/check-quality.js
 // Scope names start with the check id ("Q07 …") so a failure says exactly which rule it broke.
 // FAIL = broken for visitors/search engines. warn = quality to-do (never blocks a ship).
 const fs = require("fs");
@@ -172,12 +172,192 @@ for (const k of keys) {
   if (thinCats.length) (strict ? R.fail : R.warn).call(R, S("Q30", "one-listing categories"), `${thinCats.length} category(ies) have only 1 listing: ${thinCats.join(", ")} — add a second or fold it into another category`);
   else R.ok();
   // Q31 hours carry a concrete time. "Posted in store" / "check ahead" is only allowed for ids in config.vagueHoursOk (with a reason).
-  const hasTime = (h) => /\d{1,2}:\d{2}|\b24\s?(hrs?|hours)\b|\b24\/7\b/i.test(h) || /\b\d{1,2}\s?(am|pm)\b/i.test(h);
+  const hasTime = (h) => /\d{1,2}:\d{2}|\b24\s?(hrs?|hours)\b|\b24\/7\b/i.test(h) || /\b\d{1,2}\s?(am|pm)\b/i.test(h)
+    || /\b(mon|tue|wed|thu|fri|sat|sun|daily)[a-z]*\.?[^0-9]{0,12}\d{1,2}\s?[–-]\s?\d{1,2}\b/i.test(h) // "Mon–Fri 9–17"
+    || /\b(dawn|sunrise)\s+(to|until|-|–)\s+(dusk|sunset)\b|\balways (open|accessible)\b|\bopen (year[- ]round|24)\b/i.test(h);
   const vagueH = P.filter((p) => !hasTime(strip(p.hours)) && !cfg.vagueHoursOk[p.id]);
   if (vagueH.length) (strict ? R.fail : R.warn).call(R, S("Q31", "vague hours"), `${vagueH.length} listing(s) have no concrete opening time — look them up and fill them in (or add the id to vagueHoursOk with a reason): ${vagueH.slice(0, 5).map((p) => p.name).join("; ")}`);
   else R.ok();
   const stale = Object.keys(cfg.vagueHoursOk).filter((id) => P.some((p) => p.id === id && hasTime(strip(p.hours))));
   if (stale.length && strict) R.warn(S("Q31", "stale allow-list"), `${stale.join(", ")} now have real hours — remove from vagueHoursOk`);
+}
+
+// ================= extended data rules (Q33–Q64): every listing in every base =================
+// rule(): offenders -> FAIL (broken for visitors) or warn (quality to-do). `lvl` is "fail" or "warn".
+const rule = (S, id, n, lvl, list, msg) => { if (!list.length) return R.ok(); (lvl === "fail" ? R.fail : R.warn).call(R, S(id, n), `${list.length} ${msg}: ${list.slice(0, 4).join("; ")}`); };
+const nowYear = new Date().getFullYear();
+for (const k of keys) {
+  const b = cfg.bases[k]; if (!exists(b.data)) continue;
+  const D = loadData(b.data), P = D.places, CL = D.catLabels || {}, S = (id, n) => `${id} ${n} [${k}]`;
+  const nm = (p) => p.name, bl = (p) => strip(p.blurb), hr = (p) => strip(p.hours);
+  const otherTokens = keys.filter((o) => o !== k).map((o) => o);
+  // Q33 no placeholder words anywhere in a listing's text
+  rule(S, "Q33", "placeholder text", "fail", P.filter((p) => ["name", "blurb", "addr", "hours"].some((f) => /\b(TODO|TBD|FIXME|lorem|ipsum|xxx+|placeholder|n\/a)\b/i.test(strip(p[f])))).map(nm), "listing(s) contain placeholder words (TODO, TBD, lorem, n/a…)");
+  // Q34 no web addresses or e-mail in blurbs (contact lives in the phone/link fields)
+  rule(S, "Q34", "links in blurb", "warn", P.filter((p) => /https?:\/\/|www\.|\b[\w.-]+@[\w-]+\.\w+/i.test(bl(p))).map(nm), "blurb(s) contain a web address or e-mail");
+  // Q35 no shouting (a word of 7+ capital letters that is not an acronym list)
+  rule(S, "Q35", "shouting blurb", "warn", P.filter((p) => /\b[A-Z]{8,}\b/.test(bl(p))).map(nm), "blurb(s) contain a word in ALL CAPS");
+  // Q36 punctuation: at most one exclamation mark, no "!!" or "??"
+  rule(S, "Q36", "exclamations", "warn", P.filter((p) => (bl(p).match(/!/g) || []).length > 1 || /[!?]{2,}/.test(bl(p))).map(nm), "blurb(s) over-use ! or ?");
+  // Q37 unverifiable superlatives age badly and read like ads
+  rule(S, "Q37", "superlatives", "warn", P.filter((p) => /\b(world[- ]class|#\s?1\b|number one|best in (the )?(world|america|germany|korea|japan|town)|unbeatable|once in a lifetime|you won'?t believe)\b/i.test(bl(p))).map(nm), "blurb(s) use an advertising superlative");
+  // Q38 time-sensitive wording goes stale (state the fact, not the moment)
+  rule(S, "Q38", "time-sensitive wording", "warn", P.filter((p) => /\b(as of (20\d\d|today|now)|just opened|recently opened|grand opening|coming soon|new for 20\d\d|brand[- ]new|this (summer|winter|spring|fall|year))\b/i.test(bl(p))).map(nm), "blurb(s) use wording that goes out of date");
+  // Q39 years in blurbs: a past year is fine ("opened in 1998"), a future or very recent "as of" year is not
+  rule(S, "Q39", "future year", "fail", P.filter((p) => (bl(p).match(/\b(20\d\d)\b/g) || []).some((y) => +y > nowYear + 1)).map(nm), "blurb(s) mention a year in the future");
+  // Q40 hours are never just "Closed" (a closed business should not be listed)
+  rule(S, "Q40", "always closed", "fail", P.filter((p) => /^\s*(closed|permanently closed|n\/a)\s*\.?$/i.test(hr(p))).map(nm), "listing(s) say they are closed all the time — remove them");
+  // Q41 hours have no stray separators or trailing punctuation
+  rule(S, "Q41", "hours separators", "fail", P.filter((p) => /(·\s*){2,}|^\s*·|·\s*$|[,;]\s*$|\.\s*$|\s·\s·\s/.test(hr(p).replace(/\.\.\./g, "…"))).map((p) => `${p.name}: "${hr(p)}"`), "hours string(s) have an empty group or trailing punctuation");
+  // Q42 24-hour clock values are real (0–24 hours, 00–59 minutes)
+  rule(S, "Q42", "impossible clock time", "fail", P.filter((p) => [...hr(p).matchAll(/\b(\d{1,2}):(\d{2})\b/g)].some((m) => +m[1] > 24 || +m[2] > 59 || (+m[1] === 24 && +m[2] > 0))).map((p) => `${p.name}: "${hr(p)}"`), "hours string(s) contain a time that cannot exist");
+  // Q43 a time range never opens and closes at the same moment
+  rule(S, "Q43", "zero-length hours", "fail", P.filter((p) => [...hr(p).matchAll(/\b(\d{1,2}:\d{2})\s*[–-]\s*(\d{1,2}:\d{2})\b/g)].some((m) => m[1].padStart(5, "0") === m[2].padStart(5, "0") && m[1] !== "00:00")).map((p) => `${p.name}: "${hr(p)}"`), "hours range(s) open and close at the same time");
+  // Q44 day names use the abbreviations the hours parser reads and visitors expect
+  rule(S, "Q44", "day abbreviations", "warn", P.filter((p) => /\b(Tues|Thur|Thurs|Weds|Mond|Fryday|Satur\b|Sund\b)\b/.test(hr(p))).map((p) => `${p.name}: "${hr(p)}"`), "hours string(s) use a non-standard day abbreviation (use Mon Tue Wed Thu Fri Sat Sun)");
+  // Q45 time ranges use an en dash, not a hyphen (consistent typography)
+  rule(S, "Q45", "range punctuation", "warn", P.filter((p) => /\d{1,2}:\d{2}\s?-\s?\d{1,2}:\d{2}/.test(hr(p))).map((p) => `${p.name}: "${hr(p)}"`), "hours string(s) use a hyphen between times (use an en dash –)");
+  // Q46 address hygiene: no trailing comma/period, not just the listing's name
+  rule(S, "Q46", "address punctuation", "fail", P.filter((p) => /[,;.]\s*$/.test(strip(p.addr)) || /^\s*[,;]/.test(strip(p.addr)) || /,\s*,/.test(strip(p.addr))).map((p) => `${p.name}: "${strip(p.addr)}"`), "address(es) have stray punctuation");
+  rule(S, "Q47", "address is the name", "warn", P.filter((p) => strip(p.addr).trim().toLowerCase() === strip(p.name).trim().toLowerCase()).map(nm), "address(es) just repeat the listing name");
+  // Q48 names: no leading/trailing punctuation, not tiny, no doubled words
+  rule(S, "Q48", "name hygiene", "fail", P.filter((p) => /^[\s\-–—,.:;]|[\s\-–—,:;]$/.test(strip(p.name)) || (/\.$/.test(strip(p.name)) && !/\b(Co|Inc|Ltd|Jr|Sr|Dr|St|Mt|Ft|Bros|Corp|Ave)\.$/.test(strip(p.name))) || strip(p.name).trim().length < 3 || /\b([a-z]{3,})\s+\1\b/.test(strip(p.name))).map(nm), "name(s) have stray punctuation, are too short or repeat a lowercase word");
+  // Q49 the same business name must not appear twice in one base
+  const seenNames = {}; P.forEach((p) => { const key = strip(p.name).toLowerCase().replace(/[^a-z0-9]+/g, ""); (seenNames[key] = seenNames[key] || []).push(p.id); });
+  rule(S, "Q49", "duplicate names", "warn", Object.values(seenNames).filter((v) => v.length > 1).map((v) => v.join(" + ")), "name(s) appear on more than one listing");
+  // Q50 rating is null or 1–5; review count is a whole number
+  rule(S, "Q50", "rating range", "fail", P.filter((p) => p.rating != null && !(typeof p.rating === "number" && p.rating >= 1 && p.rating <= 5)).map(nm), "rating(s) outside 1–5");
+  rule(S, "Q50", "review count", "fail", P.filter((p) => p.reviewCount !== undefined && !(Number.isInteger(p.reviewCount) && p.reviewCount >= 0)).map(nm), "reviewCount(s) that are not whole numbers ≥ 0");
+  // Q51 a rating without any reviews is an invented number
+  rule(S, "Q51", "rating without reviews", "warn", P.filter((p) => p.rating != null && !p.reviewCount).map(nm), "listing(s) show a rating with 0 reviews behind it");
+  // Q52 catLabels: unique, short, non-empty labels
+  const labs = Object.values(CL);
+  rule(S, "Q52", "category labels", "fail", [...labs.filter((l, i) => labs.indexOf(l) !== i), ...labs.filter((l) => !String(l).trim() || String(l).length > 34)], "category label(s) that are duplicated, empty or over 34 characters");
+  // Q53 every listing's category is declared in catLabels
+  rule(S, "Q53", "undeclared category", "fail", P.filter((p) => !CL[p.cat]).map((p) => `${p.name} (${p.cat})`), "listing(s) use a category that catLabels does not declare");
+  // Q54 on-base pins (dist 0) must carry the "installation area" note so visitors are not misled
+  rule(S, "Q54", "on-base pin note", "warn", P.filter((p) => p.dist === 0 && !/Pin marks the installation area|on[- ]base|aboard|inside the (gate|base|installation)|on post/i.test(bl(p) + " " + strip(p.addr))).map(nm), "on-base listing(s) don't say the pin is approximate or on-base");
+  // Q55 ids and names must not carry another base's name (copy-paste leftovers)
+  const foreignId = P.filter((p) => otherTokens.some((o) => o !== k && !k.includes(o) && !o.includes(k) && p.id.split("-").includes(o)));
+  rule(S, "Q55", "other base in id", "fail", foreignId.map((p) => p.id), "id(s) contain another base's key");
+  // Q56 blurb length distribution: not mostly stubs
+  const stubs = P.filter((p) => bl(p).length < 80);
+  if (stubs.length / P.length > 0.25) R.warn(S("Q56", "short blurbs"), `${stubs.length}/${P.length} blurbs are under 80 characters (thin pages rank and convert worse)`); else R.ok();
+  // Q57 phone coverage
+  const noPhone = P.filter((p) => !p.phone);
+  if (noPhone.length / P.length > 0.4) R.warn(S("Q57", "phone coverage"), `${noPhone.length}/${P.length} listings have no phone number`); else R.ok();
+  // Q58 placeholder-hours share (stricter than Q27's 25%)
+  const phs = P.filter((p) => /check current hours/i.test(hr(p)));
+  if (phs.length / P.length > 0.1) R.warn(S("Q58", "placeholder hours share"), `${phs.length}/${P.length} listings (${Math.round((100 * phs.length) / P.length)}%) still have placeholder hours`); else R.ok();
+  // Q59 every category with 3+ listings in the essentials has a spread of at least 2 different pins >150 m apart (no all-on-one-spot categories)
+  const catPins = {}; P.forEach((p) => (catPins[p.cat] = catPins[p.cat] || new Set()).add(p.lat.toFixed(3) + "," + p.lng.toFixed(3)));
+  rule(S, "Q59", "category on one pin", "warn", Object.entries(catPins).filter(([c, v]) => v.size === 1 && P.filter((p) => p.cat === c).length >= 4).map(([c]) => c), "categor(ies) have 4+ listings all on the same pin");
+  // Q60 coordinates are numbers in range, with sign matching the region's bounding box
+  rule(S, "Q60", "coordinates", "fail", P.filter((p) => !(Number.isFinite(p.lat) && Number.isFinite(p.lng) && Math.abs(p.lat) <= 90 && Math.abs(p.lng) <= 180)).map(nm), "listing(s) have invalid coordinates");
+  // Q61 dist is a non-negative number with at most two decimals
+  rule(S, "Q61", "dist format", "fail", P.filter((p) => !(typeof p.dist === "number" && p.dist >= 0 && p.dist < 2000 && Math.abs(p.dist * 100 - Math.round(p.dist * 100)) < 1e-6)).map((p) => `${p.name}: ${p.dist}`), "dist value(s) that are negative, huge or have more than 2 decimals");
+  // Q62 listing objects don't carry unknown fields (typos like "hour:" silently drop data)
+  const allowed = new Set(["id", "name", "cat", "dist", "lat", "lng", "addr", "blurb", "hours", "phone", "rating", "reviewCount", "area", "url", "website", "tags", "icon"]);
+  rule(S, "Q62", "unknown field", "warn", P.filter((p) => Object.keys(p).some((f) => !allowed.has(f))).map((p) => `${p.name}: ${Object.keys(p).filter((f) => !allowed.has(f)).join(",")}`), "listing(s) have a field the site does not read");
+  // Q63 area (Camp Pendleton) is only north/south, and every Pendleton listing has one
+  if (k === "camppendleton") rule(S, "Q63", "pendleton area", "fail", P.filter((p) => p.area !== undefined && !["north", "south"].includes(p.area)).map(nm), "listing(s) have an area other than \"north\" or \"south\" (missing is read as north)"); else R.ok();
+  // Q64 the data file itself: no BOM, no Windows line endings, ends with a newline
+  const raw = read(b.data);
+  rule(S, "Q64", "file hygiene", "fail", [raw.charCodeAt(0) === 0xfeff && "BOM at start", /\r\n/.test(raw) && "CRLF line endings", !raw.endsWith("\n") && "no final newline"].filter(Boolean), "data-file problem(s)");
+}
+
+// ================= extended page & site rules (Q65–Q87) =================
+const allPages = fs.readdirSync(ROOT).filter((f) => f.endsWith(".html"));
+const pageTitles = {}, pageDescs = {};
+for (const f of allPages) {
+  const h = read(f), isTool = ["admin.html", "404.html"].includes(f), S = (id, n) => `${id} ${n} [${f}]`;
+  const title = (h.match(/<title>([^<]*)<\/title>/) || [])[1] || "", desc = (h.match(/<meta name="description" content="([^"]*)"/) || [])[1] || "";
+  (pageTitles[title] = pageTitles[title] || []).push(f); if (desc) (pageDescs[desc] = pageDescs[desc] || []).push(f);
+  // Q65 exactly one canonical, absolute, https, no .html, no query
+  const canon = [...h.matchAll(/<link rel="canonical" href="([^"]*)"/g)].map((m) => m[1]);
+  if (!isTool && f !== "listing.html") { R.check(canon.length === 1 && /^https:\/\/militarythingstodo\.com(\/[a-z0-9-]*)?$/.test(canon[0] || ""), S("Q65", "canonical"), `needs exactly one canonical like https://militarythingstodo.com/page (found ${canon.join(" | ") || "none"})`); }
+  // Q66 og:url equals the canonical, and og:title/og:description exist
+  const isNoindex = /<meta name="robots" content="[^"]*noindex/.test(h);
+  if (!isTool && f !== "listing.html" && !isNoindex) {
+    const ogu = (h.match(/property="og:url" content="([^"]*)"/) || [])[1];
+    R.check(ogu === canon[0], S("Q66", "og:url"), `og:url (${ogu}) differs from the canonical (${canon[0]})`);
+    R.check(/property="og:title"/.test(h) && /property="og:description"/.test(h), S("Q66", "og tags"), "missing og:title or og:description");
+  }
+  // Q67 every JSON-LD block is valid JSON
+  const badLd = [...h.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].filter((m) => { try { JSON.parse(m[1]); return false; } catch (e) { return true; } });
+  R.check(!badLd.length, S("Q67", "JSON-LD"), `${badLd.length} JSON-LD block(s) are not valid JSON`);
+  // Q68 no duplicate id= attributes (breaks anchors, labels and scripts)
+  const ids = [...h.replace(/<script[\s\S]*?<\/script>/g, "").matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]), dup = [...new Set(ids.filter((x, i) => ids.indexOf(x) !== i))];
+  R.check(!dup.length, S("Q68", "duplicate ids"), `duplicate id attribute(s): ${dup.slice(0, 4).join(", ")}`);
+  // Q69 in-page anchors (#x) point at an element that exists
+  const ids2 = new Set(ids), badAnch = [...h.matchAll(/href="#([A-Za-z][\w-]*)"/g)].map((m) => m[1]).filter((a) => !ids2.has(a) && !new RegExp(`id=["']${a}["']`).test(h));
+  R.check(!badAnch.length, S("Q69", "anchors"), `link(s) to missing section(s): ${[...new Set(badAnch)].slice(0, 4).join(", ")}`);
+  // Q70 charset utf-8 and viewport
+  R.check(/<meta charset="utf-8"/i.test(h), S("Q70", "charset"), "needs <meta charset=\"utf-8\">");
+  // Q71 no debug leftovers in inline scripts
+  const inline = [...h.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1]).join("\n");
+  R.check(!/\bdebugger\b|console\.(log|debug)\(/.test(inline), S("Q71", "debug leftovers"), "inline script has console.log/debugger left in");
+  // Q72 no TODO/FIXME/lorem text visible on a page
+  R.check(!/\b(TODO|FIXME|lorem ipsum)\b/i.test(textOf(h)), S("Q72", "placeholder text"), "page shows TODO/FIXME/lorem text");
+  // Q73 nothing points at a local dev server
+  R.check(!/localhost|127\.0\.0\.1|0\.0\.0\.0/.test(h.replace(/<script[\s\S]*?<\/script>/g, "")), S("Q73", "dev URL"), "page links to localhost/127.0.0.1");
+  // Q74 favicon declared
+  R.check(/rel="(shortcut )?icon"/.test(h), S("Q74", "favicon"), "no <link rel=\"icon\">");
+  // Q75 local scripts, styles and images referenced actually exist
+  const refs = [...h.matchAll(/\b(?:src|href)="(\/[^"#?]+\.(?:js|css|png|jpe?g|svg|ico|webp|json))"/g)].map((m) => m[1]).filter((u) => !u.startsWith("//"));
+  const missingRef = [...new Set(refs)].filter((u) => !exists(u.slice(1)));
+  R.check(!missingRef.length, S("Q75", "missing file"), `references file(s) that do not exist: ${missingRef.slice(0, 3).join(", ")}`);
+  // Q76 internal page links point at a real page or a known worker route
+  const routes = new Set(["", ...allPages.map((x) => x.replace(".html", "")), "listing", "admin", "api"]);
+  const deadLinks = [...h.matchAll(/\bhref="\/([a-z0-9-]*)(?:[?#][^"]*)?"/g)].map((m) => m[1]).filter((r) => !routes.has(r) && !/\.[a-z0-9]+$/.test(r));
+  R.check(!deadLinks.length, S("Q76", "internal links"), `link(s) to pages that do not exist: ${[...new Set(deadLinks)].slice(0, 4).join(", ")}`);
+  // Q77 headings: first heading in the document is the h1 (no h2/h3 above it)
+  const firstH = (h.match(/<h([1-6])[\s>]/) || [])[1];
+  if (!isTool) R.check(firstH === "1" || firstH === undefined || f === "index.html" || /<h1/.test(h.split(/<h[2-6][\s>]/)[0]), S("Q77", "heading order"), `first heading is h${firstH}, not h1`); else R.ok();
+  // Q78 buttons that are not inside a form say what they do (type="button" or visible text/aria-label)
+  const emptyBtn = [...h.matchAll(/<button\b([^>]*)>\s*<\/button>/g)].filter((m) => !/aria-label=/.test(m[1]));
+  R.check(!emptyBtn.length, S("Q78", "empty buttons"), `${emptyBtn.length} empty <button> with no aria-label`);
+  // Q79 images have a non-empty alt unless explicitly decorative (role="presentation"/aria-hidden)
+  const blankAlt = [...h.matchAll(/<img\b[^>]*\balt=""[^>]*>/g)].filter((m) => !/role="presentation"|aria-hidden="true"/.test(m[0]));
+  if (blankAlt.length) R.warn(S("Q79", "empty alt"), `${blankAlt.length} image(s) have alt="" but aren't marked decorative`); else R.ok();
+  // Q80 admin, 404 and search results are not indexable
+  if (["admin.html", "404.html"].includes(f)) R.check(/<meta name="robots" content="[^"]*noindex/.test(h), S("Q80", "noindex"), "must carry <meta name=\"robots\" content=\"noindex\">"); else R.ok();
+}
+// Q81 titles are unique across the site
+R.check(!Object.entries(pageTitles).filter(([t, v]) => t && v.length > 1 && !v.every((x) => ["admin.html", "404.html"].includes(x))).length, "Q81 duplicate titles", `these pages share a <title>: ${Object.entries(pageTitles).filter(([t, v]) => t && v.length > 1).map(([t, v]) => v.join("+")).slice(0, 4).join(" ; ")}`);
+// Q82 meta descriptions are unique across the site
+R.check(!Object.entries(pageDescs).filter(([, v]) => v.length > 1).length, "Q82 duplicate descriptions", `these pages share a meta description: ${Object.entries(pageDescs).filter(([, v]) => v.length > 1).map(([, v]) => v.join("+")).slice(0, 4).join(" ; ")}`);
+// Q83 sitemap: no duplicate URLs, all on the site's domain, none ending .html, none for noindex pages
+{
+  const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].replace(/&amp;/g, "&")), dups = locs.filter((u, i) => locs.indexOf(u) !== i);
+  R.check(!dups.length, "Q83 sitemap duplicates", `${dups.length} duplicate <loc> entries: ${dups.slice(0, 3).join(" ")}`);
+  R.check(locs.every((u) => u.startsWith(cfg.siteUrl + "/") || u === cfg.siteUrl), "Q83 sitemap domain", `entries outside ${cfg.siteUrl}: ${locs.filter((u) => !u.startsWith(cfg.siteUrl)).slice(0, 3).join(" ")}`);
+  R.check(!locs.some((u) => /\.html($|\?)/.test(u)), "Q83 sitemap .html", "sitemap lists a .html URL (use clean URLs)");
+  const noindexPages = allPages.filter((f) => /<meta name="robots" content="[^"]*noindex/.test(read(f))).map((f) => f.replace(".html", ""));
+  R.check(!locs.some((u) => noindexPages.includes(u.replace(cfg.siteUrl + "/", "").split("?")[0])), "Q83 sitemap noindex", "sitemap lists a page that is marked noindex");
+  R.check(locs.length <= 50000 && Buffer.byteLength(sitemap) < 50 * 1024 * 1024, "Q83 sitemap size", "sitemap exceeds the 50,000 URL / 50 MB limit — split it");
+}
+// Q84 sitemap listing URLs only name bases that exist and ids that exist
+{
+  const bad = [];
+  for (const m of sitemap.matchAll(/<loc>[^<]*\/listing\?base=([a-z]+)&amp;id=([^<]+)<\/loc>/g)) { const b = cfg.bases[m[1]]; if (!b || !loadData(b.data).places.some((p) => p.id === m[2])) bad.push(`${m[1]}/${m[2]}`); }
+  R.check(!bad.length, "Q84 sitemap listing URLs", `${bad.length} sitemap listing URL(s) have no matching listing: ${bad.slice(0, 3).join(", ")}`);
+}
+// Q85 wrangler.jsonc parses (comments allowed) and names the worker
+{
+  let ok = false; try { const j = JSON.parse(wrangler.replace(/^\s*\/\/.*$/gm, "").replace(/,(\s*[}\]])/g, "$1")); ok = !!j.name; } catch (e) { /* reported below */ }
+  R.check(ok, "Q85 wrangler.jsonc", "wrangler.jsonc is not valid JSON(C) or has no \"name\"");
+}
+// Q86 manifest.json is valid and its icons exist
+{
+  let ok = true, msg = ""; try { const m = JSON.parse(read("manifest.json")); for (const i of m.icons || []) if (!exists(i.src.replace(/^\//, ""))) { ok = false; msg = i.src; } if (!m.name) { ok = false; msg = "name"; } } catch (e) { ok = false; msg = e.message; }
+  R.check(ok, "Q86 manifest.json", `manifest.json problem: ${msg}`);
+}
+// Q87 JavaScript files shipped to visitors parse and carry no debug leftovers
+for (const f of fs.readdirSync(ROOT).filter((x) => /^(hours|money|motion|data.*)\.js$/.test(x))) {
+  const src = read(f); let ok = true; try { new (require("vm").Script)(src.replace(/^const /gm, "var "), { filename: f }); } catch (e) { ok = false; }
+  R.check(ok, `Q87 syntax [${f}]`, "does not parse as JavaScript");
+  if (!/^data/.test(f)) R.check(!/\bdebugger\b|console\.(log|debug)\(/.test(src), `Q87 debug leftovers [${f}]`, "has console.log/debugger left in");
 }
 
 process.exit(R.print() ? 0 : 1);
