@@ -233,7 +233,7 @@ async function handleDeleteReview(request, env) {
 
 const MAX_SUGGESTIONS_STORED = 500;
 const MAX_SUGGESTION_FIELD_LENGTH = 500;
-const VALID_BASE_KEYS = ["ramstein", "fortbragg", "camppendleton", "yokota", "norfolk", "humphreys", "campbell", "stuttgart"];
+const VALID_BASE_KEYS = ["ramstein", "fortbragg", "camppendleton", "yokota", "norfolk", "humphreys", "campbell", "stuttgart", "wiesbaden"];
 
 // Owner notification via Discord webhook — best-effort only. If the webhook
 // isn't configured yet, or Discord is briefly unreachable, this never blocks
@@ -495,6 +495,7 @@ const LISTING_BASE_CONFIG = {
   humphreys: { label: "Camp Humphreys", full: "Camp Humphreys", refWord: "gate", unit: "km", dataFile: "data-humphreys.js" },
   campbell: { label: "Fort Campbell", full: "Fort Campbell", refWord: "gate", unit: "mi", dataFile: "data-campbell.js" },
   stuttgart: { label: "Stuttgart", full: "USAG Stuttgart", refWord: "base", unit: "km", dataFile: "data-stuttgart.js" },
+  wiesbaden: { label: "Wiesbaden", full: "USAG Wiesbaden", refWord: "base", unit: "km", dataFile: "data-wiesbaden.js" },
 };
 const SITE = "https://militarythingstodo.com";
 
@@ -930,7 +931,7 @@ async function handleGetRates(request, env) {
 // ---- Exchange (on-post) gas prices — entered by the site owner in admin.html ----
 // The Exchange no longer publishes overseas pump prices in a readable feed, so the owner
 // types them in from the pump sign / Exchange posts. Stored per base in KV.
-const GAS_BASES = ["ramstein", "fortbragg", "camppendleton", "yokota", "norfolk", "humphreys", "campbell", "stuttgart"];
+const GAS_BASES = ["ramstein", "fortbragg", "camppendleton", "yokota", "norfolk", "humphreys", "campbell", "stuttgart", "wiesbaden"];
 const LITERS_PER_GALLON = 3.785411784;
 
 async function handleGetGas(request, env) {

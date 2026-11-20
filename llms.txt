@@ -14,6 +14,7 @@ Each listing page shows the place's description, address, distance from the base
 - [Camp Humphreys & Pyeongtaek, South Korea](https://militarythingstodo.com/humphreys): places near USAG Humphreys and Anjeong-ri, Seoul and DMZ day trips
 - [Fort Campbell, Clarksville & Oak Grove, Kentucky/Tennessee](https://militarythingstodo.com/campbell): places near Fort Campbell, Nashville and Land Between the Lakes day trips
 - [USAG Stuttgart (Patch, Panzer, Kelley, Robinson Barracks & the Army Airfield), Germany](https://militarythingstodo.com/stuttgart): places near the Stuttgart military community, Black Forest, castle and Lake Constance day trips
+- [USAG Wiesbaden (Clay Kaserne, Hainerberg & Aukamm), Germany](https://militarythingstodo.com/wiesbaden): places near the Wiesbaden military community, Rheingau wine, castle and Rhine day trips
 
 ## Arrival checklists
 
@@ -25,6 +26,7 @@ Each listing page shows the place's description, address, distance from the base
 - [New to Camp Humphreys](https://militarythingstodo.com/guide-humphreys)
 - [New to Fort Campbell](https://militarythingstodo.com/guide-campbell)
 - [New to Stuttgart](https://militarythingstodo.com/guide-stuttgart)
+- [New to Wiesbaden](https://militarythingstodo.com/guide-wiesbaden)
 
 ## More
 
