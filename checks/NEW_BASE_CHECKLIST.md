@@ -2,12 +2,13 @@
 
 `checks/run.sh all` runs everything below automatically and exits non-zero if anything fails (warnings don't fail).
 `checks/ship.sh <message-file>` runs it, prints what changed since the last ship, and only if everything passes commits → staging → main → waits for the deploy → runs the live check. If the live check fails twice it **rolls main back automatically** (`checks/rollback.sh <merge-sha>` does the same by hand; your work stays on staging).
-`node checks/selftest.js` breaks a copy of the site 26 ways and confirms the suite notices each one (run it after editing a check).
+`node checks/selftest.js` breaks a copy of the site 64 ways and confirms the suite notices each one (run it after editing a check).
 
 | Command | What it covers |
 |---|---|
-| `checks/run.sh fast` | static + headless Chromium (about 1 min) |
-| `checks/run.sh all` | static + Chromium + **WebKit (iPhone Safari)** + Firefox + the real worker running locally (WebKit/Firefox/wrangler auto-install to the temp dir; an engine that can't be installed is skipped with a message) |
+| `node checks/check-quality.js` | the 28 base-quality checks (Q01–Q29, below); also part of `fast` and `all` |
+| `checks/run.sh fast` | static + quality + headless Chromium (about 1 min) |
+| `checks/run.sh all` | static + quality + Chromium + **WebKit (iPhone Safari)** + Firefox + the real worker running locally (WebKit/Firefox/wrangler auto-install to the temp dir; an engine that can't be installed is skipped with a message) |
 | `checks/run.sh live` | waits for the deploy, then checks the live site |
 
 ## When you add a base — do this first
@@ -15,6 +16,41 @@
 2. Register it in: `_worker.js` (`VALID_BASE_KEYS`, `LISTING_BASE_CONFIG`), `listing.html` (`BASE_CONFIG`), `search.html` (`BASES`), `suggest.html`, `admin.html` (`BASE_LABELS`), `index.html` (base card + status), the base switcher on every base page, `sitemap.xml`.
 3. Add `"/<page>"` to `assets.run_worker_first` in `wrangler.jsonc` (the worker pre-fills the base page for crawlers), add the base to `LISTING_BASE_CONFIG` in `_worker.js` (label, full, refWord, unit, dataFile), make a 1200×630 share image at `og/<key>.jpg`, and add the base to `llms.txt`.
 4. Run `checks/run.sh all` and fix everything red.
+
+## Base-quality checks (checks/check-quality.js) — run for every new or edited base
+Each failure names its id, e.g. `FAIL [Q07 title length [yokota]]`. FAIL blocks a ship; *warn* is a to-do list.
+| Id | Rule |
+|---|---|
+| Q01 | `og/<key>.jpg` exists, is a real 1200×630 JPEG, under 400 KB |
+| Q02 | The base page **and** guide use that base's own `og:image` / `twitter:image` |
+| Q03 | `"/<page>"` is in `run_worker_first` in `wrangler.jsonc` |
+| Q04 | `llms.txt` links the base page and its guide |
+| Q05 | `LISTING_BASE_CONFIG` in the worker has the right `dataFile` and `unit` |
+| Q06 | `robots.txt` has the Sitemap line and doesn't block everything |
+| Q07 | Title names the base (20–75 characters); meta description 80–175 characters (page and guide) |
+| Q08 | Exactly one `<h1>` (page and guide) |
+| Q09 | `<html lang="en">` and a viewport tag (page and guide) |
+| Q10 | No `http://` links or resources on any page |
+| Q11 | Every `target="_blank"` link has `rel="noopener"` |
+| Q12 | Every `<img>` has an `alt` attribute |
+| Q13 | Guide has 8+ checklist items and mentions no other base's place names |
+| Q14 | Base page ≤ 500 KB, data file ≤ 800 KB (warning from 400 / 650 KB) |
+| Q15 | The local emergency number (`emergency` in config: 112 / 911 / 119) is shown on the page |
+| Q16 | `#moneySection` belongs to this base and carries the right currency feed (`money` in config) |
+| Q17 | Listing ids are lowercase-kebab, URL-safe, ≤ 70 characters |
+| Q18 | No broken encoding (mojibake like `Ã¤`, `â€™`), `&amp;`/HTML entities, double spaces or stray whitespace in name/blurb/address/hours/phone. **Write ä ö ü ß é as real letters.** |
+| Q19 | Blurb 15–800 characters, starts with a capital and ends with punctuation (warnings: under 40 = thin, over 600 = long) |
+| Q20 | Names ≤ 80 characters, not ALL CAPS, not flagged closed/TODO |
+| Q21 | Address is not empty (warnings: place name only; and, when the base sets `addrRe`, no local postcode — **set `addrRe: /\b\d{5}\b/` on every new German base**) |
+| Q22 | The main phone number has 7–15 digits and no words (notes like `(DSN …)` / `ext.` after it are fine) |
+| Q23 | Warnings: a pin exactly on the base reference point; pins with under 4 decimals (a city-level guess) |
+| Q24 | Warning: an everyday listing (not a day trip) more than 60 km / 40 mi from the base (`dayTripCats` in config) |
+| Q25 | 60+ listings, 10+ categories, and the essentials (`essentialCats`: restaurant, grocery, health, banking, housing, schools, auto, attraction) all present |
+| Q26 | Warning: one category is more than 40% of the base |
+| Q27 | Every listing has hours text (warning if over 25% still say "check current hours") |
+| Q28 | 5+ seasonal event cards ("Typical dates" / "Typical schedule") |
+| Q29 | Every sitemap `lastmod` is a real date and not in the future |
+Per-base facts these use (`emergency`, `money`, optional `addrRe`, shared `dayTripCats` / `essentialCats`) live in `checks/config.js` — fill them in when you add the base.
 
 ## What is checked automatically
 **Leftovers from the template copy** — other bases' names/cities/hospitals anywhere on the page or in the data; other bases' reference coordinates; `<script src>` pointing at the wrong data file; `CURRENT_BASE_KEY`; `HUB_TIME_ZONE`; map centre and base marker; stats text ("N locations / M categories"); "Start Guide" link.
