@@ -662,8 +662,8 @@
       </div>
       <div class="coords-row">
         <span><b>48.7355° N, 9.0809° E</b> — Patch Barracks (nearest site is the reference point)</span>
-        <span><b>18</b> categories mapped</span>
-        <span><b>62</b> locations logged</span>
+        <span><b>25</b> categories mapped</span>
+        <span><b>96</b> locations logged</span>
       </div>
     </div>
   </header>
@@ -682,23 +682,29 @@
         <div class="sub-rows" id="subRows">
           <div class="sub-row" data-group="food" role="group" aria-label="Food &amp; Drink categories">
             <button class="cat-tab sub-tab" data-cat="restaurant">Restaurants &amp; Cafés</button>
+            <button class="cat-tab sub-tab" data-cat="bars">Bars &amp; Nightlife</button>
             <button class="cat-tab sub-tab" data-cat="grocery">Grocery &amp; Food Stores</button>
             <button class="cat-tab sub-tab" data-cat="farmers">Farmers Markets</button>
           </div>
           <div class="sub-row" data-group="shop" role="group" aria-label="Shopping &amp; Auto categories">
             <button class="cat-tab sub-tab" data-cat="shopping">Shopping &amp; Retail</button>
             <button class="cat-tab sub-tab" data-cat="auto">Auto &amp; Transportation</button>
+            <button class="cat-tab sub-tab" data-cat="phone">Phone &amp; Internet</button>
           </div>
           <div class="sub-row" data-group="settle" role="group" aria-label="Getting Settled categories">
-            <button class="cat-tab sub-tab" data-cat="housing">Housing &amp; Off-Post Living</button>
+            <button class="cat-tab sub-tab" data-cat="housing">Housing &amp; Lodging</button>
             <button class="cat-tab sub-tab" data-cat="services">Base Services</button>
             <button class="cat-tab sub-tab" data-cat="banking">Banking &amp; Money</button>
           </div>
           <div class="sub-row" data-group="care" role="group" aria-label="Health &amp; Personal categories">
             <button class="cat-tab sub-tab" data-cat="health">Health &amp; Medical</button>
+            <button class="cat-tab sub-tab" data-cat="tailor">Tailoring &amp; Alterations</button>
+            <button class="cat-tab sub-tab" data-cat="pets">Pet Services</button>
           </div>
           <div class="sub-row" data-group="family" role="group" aria-label="Family &amp; Community categories">
             <button class="cat-tab sub-tab" data-cat="schools">Schools &amp; Childcare</button>
+            <button class="cat-tab sub-tab" data-cat="kids">Kids &amp; Playgrounds</button>
+            <button class="cat-tab sub-tab" data-cat="education">Education &amp; Career</button>
             <button class="cat-tab sub-tab" data-cat="community">Community &amp; Family Support</button>
             <button class="cat-tab sub-tab" data-cat="religious">Chapels &amp; Religious Services</button>
           </div>
@@ -712,6 +718,7 @@
           </div>
           <div class="sub-row" data-group="trips" role="group" aria-label="Day Trips categories">
             <button class="cat-tab sub-tab" data-cat="castles">Castles &amp; Historic Day Trips</button>
+            <button class="cat-tab sub-tab" data-cat="wine">Wine Country Day Trips</button>
           </div>
         </div>
       </div>
@@ -771,7 +778,7 @@
           <div class="legend-items" id="legendItems"></div>
         </div>
       </div>
-      <p style="font-size:12px; color:#69665B; margin-top:8px;">All 62 logged locations at once — zoom, click a pin for details, or toggle categories in the legend.</p>
+      <p style="font-size:12px; color:#69665B; margin-top:8px;">All 96 logged locations at once — zoom, click a pin for details, or toggle categories in the legend.</p>
     </div>
 
     <div id="listView" tabindex="-1">
@@ -794,6 +801,9 @@
         </div>
       </div>
 
+      <h2 class="section-label">Bars &amp; Nightlife</h2>
+      <div class="grid" data-group="bars" id="grid-bars"></div>
+
       <h2 class="section-label">Grocery &amp; Food Stores</h2>
       <div class="grid" data-group="grocery" id="grid-grocery"></div>
 
@@ -806,13 +816,22 @@
       <h2 class="section-label">Auto &amp; Transportation</h2>
       <div class="grid" data-group="auto" id="grid-auto"></div>
 
+      <h2 class="section-label">Phone &amp; Internet</h2>
+      <div class="grid" data-group="phone" id="grid-phone"></div>
+
       <h2 class="section-label">Health &amp; Medical</h2>
       <div class="grid" data-group="health" id="grid-health"></div>
+
+      <h2 class="section-label">Tailoring &amp; Alterations</h2>
+      <div class="grid" data-group="tailor" id="grid-tailor"></div>
+
+      <h2 class="section-label">Pet Services</h2>
+      <div class="grid" data-group="pets" id="grid-pets"></div>
 
       <h2 class="section-label">Banking &amp; Money</h2>
       <div class="grid" data-group="banking" id="grid-banking"></div>
 
-      <h2 class="section-label">Housing &amp; Off-Post Living</h2>
+      <h2 class="section-label">Housing &amp; Lodging</h2>
       <div class="grid" data-group="housing" id="grid-housing"></div>
 
       <h2 class="section-label">Base Services</h2>
@@ -820,6 +839,12 @@
 
       <h2 class="section-label">Schools &amp; Childcare</h2>
       <div class="grid" data-group="schools" id="grid-schools"></div>
+
+      <h2 class="section-label">Kids &amp; Playgrounds</h2>
+      <div class="grid" data-group="kids" id="grid-kids"></div>
+
+      <h2 class="section-label">Education &amp; Career</h2>
+      <div class="grid" data-group="education" id="grid-education"></div>
 
       <h2 class="section-label">Community &amp; Family Support</h2>
       <div class="grid" data-group="community" id="grid-community"></div>
@@ -844,6 +869,9 @@
 
       <h2 class="section-label">Castles &amp; Historic Day Trips</h2>
       <div class="grid" data-group="castles" id="grid-castles"></div>
+
+      <h2 class="section-label">Wine Country Day Trips</h2>
+      <div class="grid" data-group="wine" id="grid-wine"></div>
 
       <h2 class="section-label" id="eventsLabel">Seasonal Events</h2>
       <div class="help-grid" id="eventsGrid">
@@ -1256,7 +1284,7 @@ function sortPlaces(items, sortBy){
 
 function render(){
   const sortBy = document.getElementById("sortSelect") ? document.getElementById("sortSelect").value : "distance";
-  ["restaurant","grocery","farmers","shopping","auto","health","banking","housing","services","schools","community","religious","fitness","rec","outdoors","attraction","museum","castles"].forEach(cat=>{
+  ["restaurant","bars","grocery","farmers","shopping","auto","phone","health","tailor","pets","banking","housing","services","schools","kids","education","community","religious","fitness","rec","outdoors","attraction","museum","castles","wine"].forEach(cat=>{
     const el = document.getElementById("grid-"+cat);
     const items = sortPlaces(places.filter(p=>p.cat===cat), sortBy);
     el.innerHTML = items.map(cardHTML).join("");
@@ -1271,13 +1299,13 @@ initRecentlyViewedStrip();
 
 // Category groups (progressive disclosure): top row = groups, second row = that group's categories
 const CAT_GROUPS = {
-  food: ["restaurant", "grocery", "farmers"],
-  shop: ["shopping", "auto"],
+  food: ["restaurant", "bars", "grocery", "farmers"],
+  shop: ["shopping", "auto", "phone"],
   settle: ["housing", "services", "banking"],
-  care: ["health"],
-  family: ["schools", "community", "religious"],
+  care: ["health", "tailor", "pets"],
+  family: ["schools", "kids", "education", "community", "religious"],
   fun: ["attraction", "rec", "fitness", "outdoors", "museum", "events"],
-  trips: ["castles"]
+  trips: ["castles", "wine"]
 };
 function syncGroupRow(){
   const active = document.querySelector(".cat-tab.active").dataset.cat;

@@ -69,6 +69,8 @@ const M = [
   ["Q20 ALL CAPS listing name", "quality", () => edit("data-norfolk.js", (s) => s.replace(/name:"[^"]+"/, 'name:"NORFOLK MARKET PLACE"')), /Q20/],
   ["Q22 phone made of words", "quality", () => edit("data-campbell.js", (s) => s.replace(/phone:"[^"]+"/, 'phone:"call us now"')), /Q22/],
   ["Q25 essential category (banking) missing", "quality", () => edit("data-campbell.js", (s) => s.replace(/cat:"banking"/g, 'cat:"services"')), /Q25/],
+  ["Q30 category left with no listings (Stuttgart)", "quality", () => edit("data-stuttgart.js", (s) => s.replace(/cat:"tailor"/g, 'cat:"services"')), /Q30/],
+  ["Q31 vague hours on a Stuttgart listing", "quality", () => edit("data-stuttgart.js", (s) => s.replace(/(id:"kelley-auto-skills"[^\n]*?hours:)"[^"]*"/, '$1"Hours posted at the shop"')), /Q31/],
   ["Q27 listing with no hours text", "quality", () => edit("data-yokota.js", (s) => s.replace(/hours:"[^"]+"/, 'hours:""')), /Q27/],
   ["Q28 events section loses its dates", "quality", () => edit("yokota.html", (s) => s.replace(/Typical dates/g, "Dates")), /Q28/],
   ["Q29 sitemap date in the future", "quality", () => edit("sitemap.xml", (s) => s.replace(/<lastmod>[^<]+/, "<lastmod>2099-01-01")), /Q29/],

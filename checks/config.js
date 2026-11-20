@@ -4,7 +4,7 @@
 module.exports = {
   siteUrl: "https://militarythingstodo.com",
   // Phone numbers that are legitimately shared between base pages (national / DoD-wide lines), digits only.
-  sharedNumbers: ["988", "8003429647", "8779955247", "8002221222", "911", "18003429647", "18002221222", "18779955247", "18772727337", "110", "112", "119", "825033573102", "19316485732", "19316457476", "49637194642900"],
+  sharedNumbers: ["988", "8003429647", "8779955247", "8002221222", "911", "18003429647", "18002221222", "18779955247", "18772727337", "110", "112", "119", "825033573102", "19316485732", "19316457476", "49637194642900", "499641705963074", "4971189535111"],
   // ^ last three: Humphreys Religious Support Office (all chapels), Montgomery County Parks & Rec, Clarksville Parks & Rec — shared office lines
   // Businesses that must never be listed (confirmed closed or off-limits). Matched against listing names.
   neverList: [
@@ -28,6 +28,15 @@ module.exports = {
   // money = the attribute the money section must carry for foreign currencies (null for US bases), addrRe = (optional) what a street address in that country contains, e.g. /\b\d{5}\b/ for a German postcode: set it on NEW bases so every address gets one (warning),
   // dayTripCats = categories allowed to be far from the base (everything else must be within `near` km/mi).
   dayTripCats: ["attraction","museum","outdoors","castles","ski","wine","mountains","coast","beaches","historic","culture","sandiego","tokyo","seoul","dmz","nashville","lakes","onsen","rec","kids"],
+  // Bases held to the stricter fill rules (Q30 every category populated, Q31 no avoidable vague hours). Every new base goes here from day one.
+  strictBases: ["stuttgart"],
+  // Q31 allow-list: listings whose hours genuinely cannot be written as a time (id -> why). Anything else with vague hours must be filled in.
+  vagueHoursOk: {
+    "panzer-exchange-food-court": "each outlet posts its own times; no single published schedule",
+    "patch-exchange-food-court": "each outlet posts its own times; no single published schedule",
+    "o2-shop-sindelfingen": "shop publishes hours only in-store",
+    "patch-alterations-shop": "hours posted at the counter only",
+  },
   essentialCats: ["restaurant","grocery","health","banking","housing","schools","auto","attraction"],
   bases: {
     ramstein: {
