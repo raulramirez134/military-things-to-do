@@ -13,7 +13,9 @@ function curl(url, { follow = true } = {}) {
   } catch (e) { return { s: 0, type: "", url, body: Buffer.alloc(0), err: e.message }; } finally { try { fs.unlinkSync(out); } catch (e) {} }
 }
 // Cloudflare injects a bot-challenge <script> before </body> and prepends managed content to robots.txt; ignore both.
-const norm = (b) => b.toString().replace(/<script>\(function\(\)\{function c\(\)\{var b=a\.contentDocument[\s\S]*?<\/script>/g, "");
+const norm = (b) => b.toString().replace(/<script>\(function\(\)\{function c\(\)\{var b=a\.contentDocument[\s\S]*?<\/script>/g, "")
+  // the worker pre-fills each base page's empty category grids with plain cards for crawlers; compare the template
+  .replace(/(<div class="grid" data-group="[a-z]+" id="grid-[a-z]+">)[^\n]*<\/div>\n/g, "$1</div>\n");
 const sha = (b) => crypto.createHash("sha256").update(norm(b)).digest("hex");
 const files = [];
 for (const k of Object.keys(cfg.bases)) { const b = cfg.bases[k]; files.push([b.page.replace(".html", ""), b.page], [b.data, b.data], [b.guide.replace(".html", ""), b.guide]); }
@@ -51,6 +53,6 @@ const stale = () => files.filter(([u, f]) => {
   R.check(n === want, "sitemap", `live sitemap has ${n} URLs, local has ${want}`);
   const nf = curl(`${SITE}/definitely-not-a-page-xyz`, { follow: false }); R.check(nf.s === 404, "404", `unknown path returned ${nf.s}`);
   const api = curl(`${SITE}/api/reviews?placeId=checks-probe`); R.check(/json/.test(api.type), "api", `/api/reviews not JSON (${api.s} ${api.type})`);
-  const idx = curl(`${SITE}/`); R.check(idx.s === 200 && /Find Your Base/.test(idx.body.toString()), "index", `homepage ${idx.s}`);
+  const idx = curl(`${SITE}/`); R.check(idx.s === 200 && /Find your base/i.test(idx.body.toString()), "index", `homepage ${idx.s}`);
   process.exit(R.print() ? 0 : 1);
 })();
