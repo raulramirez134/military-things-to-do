@@ -147,7 +147,7 @@
   .brief-inner{ max-width:1100px; margin:0 auto; }
   .brief-flex{ display:flex; align-items:center; justify-content:space-between; gap:30px; }
   .brief-copy{ flex:1; min-width:0; }
-  .brief-graphic{ flex-shrink:0; width:150px; height:202px; opacity:0.95; }
+  .brief-graphic{ flex-shrink:0; width:168px; height:210px; border-radius:16px; box-shadow:0 0 0 1.5px rgba(237,231,214,.2), 0 14px 30px rgba(0,0,0,.3); }
   .brief-graphic svg{ width:100%; height:100%; }
   @media (max-width:760px){ .brief-graphic{ display:none; } }
   .eyebrow{
@@ -674,39 +674,7 @@
           </p>
         </div>
         <div class="brief-graphic" aria-hidden="true">
-          <svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="campbellBrass" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#F2CD8A"/><stop offset="55%" stop-color="#D9A24C"/><stop offset="100%" stop-color="#8F6420"/>
-              </linearGradient>
-              <linearGradient id="campbellOlive" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#8A9C74"/><stop offset="100%" stop-color="#5B6B4F"/>
-              </linearGradient>
-              <radialGradient id="campbellBadgeBg" cx="50%" cy="35%" r="65%">
-                <stop offset="0%" stop-color="#223129"/><stop offset="100%" stop-color="#141f19"/>
-              </radialGradient>
-            </defs>
-            <rect x="18" y="14" width="164" height="164" rx="26" fill="url(#campbellBadgeBg)"/>
-            <!-- main rotor -->
-            <rect x="34" y="58" width="132" height="4" rx="2" fill="url(#campbellOlive)"/>
-            <rect x="96" y="60" width="8" height="12" rx="2" fill="url(#campbellOlive)"/>
-            <!-- fuselage + tail boom -->
-            <path d="M 58,100 C 58,82 72,72 92,72 L 118,72 C 128,72 134,78 138,86 L 166,92 L 168,98 L 136,102 C 132,112 122,118 108,118 L 76,118 C 64,118 58,110 58,100 Z" fill="url(#campbellBrass)"/>
-            <!-- cockpit window -->
-            <path d="M 62,96 C 63,86 70,80 80,79 L 84,79 L 84,96 Z" fill="#182420" opacity="0.55"/>
-            <!-- cabin window -->
-            <rect x="92" y="82" width="16" height="12" rx="2" fill="#182420" opacity="0.45"/>
-            <!-- tail fin + rotor -->
-            <path d="M 160,92 L 170,74 L 175,75 L 170,96 Z" fill="url(#campbellBrass)"/>
-            <circle cx="172" cy="76" r="9" fill="none" stroke="url(#campbellOlive)" stroke-width="2.5"/>
-            <!-- landing gear -->
-            <line x1="78" y1="118" x2="74" y2="134" stroke="url(#campbellOlive)" stroke-width="3" stroke-linecap="round"/>
-            <line x1="110" y1="118" x2="114" y2="134" stroke="url(#campbellOlive)" stroke-width="3" stroke-linecap="round"/>
-            <rect x="62" y="133" width="66" height="4" rx="2" fill="url(#campbellOlive)"/>
-            <line x1="30" y1="192" x2="170" y2="192" stroke="rgba(217,162,76,0.4)" stroke-width="1"/>
-            <text x="100" y="210" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="17" font-weight="700" letter-spacing="2" fill="#D9A24C">FORT</text>
-            <text x="100" y="226" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" letter-spacing="4" fill="rgba(237,231,214,0.65)">CAMPBELL</text>
-          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 400" focusable="false"><defs><clipPath id="campbell-c"><rect width="320" height="400" rx="30"/></clipPath><linearGradient id="ca-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2B4652"/><stop offset="0.4" stop-color="#3F5C6B"/><stop offset="0.7" stop-color="#D9A24C"/><stop offset="1" stop-color="#F2CD8A"/></linearGradient></defs><g clip-path="url(#campbell-c)"><rect width="320" height="400" fill="url(#ca-sky)"/><circle cx="210" cy="246" r="72" fill="#EDE7D6" opacity="0.16"/><circle cx="210" cy="246" r="90" fill="#EDE7D6" opacity="0.16"/><circle cx="210" cy="246" r="112" fill="#EDE7D6" opacity="0.16"/><circle cx="210" cy="246" r="58" fill="#EDE7D6"/><g fill="#EDE7D6" opacity="0.32"><rect x="38" y="114" width="68" height="16" rx="8"/><circle cx="62" cy="112" r="13"/><circle cx="82" cy="116" r="10"/></g><g fill="#EDE7D6" opacity="0.28"><rect x="238.8" y="81.2" width="54.4" height="12.8" rx="6.4"/><circle cx="258" cy="79.6" r="10.4"/><circle cx="274" cy="82.8" r="8"/></g><g fill="#EDE7D6" opacity="0.35"><rect x="60.5" y="209.5" width="51" height="12" rx="6"/><circle cx="78.5" cy="208" r="9.8"/><circle cx="93.5" cy="211" r="7.5"/></g><path d="M233.7,150 Q236.8,145.5 240,150 Q243.2,145.5 246.3,150" fill="none" stroke="#223129" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.45"/><path d="M257.1,166 Q259.6,162.5 262,166 Q264.4,162.5 266.9,166" fill="none" stroke="#223129" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"/><g transform="translate(70,150) rotate(-6) scale(0.8)"><path d="M38,22 C60,20 84,20 100,18 C104,17.6 106,18 105.4,19.6 C104,21.6 100,23 94,24 C76,26 56,27 40,28 Z" fill="#223129"/><path d="M92,19 C94,12 98,6 102,2 C104,1 106,2 105,4 C104,9 102,14 101,19 Z" fill="#182420"/><circle cx="104" cy="8" r="6" fill="none" stroke="#223129" stroke-width="1.4" opacity=".6"/><path d="M4,30 C2,22 8,14 22,12 C34,10.5 48,12 58,16 C64,19 66,24 64,28 C62,33 54,36 36,36.6 C20,37 6,36 4,30 Z" fill="#182420"/><path d="M4,30 C2,34 8,37 22,37.4 C38,38 56,35.6 63,29 C58,33 40,35 24,34 C14,33.4 7,32.6 4,30 Z" fill="#223129"/><path d="M6,27 C6,21 12,17.6 22,17 C26,17 28,19 28,22 L28,27 C20,27.6 12,27.6 6,27 Z" fill="#6F8E9C"/><path d="M32,18 C38,17 46,17.6 52,20 L52,27 L32,27.6 Z" fill="#6F8E9C" opacity=".8"/><path d="M40,12 L40,6" stroke="#223129" stroke-width="3" stroke-linecap="round"/><path d="M-40,5.6 C-10,3 20,3.4 40,4.6 C62,3.4 92,3 120,5.6 C92,7 62,6.8 40,6.6 C20,6.8 -10,7 -40,5.6 Z" fill="#223129" opacity=".55"/><path d="M10,42 C24,44 46,44 60,42" fill="none" stroke="#223129" stroke-width="2.4" stroke-linecap="round"/><path d="M22,37 L22,42 M48,37 L48,42" stroke="#223129" stroke-width="2" stroke-linecap="round"/></g><path d="M-20,268 C-6.7,265 33.3,250.3 60,250 C86.7,249.7 113.3,266.3 140,266 C166.7,265.7 186.7,248.3 220,248 C253.3,247.7 320,261.3 340,264 L340,410 L-20,410 Z" fill="#3F5C6B" opacity="0.9"/><path d="M-20,292 C-3.3,289 48.3,274.3 80,274 C111.7,273.7 140,290.3 170,290 C200,289.7 231.7,272.3 260,272 C288.3,271.7 326.7,285.3 340,288 L340,410 L-20,410 Z" fill="#5B6B4F" opacity="1"/><path d="M-20,314 C-6.7,311.7 31.7,300.3 60,300 C88.3,299.7 118.3,312.3 150,312 C181.7,311.7 218.3,298 250,298 C281.7,298 325,309.7 340,312 L340,410 L-20,410 Z" fill="#41502F" opacity="1"/><path d="M-20,330 C-6.7,329.3 33.3,324.3 60,326 C86.7,327.7 115,338.7 140,340 C165,341.3 185,333 210,334 C235,335 268.3,344.7 290,346 C311.7,347.3 331.7,342.7 340,342 L340,362 L290,364 C220,352 150,358 70,346 C20,344 -20,348 -20,348 Z" fill="#6F8E9C"/><path d="M-20,352 C-5,349.7 40,337 70,338 C100,339 130,356.7 160,358 C190,359.3 220,345.3 250,346 C280,346.7 325,359.3 340,362 L340,410 L-20,410 Z" fill="#41502F" opacity="0"/><path d="M-20,362 C-3.3,360 46.7,349 80,350 C113.3,351 150,366.7 180,368 C210,369.3 233.3,357.7 260,358 C286.7,358.3 326.7,368 340,370 L340,410 L-20,410 Z" fill="#2F3B2A" opacity="1"/><path d="M-20,374 C-1.7,372.7 55,365 90,366 C125,367 148.3,379.7 190,380 C231.7,380.3 315,370 340,368 L340,420 L-20,420 Z" fill="#5B6B4F" opacity=".5"/><path d="M-20,384 C-1.7,382.7 55,375.3 90,376 C125,376.7 148.3,387.7 190,388 C231.7,388.3 315,379.7 340,378 L340,420 L-20,420 Z" fill="#C08A34" opacity=".5"/><path d="M-20,394 C-1.7,392.3 53.3,383.7 90,384 C126.7,384.3 158.3,395.7 200,396 C241.7,396.3 316.7,387.7 340,386 L340,410 L-20,410 Z" fill="#182420" opacity="1"/><rect x="262" y="318" width="9" height="22" rx="4.5" fill="#223129"/><path d="M262,320 C262,314 271,314 271,320 Z" fill="#223129"/><path d="M274,340 L274,328 C280,322 290,322 296,328 L296,340 Z" fill="#223129"/></g></svg>
         </div>
       </div>
       <div class="coords-row">
