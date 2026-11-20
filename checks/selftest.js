@@ -48,11 +48,35 @@ const M = [
   ["old inline hours parser pasted back", "static", () => edit("norfolk.html", (s) => s.replace("// Open/Closed parsing (parseHoursString", "function parseHoursString(x){ return null; }\n// Open/Closed parsing (parseHoursString")), /defines its own parseHoursString/],
   ["page forgets to load hours.js", "static", () => edit("search.html", (s) => s.replace('<script src="/hours.js"></script>', "")), /must load/],
   ["12-hour time in hours field", "static", () => edit("data.js", (s) => s.replace('hours:"Mon–Fri 9–18 · Sat 9–17"', 'hours:"Mon–Fri 9–6 · Sat 9–5"')), /12-hour time/],
+  // ---- base-quality checks (checks/check-quality.js) ----
+  ["Q01 share image is not a 1200x630 JPEG", "quality", () => fs.writeFileSync(path.join(tmp, "og/yokota.jpg"), "not a jpeg"), /Q01/],
+  ["Q02 page points at another base's share image", "quality", () => edit("humphreys.html", (s) => s.replace("og/humphreys.jpg", "og/yokota.jpg")), /Q02/],
+  ["Q03 base missing from run_worker_first", "quality", () => edit("wrangler.jsonc", (s) => s.replace(', "/campbell"', "")), /Q03/],
+  ["Q04 base missing from llms.txt", "quality", () => edit("llms.txt", (s) => s.replace("militarythingstodo.com/campbell)", "militarythingstodo.com/campbel)")), /Q04/],
+  ["Q05 worker config has the wrong unit", "quality", () => edit("_worker.js", (s) => s.replace('unit: "mi", dataFile: "data-campbell.js"', 'unit: "km", dataFile: "data-campbell.js"')), /Q05/],
+  ["Q06 robots.txt loses the sitemap line", "quality", () => edit("robots.txt", (s) => s.replace(/^Sitemap:.*$/im, "")), /Q06/],
+  ["Q07 meta description far too short", "quality", () => edit("norfolk.html", (s) => s.replace(/(<meta name="description" content=")[^"]*"/, '$1Norfolk."')), /Q07/],
+  ["Q08 second h1 on a guide", "quality", () => edit("guide-yokota.html", (s) => s.replace("</body>", "<h1>Another title</h1></body>")), /Q08/],
+  ["Q09 guide loses lang attribute", "quality", () => edit("guide-norfolk.html", (s) => s.replace('<html lang="en">', "<html>")), /Q09/],
+  ["Q10 http:// link on a page", "quality", () => edit("about.html", (s) => s.replace("</body>", '<a href="http://example.com/x">x</a></body>')), /Q10/],
+  ["Q11 new-tab link without noopener", "quality", () => edit("privacy.html", (s) => s.replace("</body>", '<a href="https://example.com" target="_blank">x</a></body>')), /Q11/],
+  ["Q12 image without alt", "quality", () => edit("about.html", (s) => s.replace("</body>", '<img src="/og/home.jpg"></body>')), /Q12/],
+  ["Q13 guide mentions another base's hospital", "quality", () => edit("guide-yokota.html", (s) => s.replace("</body>", "<p>Go to Womack Army Medical Center.</p></body>")), /Q13/],
+  ["Q14 base page far too heavy", "quality", () => edit("ramstein.html", (s) => s.replace("</body>", "<!-- " + "x".repeat(520 * 1024) + " --></body>")), /Q14/],
+  ["Q16 money section has the wrong currency feed", "quality", () => edit("humphreys.html", (s) => s.replace('data-rates="won"', 'data-rates="yen"')), /Q16/],
+  ["Q17 listing id with capitals", "quality", () => edit("data-norfolk.js", (s) => s.replace(/id:"([a-z])/, (m, c) => `id:"${c.toUpperCase()}`)), /Q17/],
+  ["Q18 broken umlaut (mojibake) in a blurb", "quality", () => edit("data.js", (s) => s.replace(/blurb:"/, 'blurb:"KÃ¤se ')), /Q18/],
+  ["Q20 ALL CAPS listing name", "quality", () => edit("data-norfolk.js", (s) => s.replace(/name:"[^"]+"/, 'name:"NORFOLK MARKET PLACE"')), /Q20/],
+  ["Q22 phone made of words", "quality", () => edit("data-campbell.js", (s) => s.replace(/phone:"[^"]+"/, 'phone:"call us now"')), /Q22/],
+  ["Q25 essential category (banking) missing", "quality", () => edit("data-campbell.js", (s) => s.replace(/cat:"banking"/g, 'cat:"services"')), /Q25/],
+  ["Q27 listing with no hours text", "quality", () => edit("data-yokota.js", (s) => s.replace(/hours:"[^"]+"/, 'hours:""')), /Q27/],
+  ["Q28 events section loses its dates", "quality", () => edit("yokota.html", (s) => s.replace(/Typical dates/g, "Dates")), /Q28/],
+  ["Q29 sitemap date in the future", "quality", () => edit("sitemap.xml", (s) => s.replace(/<lastmod>[^<]+/, "<lastmod>2099-01-01")), /Q29/],
 ];
 let missed = 0;
 for (const [name, kind, mut, re] of M) {
   copy(); try { mut(); } catch (e) { console.log(`?? ${name}: could not apply mutation (${e.message})`); missed++; continue; }
-  const args = kind === "static" ? ["checks/check-static.js"] : kind === "worker" ? ["checks/check-worker.js"] : ["checks/check-browser.js", kind.split(":")[1]];
+  const args = kind === "static" ? ["checks/check-static.js"] : kind === "quality" ? ["checks/check-quality.js"] : kind === "worker" ? ["checks/check-worker.js"] : ["checks/check-browser.js", kind.split(":")[1]];
   const r = cp.spawnSync("node", args, { cwd: tmp, encoding: "utf8", env: { ...process.env, NODE_PATH: process.env.NODE_PATH || cp.execSync("npm root -g").toString().trim() }, timeout: 400000 });
   const out = (r.stdout || "") + (r.stderr || "");
   const caught = r.status !== 0 && re.test(out);

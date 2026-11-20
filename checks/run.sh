@@ -9,8 +9,8 @@ export NODE_PATH="${NODE_PATH:-$(npm root -g 2>/dev/null)}"
 mode="${1:-all}"; rc=0
 run() { echo; echo "### $*"; node "$@" || rc=1; }
 case "$mode" in
-  fast) run checks/check-static.js; run checks/check-browser.js ;;
-  all)  run checks/check-static.js
+  fast) run checks/check-static.js; run checks/check-quality.js; run checks/check-browser.js ;;
+  all)  run checks/check-static.js; run checks/check-quality.js
         for e in ${BROWSERS:-chromium webkit firefox}; do echo; echo "### browser engine: $e"; ENGINE=$e node checks/check-browser.js || rc=1; done
         run checks/check-worker.js ;;
   live) run checks/check-live.js --wait ;;

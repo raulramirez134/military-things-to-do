@@ -24,48 +24,60 @@ module.exports = {
   ],
   // Categories that must not exist for a base (off-limits business types).
   bannedCats: { humphreys: ["tattoo"] },
+  // Per-base facts used by checks/check-quality.js: emergency = the local emergency number that must appear on the base page,
+  // money = the attribute the money section must carry for foreign currencies (null for US bases), addrRe = (optional) what a street address in that country contains, e.g. /\b\d{5}\b/ for a German postcode: set it on NEW bases so every address gets one (warning),
+  // dayTripCats = categories allowed to be far from the base (everything else must be within `near` km/mi).
+  dayTripCats: ["attraction","museum","outdoors","castles","ski","wine","mountains","coast","beaches","historic","culture","sandiego","tokyo","seoul","dmz","nashville","lakes","onsen","rec","kids"],
+  essentialCats: ["restaurant","grocery","health","banking","housing","schools","auto","attraction"],
   bases: {
     ramstein: {
       label: "Ramstein", status: "live", page: "ramstein.html", data: "data.js", guide: "guide.html",
       tz: "Europe/Berlin", unit: "km", refWord: "gate", refs: [[49.4512593, 7.5844778]],
       bbox: [46.5, 5.5, 50.5, 12], tokens: ["Ramstein", "Landstuhl", "Kaiserslautern"],
       phone: /^(\+49|0)/, topbar: "RAMSTEIN",
+      emergency: "112", money: 'data-currencies="EUR',
     },
     fortbragg: {
       label: "Fort Bragg", status: "live", page: "fortbragg.html", data: "data-fortbragg.js", guide: "guide-fortbragg.html",
       tz: "America/New_York", unit: "mi", refWord: "post", refs: [[35.1415, -79.006]],
       bbox: [34.5, -83, 36.8, -75], tokens: ["Fort Bragg", "Fayetteville", "Womack"],
       phone: /^(\+1|\(?\d{3}\)?)/, topbar: "FORT BRAGG",
+      emergency: "911", money: null,
     },
     camppendleton: {
       label: "Camp Pendleton", status: "live", page: "camppendleton.html", data: "data-camppendleton.js", guide: "guide-camppendleton.html",
       tz: "America/Los_Angeles", unit: "mi", refWord: "base", refs: [[33.2276, -117.393], [33.3756458, -117.5647693]],
       bbox: [32.4, -118, 34, -116.8], tokens: ["Pendleton", "Oceanside"],
       phone: /^(\+1|\(?\d{3}\)?)/, topbar: "PENDLETON",
+      emergency: "911", money: null,
     },
     yokota: {
       label: "Yokota", status: "live", page: "yokota.html", data: "data-yokota.js", guide: "guide-yokota.html",
       tz: "Asia/Tokyo", unit: "km", refWord: "base", refs: [[35.7428, 139.3384]],
       bbox: [34.8, 138.4, 36.2, 140.3], tokens: ["Yokota", "Fussa", "374th"],
       phone: /^(\+81|0)/, topbar: "YOKOTA",
+      emergency: "119", money: 'data-rates="yen"',
     },
     norfolk: {
       label: "Naval Station Norfolk", status: "live", page: "norfolk.html", data: "data-norfolk.js", guide: "guide-norfolk.html",
       tz: "America/New_York", unit: "mi", refWord: "gate", refs: [[36.9468, -76.3098]],
       bbox: [36.3, -77.2, 37.6, -75.6], tokens: ["Norfolk", "Hampton Roads", "Portsmouth"],
       phone: /^(\+1|\(?\d{3}\)?)/, topbar: "NORFOLK",
+      emergency: "911", money: null,
     },
     humphreys: {
       label: "Camp Humphreys", status: "live", page: "humphreys.html", data: "data-humphreys.js", guide: "guide-humphreys.html",
       tz: "Asia/Seoul", unit: "km", refWord: "gate", refs: [[36.967, 127.033]],
       bbox: [36.4, 126.5, 38.0, 127.6], tokens: ["Humphreys", "Pyeongtaek", "Anjeong", "Allgood"],
       phone: /^(\+82|0)/, topbar: "HUMPHREYS",
+      emergency: "112", money: 'data-rates="won"',
     },
     campbell: {
       label: "Fort Campbell", status: "live", page: "campbell.html", data: "data-campbell.js", guide: "guide-campbell.html",
       tz: "America/Chicago", unit: "mi", refWord: "gate", refs: [[36.6436477, -87.4409467]],
       bbox: [35.8, -88.6, 37.3, -85.9], tokens: ["Fort Campbell", "Clarksville", "Blanchfield", "Oak Grove"],
       phone: /^(\+1|\(?\d{3}\)?)/, topbar: "FORT CAMPBELL",
+      emergency: "911", money: null,
     },
   },
 };
